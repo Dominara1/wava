@@ -136,6 +136,7 @@ cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
 make
 sudo make install
+cp -rv libwava* /usr/lib
 ```
 
 And uninstalling with:
