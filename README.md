@@ -5,7 +5,9 @@ W.A.V.A.
 
 **W**ayland **A**udio **V**isualizer for **A**ll
 
-Unofficial support for WASAPI (Windows), PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and sndio.
+Unofficial support: for WASAPI (Windows)
+
+Official support for: Pipewire, PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and sndio.
 
 [![Demo video 1](https://wava-example-1.surge.sh/shot1.png)](https://wava-example-1.surge.sh/vid1.mp4)
 [![Demo video 2](https://wava-example-2.surge.sh/shot2.png)](https://wava-example-2.surge.sh/vid2.mp4)
