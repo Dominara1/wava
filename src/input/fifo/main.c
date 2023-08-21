@@ -16,9 +16,9 @@ int open_fifo(const char *path) {
 }
 
 // input: FIFO
-EXP_FUNC void* xavaInput(void* data)
+EXP_FUNC void* wavaInput(void* data)
 {
-    XAVA_AUDIO *audio = (XAVA_AUDIO *)data;
+    WAVA_AUDIO *audio = (WAVA_AUDIO *)data;
     int fd;
     uint32_t n = 0;
     //signed char buf[1024];
@@ -83,12 +83,12 @@ EXP_FUNC void* xavaInput(void* data)
     return 0;
 }
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
-    xavaWarnCondition(audio->rate != 44100,
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
+    wavaWarnCondition(audio->rate != 44100,
             "Changing the audio rate won't do much as that depends on your MPD "
             "settings. Go check those instead!");
-    audio->source = (char*)xavaConfigGetString(config, "input", "source", "/tmp/mpd.fifo");
+    audio->source = (char*)wavaConfigGetString(config, "input", "source", "/tmp/mpd.fifo");
 }
 

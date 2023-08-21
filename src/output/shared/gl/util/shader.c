@@ -5,17 +5,17 @@
 #include "shared.h"
 #include "output/shared/graphical.h"
 
-void xava_gl_module_shader_load(
-        xava_gl_module_program *program,
+void wava_gl_module_shader_load(
+        wava_gl_module_program *program,
         sgl_shader_type type,
         sgl_shader_stage stage,
         const char *name,
-        XAVAGLModule *module,
-        XAVA *xava) {
+        WAVAGLModule *module,
+        WAVA *wava) {
     RawData *file;
     char *returned_path;
     char file_path[MAX_PATH];
-    XAVAIONOTIFYWATCHSETUP a;
+    WAVAIONOTIFYWATCHSETUP a;
     MALLOC_SELF(a, 1);
 
     switch(type) {
@@ -27,7 +27,7 @@ void xava_gl_module_shader_load(
             strcat(file_path, name);
             break;
         default:
-            xavaBail("A really BIG oopsie happened here!");
+            wavaBail("A really BIG oopsie happened here!");
             break;
     }
 
@@ -35,20 +35,20 @@ void xava_gl_module_shader_load(
     switch(stage) {
         case SGL_VERT: {
             strcat(file_path, "/vertex.glsl");
-            xavaLogCondition(xavaFindAndCheckFile(XAVA_FILE_TYPE_CONFIG,
+            wavaLogCondition(wavaFindAndCheckFile(WAVA_FILE_TYPE_CONFIG,
                     file_path, &returned_path) == false,
                     "Failed to load '%s'!", file_path);
             shader = &program->vert;
             break;
         }
         case SGL_GEO: {
-            xavaWarn("Avoid using geometry shaders as they are quite demanding");
+            wavaWarn("Avoid using geometry shaders as they are quite demanding");
             strcat(file_path, "/geometry.glsl");
-            bool success = xavaFindAndCheckFile(XAVA_FILE_TYPE_OPTIONAL_CONFIG,
+            bool success = wavaFindAndCheckFile(WAVA_FILE_TYPE_OPTIONAL_CONFIG,
                                                 file_path,
                                                 &returned_path);
             if(!success) {
-                xavaLog("Failed to load '%s'!", file_path);
+                wavaLog("Failed to load '%s'!", file_path);
                 returned_path = NULL;
             }
             shader = &program->geo;
@@ -56,7 +56,7 @@ void xava_gl_module_shader_load(
         }
         case SGL_FRAG: {
             strcat(file_path, "/fragment.glsl");
-            xavaBailCondition(xavaFindAndCheckFile(XAVA_FILE_TYPE_CONFIG,
+            wavaBailCondition(wavaFindAndCheckFile(WAVA_FILE_TYPE_CONFIG,
                     file_path, &returned_path) == false,
                     "Failed to load '%s'!", file_path);
             shader = &program->frag;
@@ -64,11 +64,11 @@ void xava_gl_module_shader_load(
         }
         case SGL_CONFIG: { // load shader config file
             strcat(file_path, "/config.ini");
-            bool success = xavaFindAndCheckFile(XAVA_FILE_TYPE_OPTIONAL_CONFIG,
+            bool success = wavaFindAndCheckFile(WAVA_FILE_TYPE_OPTIONAL_CONFIG,
                                                 file_path,
                                                 &returned_path);
             if(!success) {
-                xavaLog("Failed to load '%s'!", file_path);
+                wavaLog("Failed to load '%s'!", file_path);
                 returned_path = NULL;
             }
             break;
@@ -94,41 +94,41 @@ void xava_gl_module_shader_load(
 
     // load file
     if(stage == SGL_CONFIG) {
-        program->config = xavaConfigOpen(returned_path);
+        program->config = wavaConfigOpen(returned_path);
 
         // add watcher
         a->filename           = returned_path;
         a->id                 = 1; // dont really care tbh
-        a->xava               = xava;
-        a->ionotify           = xava->ionotify;
-        a->xava_ionotify_func = module->func.ionotify_callback;
-        xavaBailCondition(!xavaIONotifyAddWatch(a),
-            "xavaIONotifyAddWatch failed!");
+        a->wava               = wava;
+        a->ionotify           = wava->ionotify;
+        a->wava_ionotify_func = module->func.ionotify_callback;
+        wavaBailCondition(!wavaIONotifyAddWatch(a),
+            "wavaIONotifyAddWatch failed!");
     } else {
         shader->path = strdup(returned_path);
-        file = xavaReadFile(shader->path);
-        shader->text = xavaDuplicateMemory(file->data, file->size);
-        xavaCloseFile(file);
+        file = wavaReadFile(shader->path);
+        shader->text = wavaDuplicateMemory(file->data, file->size);
+        wavaCloseFile(file);
 
         // add watcher
         a->filename           = shader->path;
         a->id                 = 1; // dont really care tbh
-        a->xava               = xava;
-        a->ionotify           = xava->ionotify;
-        a->xava_ionotify_func = module->func.ionotify_callback;
-        xavaBailCondition(!xavaIONotifyAddWatch(a),
-            "xavaIONotifyAddWatch failed!");
+        a->wava               = wava;
+        a->ionotify           = wava->ionotify;
+        a->wava_ionotify_func = module->func.ionotify_callback;
+        wavaBailCondition(!wavaIONotifyAddWatch(a),
+            "wavaIONotifyAddWatch failed!");
     }
 
     // clean escape
     free(returned_path);
 }
 
-GLint xava_gl_module_shader_build(struct shader *shader, GLenum shader_type) {
+GLint wava_gl_module_shader_build(struct shader *shader, GLenum shader_type) {
     GLint status;
 
     shader->handle = glCreateShader(shader_type);
-    xavaReturnErrorCondition(shader->handle == 0, 0, "Failed to build shader");
+    wavaReturnErrorCondition(shader->handle == 0, 0, "Failed to build shader");
 
     glShaderSource(shader->handle, 1, (const char **) &shader->text, NULL);
     glCompileShader(shader->handle);
@@ -151,7 +151,7 @@ GLint xava_gl_module_shader_build(struct shader *shader, GLenum shader_type) {
         }
 
         if(unknown_type) {
-            xavaError("Error: Compiling '%s' failed\n%*s",
+            wavaError("Error: Compiling '%s' failed\n%*s",
                     shader->path, len, log);
         } else {
             char *source_line;
@@ -163,7 +163,7 @@ GLint xava_gl_module_shader_build(struct shader *shader, GLenum shader_type) {
             source_line = strdup(string_ptr);
             *strchr(source_line, '\n') = '\0';
 
-            xavaError("Error: Compiling '%s' failed\n%.*sCode:\n% 4d: %.*s",
+            wavaError("Error: Compiling '%s' failed\n%.*sCode:\n% 4d: %.*s",
                     shader->path, len, log, line, 256, source_line);
 
             free(source_line);
@@ -172,7 +172,7 @@ GLint xava_gl_module_shader_build(struct shader *shader, GLenum shader_type) {
         return status;
     }
 
-    xavaSpam("Compiling '%s' successful", shader->path);
+    wavaSpam("Compiling '%s' successful", shader->path);
 
     // free text and path info
     free(shader->path);
@@ -181,14 +181,14 @@ GLint xava_gl_module_shader_build(struct shader *shader, GLenum shader_type) {
     return status;
 }
 
-void xava_gl_module_program_create(xava_gl_module_program *program) {
+void wava_gl_module_program_create(wava_gl_module_program *program) {
     GLint status;
 
     program->program = glCreateProgram();
-    xava_gl_module_shader_build(&program->vert,    GL_VERTEX_SHADER);
+    wava_gl_module_shader_build(&program->vert,    GL_VERTEX_SHADER);
     if(program->geo.text) // optional stage, we check if it's included in the shader pack
-        xava_gl_module_shader_build(&program->geo, GL_GEOMETRY_SHADER);
-    xava_gl_module_shader_build(&program->frag,    GL_FRAGMENT_SHADER);
+        wava_gl_module_shader_build(&program->geo, GL_GEOMETRY_SHADER);
+    wava_gl_module_shader_build(&program->frag,    GL_FRAGMENT_SHADER);
 
     glAttachShader(program->program, program->vert.handle);
     if(program->geo.text) // optional stage, we check if it's included in the shader pack
@@ -206,11 +206,11 @@ void xava_gl_module_program_create(xava_gl_module_program *program) {
         char log[1000];
         GLsizei len;
         glGetProgramInfoLog(program->program, 1000, &len, log);
-        xavaBail("Error: linking:\n%*s\n", len, log);
+        wavaBail("Error: linking:\n%*s\n", len, log);
     }
 }
 
-void xava_gl_module_program_destroy(xava_gl_module_program *program) {
+void wava_gl_module_program_destroy(wava_gl_module_program *program) {
     glDeleteProgram(program->program);
 }
 

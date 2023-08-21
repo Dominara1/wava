@@ -5,12 +5,12 @@
 #include "output/shared/graphical.h"
 
 
-void EGLConfigLoad(XAVA *xava) {
-    SGLConfigLoad(xava);
+void EGLConfigLoad(WAVA *wava) {
+    SGLConfigLoad(wava);
 }
 
-EGLBoolean EGLCreateContext(XAVA *xava, struct _escontext *ESContext) {
-    XAVA_CONFIG *conf = &xava->conf;
+EGLBoolean EGLCreateContext(WAVA *wava, struct _escontext *ESContext) {
+    WAVA_CONFIG *conf = &wava->conf;
     EGLint numConfigs;
     EGLint majorVersion;
     EGLint minorVersion;
@@ -39,30 +39,30 @@ EGLBoolean EGLCreateContext(XAVA *xava, struct _escontext *ESContext) {
     EGLDisplay display = eglGetDisplay(ESContext->native_display);
     if ( display == EGL_NO_DISPLAY )
     {
-        xavaError("No EGL display");
+        wavaError("No EGL display");
         return EGL_FALSE;
     }
 
     // Initialize EGL
     if ( !eglInitialize(display, &majorVersion, &minorVersion) )
     {
-        xavaError("eglInitialize failed");
+        wavaError("eglInitialize failed");
         return EGL_FALSE;
     }
 
-    xavaSpam("Initialized EGL API version: %d.%d", majorVersion, minorVersion);
+    wavaSpam("Initialized EGL API version: %d.%d", majorVersion, minorVersion);
 
     // Get configs
     if ( (eglGetConfigs(display, NULL, 0, &numConfigs) != EGL_TRUE) || (numConfigs == 0))
     {
-        xavaError("EGL was unable to find display configs");
+        wavaError("EGL was unable to find display configs");
         return EGL_FALSE;
     }
 
     // Choose config
     if ( (eglChooseConfig(display, fbAttribs, &config, 1, &numConfigs) != EGL_TRUE) || (numConfigs != 1))
     {
-        xavaError("EGL was unable to choose a config");
+        wavaError("EGL was unable to choose a config");
         return EGL_FALSE;
     }
 
@@ -70,7 +70,7 @@ EGLBoolean EGLCreateContext(XAVA *xava, struct _escontext *ESContext) {
     surface = eglCreateWindowSurface(display, config, ESContext->native_window, NULL);
     if ( surface == EGL_NO_SURFACE )
     {
-        xavaError("EGL was unable to create a surface");
+        wavaError("EGL was unable to create a surface");
         return EGL_FALSE;
     }
 
@@ -78,14 +78,14 @@ EGLBoolean EGLCreateContext(XAVA *xava, struct _escontext *ESContext) {
     context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs );
     if ( context == EGL_NO_CONTEXT )
     {
-        xavaError("EGL was unable to create a context");
+        wavaError("EGL was unable to create a context");
         return EGL_FALSE;
     }
 
     // Make the context current
     if ( !eglMakeCurrent(display, surface, surface, context) )
     {
-        xavaError("EGL was not able to switch to to the current window");
+        wavaError("EGL was not able to switch to to the current window");
         return EGL_FALSE;
     }
 
@@ -95,29 +95,29 @@ EGLBoolean EGLCreateContext(XAVA *xava, struct _escontext *ESContext) {
     return EGL_TRUE;
 }
 
-void EGLInit(XAVA *xava) {
+void EGLInit(WAVA *wava) {
     glewInit();
-    SGLInit(xava);
+    SGLInit(wava);
 }
 
-void EGLApply(XAVA *xava) {
-    SGLApply(xava);
+void EGLApply(WAVA *wava) {
+    SGLApply(wava);
 }
 
-XG_EVENT_STACK *EGLEvent(XAVA *xava) {
-    return SGLEvent(xava);
+XG_EVENT_STACK *EGLEvent(WAVA *wava) {
+    return SGLEvent(wava);
 }
 
-void EGLClear(XAVA *xava) {
-    SGLClear(xava);
+void EGLClear(WAVA *wava) {
+    SGLClear(wava);
 }
 
-void EGLDraw(XAVA *xava) {
-    SGLDraw(xava);
+void EGLDraw(WAVA *wava) {
+    SGLDraw(wava);
 }
 
-void EGLCleanup(XAVA *xava, struct _escontext *ESContext) {
-    SGLCleanup(xava);
+void EGLCleanup(WAVA *wava, struct _escontext *ESContext) {
+    SGLCleanup(wava);
     eglDestroyContext(ESContext->display, ESContext->context);
     eglDestroySurface(ESContext->display, ESContext->surface);
     eglTerminate(ESContext->display);

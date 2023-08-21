@@ -1,7 +1,7 @@
 #include "shared.h"
 
-#ifndef __XAVA_OUTPUT_GL_MAIN_H
-#define __XAVA_OUTPUT_GL_MAIN_H
+#ifndef __WAVA_OUTPUT_GL_MAIN_H
+#define __WAVA_OUTPUT_GL_MAIN_H
 
 // for static checker sake
 #if !defined(GL) && !defined(EGL)
@@ -18,32 +18,32 @@
     #include <GL/glew.h>
 #endif
 
-typedef struct XAVAGLModuleOptions {
+typedef struct WAVAGLModuleOptions {
     // actual options used by the module
     GLdouble     resolution_scale;
-    XAVA         *xava;
+    WAVA         *wava;
     void         (*ionotify_callback)
-                        (XAVA_IONOTIFY_EVENT,
+                        (WAVA_IONOTIFY_EVENT,
                         const char* filename,
                         int id,
-                        XAVA*);
+                        WAVA*);
 
     char           *prefix;
     XG_EVENT_STACK *events;
-} XAVAGLModuleOptions;
+} WAVAGLModuleOptions;
 
 // working around my badly designed includes
-typedef struct XAVAGLModule XAVAGLModule;
+typedef struct WAVAGLModule WAVAGLModule;
 
 // shader stuff
-typedef struct xava_gl_module_program {
+typedef struct wava_gl_module_program {
     struct shader {
         char *path, *text;
         GLuint handle;
     } frag, vert, geo;
     GLuint     program;
-    xava_config_source config;
-} xava_gl_module_program;
+    wava_config_source config;
+} wava_gl_module_program;
 
 // post render stuff
 typedef enum gl_module_post_render_features {
@@ -52,38 +52,38 @@ typedef enum gl_module_post_render_features {
     GL_MODULE_POST_TIME      = 4,
 } gl_module_post_render_features;
 
-struct XAVAGLModule {
+struct WAVAGLModule {
     char               *name;
     char               *prefix;
-    XAVAMODULE         *handle;
+    WAVAMODULE         *handle;
 
     struct functions {
-        xava_version (*version)(void);
-        void         (*config_load)(XAVAGLModule*,XAVA*);
-        void         (*init)(XAVAGLModuleOptions*);
-        void         (*apply)(XAVAGLModuleOptions*);
-        void         (*event)(XAVAGLModuleOptions*);
+        wava_version (*version)(void);
+        void         (*config_load)(WAVAGLModule*,WAVA*);
+        void         (*init)(WAVAGLModuleOptions*);
+        void         (*apply)(WAVAGLModuleOptions*);
+        void         (*event)(WAVAGLModuleOptions*);
         /**
          * events are returned through the options->events thingy
          **/
-        void         (*clear)(XAVAGLModuleOptions*);
-        void         (*draw)(XAVAGLModuleOptions*);
-        void         (*cleanup)(XAVAGLModuleOptions*);
+        void         (*clear)(WAVAGLModuleOptions*);
+        void         (*draw)(WAVAGLModuleOptions*);
+        void         (*cleanup)(WAVAGLModuleOptions*);
         void         (*ionotify_callback)
-                        (XAVA_IONOTIFY_EVENT,
+                        (WAVA_IONOTIFY_EVENT,
                         const char* filename,
                         int id,
-                        XAVA*);
+                        WAVA*);
     } func;
 
-    XAVAGLModuleOptions options;
+    WAVAGLModuleOptions options;
 };
 
-typedef struct XAVAGLHostOptions {
-    XAVAGLModule         *module;
-    XAVA_CONFIG_OPTION(f64, resolution_scale);
+typedef struct WAVAGLHostOptions {
+    WAVAGLModule         *module;
+    WAVA_CONFIG_OPTION(f64, resolution_scale);
     XG_EVENT_STACK       *events;
-    XAVA                 *xava;
+    WAVA                 *wava;
 
     struct FBO {
         GLuint framebuffer;
@@ -112,18 +112,18 @@ typedef struct XAVAGLHostOptions {
         GLuint BGCOL;
     } gl_vars;
 
-    xava_gl_module_program post;
+    wava_gl_module_program post;
     gl_module_post_render_features features;
     bool post_enabled;
-} XAVAGLHostOptions;
+} WAVAGLHostOptions;
 
-void           SGLConfigLoad(XAVA *xava);
-void           SGLInit(XAVA *xava);
-void           SGLApply(XAVA *xava);
-XG_EVENT_STACK *SGLEvent(XAVA *xava);
-void           SGLClear(XAVA *xava);
-void           SGLDraw(XAVA *xava);
-void           SGLCleanup(XAVA *xava);
+void           SGLConfigLoad(WAVA *wava);
+void           SGLInit(WAVA *wava);
+void           SGLApply(WAVA *wava);
+XG_EVENT_STACK *SGLEvent(WAVA *wava);
+void           SGLClear(WAVA *wava);
+void           SGLDraw(WAVA *wava);
+void           SGLCleanup(WAVA *wava);
 
 #endif
 

@@ -1,5 +1,5 @@
-#ifndef XAVA_UTIL_MEDIA_INFO_ARTWORK_H
-#define XAVA_UTIL_MEDIA_INFO_ARTWORK_H
+#ifndef WAVA_UTIL_MEDIA_INFO_ARTWORK_H
+#define WAVA_UTIL_MEDIA_INFO_ARTWORK_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -19,12 +19,12 @@ struct            artwork {
 #define URI_HEADER_HTTP  "http://"
 #define URI_HEADER_MUSIC "music-file://"
 
-void xava_util_artwork_destroy(struct artwork *artwork);
-void xava_util_artwork_update(const char *url,
+void wava_util_artwork_destroy(struct artwork *artwork);
+void wava_util_artwork_update(const char *url,
         struct artwork *artwork, CURL *curl);
 
 // for internal use ONLY
-bool xava_util_artwork_update_by_audio_file(const char *url,
+bool wava_util_artwork_update_by_audio_file(const char *url,
         struct artwork *artwork);
 #endif
 

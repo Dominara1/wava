@@ -18,10 +18,10 @@
     #include "cairo.h"
 #endif
 
-static struct xdg_surface *xavaXDGSurface;
-static struct xdg_toplevel *xavaXDGToplevel;
+static struct xdg_surface *wavaXDGSurface;
+static struct xdg_toplevel *wavaXDGToplevel;
 
-struct xdg_wm_base *xavaXDGWMBase;
+struct xdg_wm_base *wavaXDGWMBase;
 
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *xdg_wm_base,
         uint32_t serial) {
@@ -40,14 +40,14 @@ static void xdg_toplevel_handle_configure(void *data,
     UNUSED(states);
 
     struct waydata       *wd   = data;
-    XAVA   *xava = wd->hand;
-    XAVA_CONFIG *conf = &xava->conf;
+    WAVA   *wava = wd->hand;
+    WAVA_CONFIG *conf = &wava->conf;
 
     if(w == 0 && h == 0) return;
 
     if(conf->w != (uint32_t)w && conf->h != (uint32_t)h) {
         // fixme when i get proper monitor support on XDG
-        calculate_win_geo(xava, w, h);
+        calculate_win_geo(wava, w, h);
 
         #ifdef EGL
             waylandEGLWindowResize(wd, w, h);
@@ -58,11 +58,11 @@ static void xdg_toplevel_handle_configure(void *data,
         #endif
 
         #ifdef CAIRO
-            xava_output_wayland_cairo_resize(wd);
+            wava_output_wayland_cairo_resize(wd);
         #endif
 
-        pushXAVAEventStack(wd->events, XAVA_REDRAW);
-        pushXAVAEventStack(wd->events, XAVA_RESIZE);
+        pushWAVAEventStack(wd->events, WAVA_REDRAW);
+        pushWAVAEventStack(wd->events, WAVA_RESIZE);
     }
 
     #ifdef SHM
@@ -76,7 +76,7 @@ static void xdg_toplevel_handle_close(void *data,
 
     UNUSED(xdg_toplevel);
 
-    pushXAVAEventStack(wd->events, XAVA_QUIT);
+    pushWAVAEventStack(wd->events, WAVA_QUIT);
 }
 
 struct xdg_toplevel_listener xdg_toplevel_listener = {
@@ -98,19 +98,19 @@ const struct xdg_surface_listener xdg_surface_listener = {
 
 void xdg_init(struct waydata *wd) {
     // create window, or "surface" in waland terms
-    xavaXDGSurface = xdg_wm_base_get_xdg_surface(xavaXDGWMBase, wd->surface);
+    wavaXDGSurface = xdg_wm_base_get_xdg_surface(wavaXDGWMBase, wd->surface);
 
     // for those unaware, the compositor baby sits everything that you
     // make, thus it needs a function through which the compositor
     // will manage your application
-    xdg_surface_add_listener(xavaXDGSurface, &xdg_surface_listener, wd);
+    xdg_surface_add_listener(wavaXDGSurface, &xdg_surface_listener, wd);
 
-    xavaXDGToplevel = xdg_surface_get_toplevel(xavaXDGSurface);
-    xdg_toplevel_set_title(xavaXDGToplevel, "XAVA");
-    xdg_toplevel_add_listener(xavaXDGToplevel, &xdg_toplevel_listener, wd);
+    wavaXDGToplevel = xdg_surface_get_toplevel(wavaXDGSurface);
+    xdg_toplevel_set_title(wavaXDGToplevel, "WAVA");
+    xdg_toplevel_add_listener(wavaXDGToplevel, &xdg_toplevel_listener, wd);
 }
 
 void xdg_cleanup() {
-    xdg_toplevel_destroy(xavaXDGToplevel);
-    xdg_surface_destroy(xavaXDGSurface);
+    xdg_toplevel_destroy(wavaXDGToplevel);
+    xdg_surface_destroy(wavaXDGSurface);
 }

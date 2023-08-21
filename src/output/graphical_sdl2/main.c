@@ -9,33 +9,33 @@
 #include "output/shared/graphical.h"
 #include "shared.h"
 
-SDL_Window *xavaSDLWindow;
-SDL_Surface *xavaSDLWindowSurface;
-SDL_Event xavaSDLEvent;
-SDL_DisplayMode xavaSDLVInfo;
+SDL_Window *wavaSDLWindow;
+SDL_Surface *wavaSDLWindowSurface;
+SDL_Event wavaSDLEvent;
+SDL_DisplayMode wavaSDLVInfo;
 
-SDL_GLContext xavaSDLGLContext;
+SDL_GLContext wavaSDLGLContext;
 
-EXP_FUNC void xavaOutputCleanup(XAVA *s)
+EXP_FUNC void wavaOutputCleanup(WAVA *s)
 {
     GLCleanup(s);
-    SDL_GL_DeleteContext(xavaSDLGLContext);
-    SDL_FreeSurface(xavaSDLWindowSurface);
-    SDL_DestroyWindow(xavaSDLWindow);
+    SDL_GL_DeleteContext(wavaSDLGLContext);
+    SDL_FreeSurface(wavaSDLWindowSurface);
+    SDL_DestroyWindow(wavaSDLWindow);
     SDL_Quit();
 }
 
-EXP_FUNC int xavaInitOutput(XAVA *s)
+EXP_FUNC int wavaInitOutput(WAVA *s)
 {
-    XAVA_CONFIG *p = &s->conf;
+    WAVA_CONFIG *p = &s->conf;
 
-    xavaBailCondition(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS),
+    wavaBailCondition(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS),
             "Unable to initailize SDL2: %s", SDL_GetError());
 
     // calculating window x and y position
-    xavaBailCondition(SDL_GetCurrentDisplayMode(0, &xavaSDLVInfo),
+    wavaBailCondition(SDL_GetCurrentDisplayMode(0, &wavaSDLVInfo),
             "Error opening display: %s", SDL_GetError());
-    calculate_win_pos(s, xavaSDLVInfo.w, xavaSDLVInfo.h,
+    calculate_win_pos(s, wavaSDLVInfo.w, wavaSDLVInfo.h,
             p->w, p->h);
 
     // creating a window
@@ -43,67 +43,67 @@ EXP_FUNC int xavaInitOutput(XAVA *s)
     if(p->flag.fullscreen) windowFlags |= SDL_WINDOW_FULLSCREEN;
     if(!p->flag.border) windowFlags |= SDL_WINDOW_BORDERLESS;
     if(p->vsync) windowFlags |= SDL_RENDERER_PRESENTVSYNC;
-    xavaSDLWindow = SDL_CreateWindow("XAVA", s->outer.x, s->outer.y,
+    wavaSDLWindow = SDL_CreateWindow("WAVA", s->outer.x, s->outer.y,
             s->outer.w, s->outer.h, windowFlags);
-    xavaBailCondition(!xavaSDLWindow, "SDL window cannot be created: %s", SDL_GetError());
+    wavaBailCondition(!wavaSDLWindow, "SDL window cannot be created: %s", SDL_GetError());
     //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERROR", "cannot create SDL window", NULL);
 
-    xavaSDLGLContext = SDL_GL_CreateContext(xavaSDLWindow);
+    wavaSDLGLContext = SDL_GL_CreateContext(wavaSDLWindow);
     GLInit(s);
 
     return 0;
 }
 
-EXP_FUNC void xavaOutputClear(XAVA *s) {
+EXP_FUNC void wavaOutputClear(WAVA *s) {
     GLClear(s);
 }
 
-EXP_FUNC int xavaOutputApply(XAVA *s) {
-    XAVA_CONFIG *p = &s->conf;
+EXP_FUNC int wavaOutputApply(WAVA *s) {
+    WAVA_CONFIG *p = &s->conf;
 
     // toggle fullscreen
-    SDL_SetWindowFullscreen(xavaSDLWindow,
+    SDL_SetWindowFullscreen(wavaSDLWindow,
             SDL_WINDOW_FULLSCREEN & p->flag.fullscreen);
 
-    xavaSDLWindowSurface = SDL_GetWindowSurface(xavaSDLWindow);
+    wavaSDLWindowSurface = SDL_GetWindowSurface(wavaSDLWindow);
     // Appearently SDL uses multithreading so this avoids invalid access
     // If I had a job, here's what I would be fired for xD
     SDL_Delay(100);
-    xavaOutputClear(s);
+    wavaOutputClear(s);
 
     GLApply(s);
 
-    // Window size patch, because xava wipes w and h for some reason.
-    xavaBailCondition(SDL_GetCurrentDisplayMode(
-                SDL_GetWindowDisplayIndex(xavaSDLWindow), &xavaSDLVInfo),
+    // Window size patch, because wava wipes w and h for some reason.
+    wavaBailCondition(SDL_GetCurrentDisplayMode(
+                SDL_GetWindowDisplayIndex(wavaSDLWindow), &wavaSDLVInfo),
             "Error opening display: %s", SDL_GetError());
-    calculate_win_pos(s, xavaSDLVInfo.w, xavaSDLVInfo.h,
-            xavaSDLWindowSurface->w, xavaSDLWindowSurface->h);
+    calculate_win_pos(s, wavaSDLVInfo.w, wavaSDLVInfo.h,
+            wavaSDLWindowSurface->w, wavaSDLWindowSurface->h);
     return 0;
 }
 
-EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *s) {
-    XAVA_CONFIG *p = &s->conf;
+EXP_FUNC XG_EVENT wavaOutputHandleInput(WAVA *s) {
+    WAVA_CONFIG *p = &s->conf;
 
-    while(SDL_PollEvent(&xavaSDLEvent) != 0) {
-        switch(xavaSDLEvent.type) {
+    while(SDL_PollEvent(&wavaSDLEvent) != 0) {
+        switch(wavaSDLEvent.type) {
             case SDL_KEYDOWN:
-                switch(xavaSDLEvent.key.keysym.sym)
+                switch(wavaSDLEvent.key.keysym.sym)
                 {
                     // should_reload = 1
                     // resizeTerminal = 2
                     // bail = -1
                     case SDLK_a:
                         p->bs++;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case SDLK_s:
                         if(p->bs > 0) p->bs--;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case SDLK_ESCAPE:
-                        return XAVA_QUIT;
+                        return WAVA_QUIT;
                     case SDLK_f: // fullscreen
                         p->flag.fullscreen = !p->flag.fullscreen;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case SDLK_UP: // key up
                         p->sens *= 1.05;
                         break;
@@ -112,62 +112,62 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *s) {
                         break;
                     case SDLK_LEFT: // key left
                         p->bw++;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case SDLK_RIGHT: // key right
                         if(p->bw > 1) p->bw--;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case SDLK_r: // reload config
-                        return XAVA_RELOAD;
+                        return WAVA_RELOAD;
                     case SDLK_c: // change foreground color
                         if(p->gradients) break;
                         p->col = rand() % 0x100;
                         p->col = p->col << 16;
                         p->col += (unsigned int)rand();
-                        return XAVA_REDRAW;
+                        return WAVA_REDRAW;
                     case SDLK_b: // change background color
                         p->bgcol = rand() % 0x100;
                         p->bgcol = p->bgcol << 16;
                         p->bgcol += (unsigned int)rand();
-                        return XAVA_REDRAW;
+                        return WAVA_REDRAW;
                     case SDLK_q:
-                        return XAVA_QUIT;
+                        return WAVA_QUIT;
                 }
                 break;
             case SDL_WINDOWEVENT:
-                if(xavaSDLEvent.window.event == SDL_WINDOWEVENT_CLOSE) return -1;
-                else if(xavaSDLEvent.window.event == SDL_WINDOWEVENT_RESIZED){
+                if(wavaSDLEvent.window.event == SDL_WINDOWEVENT_CLOSE) return -1;
+                else if(wavaSDLEvent.window.event == SDL_WINDOWEVENT_RESIZED){
                     // if the user resized the window
-                    xavaBailCondition(SDL_GetCurrentDisplayMode(
-                                SDL_GetWindowDisplayIndex(xavaSDLWindow),
-                                &xavaSDLVInfo),
+                    wavaBailCondition(SDL_GetCurrentDisplayMode(
+                                SDL_GetWindowDisplayIndex(wavaSDLWindow),
+                                &wavaSDLVInfo),
                             "Error opening display: %s", SDL_GetError());
-                    calculate_win_pos(s, xavaSDLVInfo.w, xavaSDLVInfo.h,
-                            xavaSDLEvent.window.data1, xavaSDLEvent.window.data2);
-                    return XAVA_RESIZE;
+                    calculate_win_pos(s, wavaSDLVInfo.w, wavaSDLVInfo.h,
+                            wavaSDLEvent.window.data1, wavaSDLEvent.window.data2);
+                    return WAVA_RESIZE;
                 }
                 break;
         }
     }
 
     XG_EVENT_STACK *glEventStack = GLEvent(s);
-    while(pendingXAVAEventStack(glEventStack)) {
-        XG_EVENT event = popXAVAEventStack(glEventStack);
-        if(event != XAVA_IGNORE)
+    while(pendingWAVAEventStack(glEventStack)) {
+        XG_EVENT event = popWAVAEventStack(glEventStack);
+        if(event != WAVA_IGNORE)
             return event;
     }
 
-    return XAVA_IGNORE;
+    return WAVA_IGNORE;
 }
 
-EXP_FUNC void xavaOutputDraw(XAVA *s) {
+EXP_FUNC void wavaOutputDraw(WAVA *s) {
     GLDraw(s);
-    SDL_GL_SwapWindow(xavaSDLWindow);
+    SDL_GL_SwapWindow(wavaSDLWindow);
     return;
 }
 
-EXP_FUNC void xavaOutputLoadConfig(XAVA *s) {
-    XAVA_CONFIG *p = &s->conf;
-    //struct XAVA_CONFIG config = s->default_config.config;
+EXP_FUNC void wavaOutputLoadConfig(WAVA *s) {
+    WAVA_CONFIG *p = &s->conf;
+    //struct WAVA_CONFIG config = s->default_config.config;
 
     // VSync doesnt work on SDL2 :(
     p->vsync = 0;

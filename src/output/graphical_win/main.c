@@ -24,15 +24,15 @@
 
 #include "main.h"
 
-const char szAppName[] = "XAVA";
-const char wcWndName[] = "XAVA";
+const char szAppName[] = "WAVA";
+const char wcWndName[] = "WAVA";
 
-HWND xavaWinWindow;
-MSG xavaWinEvent;
-HMODULE xavaWinModule;
-WNDCLASSEX xavaWinClass;
-HDC xavaWinFrame;
-TIMECAPS xavaPeriod;
+HWND wavaWinWindow;
+MSG wavaWinEvent;
+HMODULE wavaWinModule;
+WNDCLASSEX wavaWinClass;
+HDC wavaWinFrame;
+TIMECAPS wavaPeriod;
 
 // These hold the size and position of the window if you're switching to fullscreen mode
 // because Windows (or rather WIN32) doesn't do it internally
@@ -40,12 +40,12 @@ i32 oldX, oldY, oldW, oldH;
 
 #ifdef GL
     BOOL WINAPI wglSwapIntervalEXT (int interval);
-    HGLRC xavaWinGLFrame;
+    HGLRC wavaWinGLFrame;
 #endif
 
 #ifdef CAIRO
-    xava_cairo_handle *xavaCairoHandle;
-    cairo_surface_t   *xavaCairoSurface;
+    wava_cairo_handle *wavaCairoHandle;
+    cairo_surface_t   *wavaCairoSurface;
 #endif
 
 // a crappy workaround for a flawed event-loop design
@@ -56,21 +56,21 @@ static _Bool resized=FALSE, quit=FALSE;
 // instead of doing this shit
 
 // Retarded shit, exhibit A:
-void *xavaHandleForWindowFuncBecauseWinAPIIsOutdated;
+void *wavaHandleForWindowFuncBecauseWinAPIIsOutdated;
 LRESULT CALLBACK WindowFunc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
     // this shit is beyond retarded
-    XAVA *xava = xavaHandleForWindowFuncBecauseWinAPIIsOutdated;
+    WAVA *wava = wavaHandleForWindowFuncBecauseWinAPIIsOutdated;
 
     // god why
-    if(xava == NULL)
+    if(wava == NULL)
         return DefWindowProc(hWnd,msg,wParam,lParam);
 
-    XAVA_CONFIG *conf = &xava->conf;
+    WAVA_CONFIG *conf = &wava->conf;
 
     switch(msg) {
         case WM_CREATE:
-            return XAVA_RESIZE;
+            return WAVA_RESIZE;
         case WM_KEYDOWN:
             switch(wParam) {
                 // should_reload = 1
@@ -78,13 +78,13 @@ LRESULT CALLBACK WindowFunc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 // bail = -1
                 case 'A':
                     conf->bs++;
-                    return XAVA_RESIZE;
+                    return WAVA_RESIZE;
                 case 'S':
                     if(conf->bs > 0) conf->bs--;
-                    return XAVA_RESIZE;
+                    return WAVA_RESIZE;
                 case 'F': // fullscreen
                     conf->flag.fullscreen = !conf->flag.fullscreen;
-                    return XAVA_RESIZE;
+                    return WAVA_RESIZE;
                 case VK_UP:
                     conf->sens *= 1.05;
                     break;
@@ -93,38 +93,38 @@ LRESULT CALLBACK WindowFunc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     break;
                 case VK_LEFT:
                     conf->bw++;
-                    return XAVA_RESIZE;
+                    return WAVA_RESIZE;
                 case VK_RIGHT:
                     if (conf->bw > 1) conf->bw--;
-                    return XAVA_RESIZE;
+                    return WAVA_RESIZE;
                 case 'R': //reload config
-                    return XAVA_RELOAD;
+                    return WAVA_RELOAD;
                 case 'Q':
-                    return XAVA_QUIT;
+                    return WAVA_QUIT;
                 case VK_ESCAPE:
-                    return XAVA_QUIT;
+                    return WAVA_QUIT;
                 case 'B':
                     conf->bgcol = (rand()<<16)|rand();
-                    return XAVA_REDRAW;
+                    return WAVA_REDRAW;
                 case 'C':
                     if(conf->gradients) break;
                     conf->col = (rand()<<16)|rand();
-                    return XAVA_REDRAW;
+                    return WAVA_REDRAW;
                 default: break;
             }
             break;
         case WM_SIZE:
-            calculate_win_geo(xava, LOWORD(lParam), HIWORD(lParam));
+            calculate_win_geo(wava, LOWORD(lParam), HIWORD(lParam));
             resized=TRUE;
-            return XAVA_RELOAD;
+            return WAVA_RELOAD;
         case WM_CLOSE:
             // Perform cleanup tasks.
             PostQuitMessage(0);
             quit=TRUE;
-            return XAVA_QUIT;
+            return WAVA_QUIT;
         case WM_DESTROY:
             quit=TRUE;
-            return XAVA_QUIT;
+            return WAVA_QUIT;
         case WM_QUIT: // lol why is this ignored
             break;
         case WM_NCHITTEST: {
@@ -135,34 +135,34 @@ LRESULT CALLBACK WindowFunc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         default:
             return DefWindowProc(hWnd,msg,wParam,lParam);
     }
-    return XAVA_IGNORE;
+    return WAVA_IGNORE;
 }
 
-EXP_FUNC void xavaOutputClear(XAVA *xava) {
+EXP_FUNC void wavaOutputClear(WAVA *wava) {
     #ifdef GL
-        GLClear(xava);
+        GLClear(wava);
     #endif
     #ifdef CAIRO
-        UNUSED(xava);
-        __internal_xava_output_cairo_clear(xavaCairoHandle);
+        UNUSED(wava);
+        __internal_wava_output_cairo_clear(wavaCairoHandle);
     #endif
 }
 
 unsigned char register_window_win(HINSTANCE HIn) {
-    xavaWinClass.cbSize=sizeof(WNDCLASSEX);
-    xavaWinClass.style=CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    xavaWinClass.lpfnWndProc=WindowFunc;
-    xavaWinClass.cbClsExtra=0;
-    xavaWinClass.cbWndExtra=0;
-    xavaWinClass.hInstance=HIn;
-    xavaWinClass.hIcon=NULL;
-    xavaWinClass.hIconSm=xavaWinClass.hIcon;
-    xavaWinClass.hCursor=LoadCursor(NULL,IDC_ARROW);
-    xavaWinClass.hbrBackground=(HBRUSH)CreateSolidBrush(0x00000000);
-    xavaWinClass.lpszMenuName=NULL;
-    xavaWinClass.lpszClassName=szAppName;
+    wavaWinClass.cbSize=sizeof(WNDCLASSEX);
+    wavaWinClass.style=CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    wavaWinClass.lpfnWndProc=WindowFunc;
+    wavaWinClass.cbClsExtra=0;
+    wavaWinClass.cbWndExtra=0;
+    wavaWinClass.hInstance=HIn;
+    wavaWinClass.hIcon=NULL;
+    wavaWinClass.hIconSm=wavaWinClass.hIcon;
+    wavaWinClass.hCursor=LoadCursor(NULL,IDC_ARROW);
+    wavaWinClass.hbrBackground=(HBRUSH)CreateSolidBrush(0x00000000);
+    wavaWinClass.lpszMenuName=NULL;
+    wavaWinClass.lpszClassName=szAppName;
 
-    return RegisterClassEx(&xavaWinClass);
+    return RegisterClassEx(&wavaWinClass);
 }
 
 void GetDesktopResolution(int *horizontal, int *vertical) {
@@ -180,8 +180,8 @@ void GetDesktopResolution(int *horizontal, int *vertical) {
     return;
 }
 
-EXP_FUNC int xavaInitOutput(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC int wavaInitOutput(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
 
     // reset event trackers
     resized=FALSE;
@@ -191,17 +191,17 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
     oldX = 0; oldY = 0; oldW = -1; oldH = -1;
 
     // get handle
-    xavaWinModule = GetModuleHandle(NULL);
+    wavaWinModule = GetModuleHandle(NULL);
 
     // register window class
-    xavaBailCondition(!register_window_win(xavaWinModule), "RegisterClassEx failed");
+    wavaBailCondition(!register_window_win(wavaWinModule), "RegisterClassEx failed");
 
     // get window size etc..
     int screenWidth, screenHeight;
     GetDesktopResolution(&screenWidth, &screenHeight);
 
     // adjust window position etc...
-    calculate_win_pos(xava, screenWidth, screenHeight,
+    calculate_win_pos(wava, screenWidth, screenHeight,
             conf->w, conf->h);
 
     // why?
@@ -215,18 +215,18 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
     if(conf->flag.border) dwStyle|=WS_CAPTION;
 
     // create window
-    xavaWinWindow = CreateWindowEx(dwExStyle, szAppName, wcWndName,
+    wavaWinWindow = CreateWindowEx(dwExStyle, szAppName, wcWndName,
         WS_POPUP | WS_VISIBLE | dwStyle,
-        xava->outer.x, xava->outer.y, xava->outer.w, xava->outer.h,
-        NULL, NULL, xavaWinModule, NULL);
-    xavaBailCondition(!xavaWinWindow, "CreateWindowEx failed");
+        wava->outer.x, wava->outer.y, wava->outer.w, wava->outer.h,
+        NULL, NULL, wavaWinModule, NULL);
+    wavaBailCondition(!wavaWinWindow, "CreateWindowEx failed");
 
     // transparency fix
-    if(conf->flag.transparency) SetLayeredWindowAttributes(xavaWinWindow,
+    if(conf->flag.transparency) SetLayeredWindowAttributes(wavaWinWindow,
             0x00FFFFFF, 255, LWA_ALPHA | LWA_COLORKEY);
-    SetWindowPos(xavaWinWindow, conf->flag.beneath ? HWND_BOTTOM : HWND_NOTOPMOST,
-            xava->outer.x, xava->outer.y,
-            xava->outer.w, xava->outer.h,
+    SetWindowPos(wavaWinWindow, conf->flag.beneath ? HWND_BOTTOM : HWND_NOTOPMOST,
+            wava->outer.x, wava->outer.y,
+            wava->outer.w, wava->outer.h,
             SWP_SHOWWINDOW);
 
     // we need the desktop window manager to enable transparent background (from Vista ...onward)
@@ -236,9 +236,9 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
     bb.hRgnBlur = hRgn;
     bb.fEnable = conf->flag.transparency;
     bb.fTransitionOnMaximized = true;
-    DwmEnableBlurBehindWindow(xavaWinWindow, &bb);
+    DwmEnableBlurBehindWindow(wavaWinWindow, &bb);
 
-    xavaWinFrame = GetDC(xavaWinWindow);
+    wavaWinFrame = GetDC(wavaWinWindow);
 
     #ifdef GL
         PIXELFORMATDESCRIPTOR pfd = {
@@ -265,14 +265,14 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
             0, 0, 0                           // Layer Masks Ignored
         };
 
-        int PixelFormat = ChoosePixelFormat(xavaWinFrame, &pfd);
-        xavaBailCondition(PixelFormat == 0, "ChoosePixelFormat failed!");
+        int PixelFormat = ChoosePixelFormat(wavaWinFrame, &pfd);
+        wavaBailCondition(PixelFormat == 0, "ChoosePixelFormat failed!");
 
-        BOOL bResult = SetPixelFormat(xavaWinFrame, PixelFormat, &pfd);
-        xavaBailCondition(bResult == FALSE, "SetPixelFormat failed!");
+        BOOL bResult = SetPixelFormat(wavaWinFrame, PixelFormat, &pfd);
+        wavaBailCondition(bResult == FALSE, "SetPixelFormat failed!");
 
-        xavaWinGLFrame = wglCreateContext(xavaWinFrame);
-        xavaBailCondition(xavaWinGLFrame == NULL, "wglCreateContext failed!");
+        wavaWinGLFrame = wglCreateContext(wavaWinFrame);
+        wavaBailCondition(wavaWinGLFrame == NULL, "wglCreateContext failed!");
     #endif
 
     // process colors
@@ -282,7 +282,7 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
         DWORD fancyVariable;
         HRESULT error = DwmGetColorizationColor(&fancyVariable, &opaque);
         conf->col = fancyVariable;
-        xavaWarnCondition(!SUCCEEDED(error), "DwmGetColorizationColor failed");
+        wavaWarnCondition(!SUCCEEDED(error), "DwmGetColorizationColor failed");
     } // as for the other case, we don't have to do any more processing
 
     if(!strcmp(conf->bcolor, "default")) {
@@ -291,34 +291,34 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
         DWORD fancyVariable;
         HRESULT error = DwmGetColorizationColor(&fancyVariable, &opaque);
         conf->bgcol = fancyVariable;
-        xavaWarnCondition(!SUCCEEDED(error), "DwmGetColorizationColor failed");
+        wavaWarnCondition(!SUCCEEDED(error), "DwmGetColorizationColor failed");
     }
 
     // WGL
     #ifdef GL
-        wglMakeCurrent(xavaWinFrame, xavaWinGLFrame);
-        GLInit(xava);
+        wglMakeCurrent(wavaWinFrame, wavaWinGLFrame);
+        GLInit(wava);
     #endif
     #ifdef CAIRO
-        xavaCairoSurface = cairo_win32_surface_create(xavaWinFrame);
-        __internal_xava_output_cairo_init(xavaCairoHandle,
-                cairo_create(xavaCairoSurface));
+        wavaCairoSurface = cairo_win32_surface_create(wavaWinFrame);
+        __internal_wava_output_cairo_init(wavaCairoHandle,
+                cairo_create(wavaCairoSurface));
     #endif
 
     // set up precise timers (otherwise unstable framerate)
-    xavaWarnCondition(timeGetDevCaps(&xavaPeriod, sizeof(TIMECAPS))!=MMSYSERR_NOERROR,
+    wavaWarnCondition(timeGetDevCaps(&wavaPeriod, sizeof(TIMECAPS))!=MMSYSERR_NOERROR,
             "Unable to obtain precise system timers! Stability may be of concern!");
 
     timeEndPeriod(0);
-    timeBeginPeriod(xavaPeriod.wPeriodMin);
+    timeBeginPeriod(wavaPeriod.wPeriodMin);
 
     return 0;
 }
 
-EXP_FUNC int xavaOutputApply(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC int wavaOutputApply(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
 
-    //ReleaseDC(xavaWinWindow, xavaWinFrame);
+    //ReleaseDC(wavaWinWindow, wavaWinFrame);
 
     if(conf->flag.fullscreen) {
         POINT Point = {0};
@@ -326,62 +326,62 @@ EXP_FUNC int xavaOutputApply(XAVA *xava) {
         MONITORINFO MonitorInfo = { 0 };
         if (GetMonitorInfo(Monitor, &MonitorInfo)) {
             DWORD Style = WS_POPUP | WS_VISIBLE;
-            SetWindowLongPtr(xavaWinWindow, GWL_STYLE, Style);
+            SetWindowLongPtr(wavaWinWindow, GWL_STYLE, Style);
 
             // dont overwrite old size on accident if already fullscreen
             if(oldW == -1 && oldH == -1) {
-                oldX = xava->outer.x; oldY = xava->outer.y;
-                oldW = xava->outer.w; oldH = xava->outer.h;
+                oldX = wava->outer.x; oldY = wava->outer.y;
+                oldW = wava->outer.w; oldH = wava->outer.h;
             }
 
             // resizing to full screen
-            SetWindowPos(xavaWinWindow, 0, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+            SetWindowPos(wavaWinWindow, 0, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
                 MonitorInfo.rcMonitor.right-MonitorInfo.rcMonitor.left,
                 MonitorInfo.rcMonitor.bottom-MonitorInfo.rcMonitor.top,
                 SWP_FRAMECHANGED | SWP_SHOWWINDOW);
         }
         // check if the window has been already resized
     } else if(oldW != -1 && oldH != -1) {
-        xava->outer.x = oldX; xava->outer.y = oldY;
-        calculate_win_geo(xava, oldW, oldH);
+        wava->outer.x = oldX; wava->outer.y = oldY;
+        calculate_win_geo(wava, oldW, oldH);
 
         oldW = -1;
         oldH = -1;
 
         // restore window properties
         DWORD Style = WS_POPUP | WS_VISIBLE | (conf->flag.border? WS_CAPTION:0);
-        SetWindowLongPtr(xavaWinWindow, GWL_STYLE, Style);
+        SetWindowLongPtr(wavaWinWindow, GWL_STYLE, Style);
 
-        SetWindowPos(xavaWinWindow, 0,
-                xava->outer.w, xava->outer.y,
-                xava->outer.w, xava->outer.h,
+        SetWindowPos(wavaWinWindow, 0,
+                wava->outer.w, wava->outer.y,
+                wava->outer.w, wava->outer.h,
                 SWP_FRAMECHANGED | SWP_SHOWWINDOW);
     }
 
-    xavaOutputClear(xava);
+    wavaOutputClear(wava);
 
     // WGL stuff
     #ifdef GL
-        GLApply(xava);
+        GLApply(wava);
         PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)(void*)wglGetProcAddress("wglSwapIntervalEXT");
         wglSwapIntervalEXT(conf->vsync);
     #endif
     #ifdef CAIRO
-        __internal_xava_output_cairo_apply(xavaCairoHandle);
+        __internal_wava_output_cairo_apply(wavaCairoHandle);
     #endif
 
     return 0;
 }
 
-EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
+EXP_FUNC XG_EVENT wavaOutputHandleInput(WAVA *wava) {
     // don't even fucking ask
-    xavaHandleForWindowFuncBecauseWinAPIIsOutdated = xava;
+    wavaHandleForWindowFuncBecauseWinAPIIsOutdated = wava;
 
-    while(PeekMessage(&xavaWinEvent, xavaWinWindow, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&xavaWinEvent);
+    while(PeekMessage(&wavaWinEvent, wavaWinWindow, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&wavaWinEvent);
 
         // you fucking piece of shit why are you predefined type AAAAAAAAAAAAAA
-        int r=DispatchMessage(&xavaWinEvent);  // handle return values
+        int r=DispatchMessage(&wavaWinEvent);  // handle return values
 
         // so you may have wondered why do i do stuff like this
         // it's because non-keyboard/mouse messages DONT pass through return values
@@ -389,78 +389,78 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
 
         if(quit) {
             quit=FALSE;
-            return XAVA_QUIT;
+            return WAVA_QUIT;
         }
         if(resized) {
             resized=FALSE;
-            return XAVA_RESIZE;
+            return WAVA_RESIZE;
         }
 
-        if(r != XAVA_IGNORE)
+        if(r != WAVA_IGNORE)
             return r;
     }
 
     XG_EVENT_STACK *eventStack = 
     #if defined(CAIRO)
-        __internal_xava_output_cairo_event(xavaCairoHandle);
+        __internal_wava_output_cairo_event(wavaCairoHandle);
     #elif defined(GL)
-        GLEvent(xava);
+        GLEvent(wava);
     #endif
 
-    while(pendingXAVAEventStack(eventStack)) {
-        XG_EVENT event = popXAVAEventStack(eventStack);
-        if(event != XAVA_IGNORE)
+    while(pendingWAVAEventStack(eventStack)) {
+        XG_EVENT event = popWAVAEventStack(eventStack);
+        if(event != WAVA_IGNORE)
             return event;
     }
 
-    return XAVA_IGNORE;
+    return WAVA_IGNORE;
 }
 
-EXP_FUNC void xavaOutputDraw(XAVA *xava) {
+EXP_FUNC void wavaOutputDraw(WAVA *wava) {
     #ifdef GL
-        wglMakeCurrent(xavaWinFrame, xavaWinGLFrame);
-        GLDraw(xava);
-        SwapBuffers(xavaWinFrame);
+        wglMakeCurrent(wavaWinFrame, wavaWinGLFrame);
+        GLDraw(wava);
+        SwapBuffers(wavaWinFrame);
     #endif
 
     #ifdef CAIRO
-        UNUSED(xava);
-        __internal_xava_output_cairo_draw(xavaCairoHandle);
-        SwapBuffers(xavaWinFrame);
+        UNUSED(wava);
+        __internal_wava_output_cairo_draw(wavaCairoHandle);
+        SwapBuffers(wavaWinFrame);
     #endif
 }
 
-EXP_FUNC void xavaOutputCleanup(XAVA *xava) {
+EXP_FUNC void wavaOutputCleanup(WAVA *wava) {
     #ifdef GL
-        GLCleanup(xava);
+        GLCleanup(wava);
         wglMakeCurrent(NULL, NULL);
-        wglDeleteContext(xavaWinGLFrame);
+        wglDeleteContext(wavaWinGLFrame);
     #endif
 
     #ifdef CAIRO
-        UNUSED(xava);
-        __internal_xava_output_cairo_cleanup(xavaCairoHandle);
+        UNUSED(wava);
+        __internal_wava_output_cairo_cleanup(wavaCairoHandle);
     #endif
 
     // Normal Win32 stuff
-    timeEndPeriod(xavaPeriod.wPeriodMin);
-    ReleaseDC(xavaWinWindow, xavaWinFrame);
-    DestroyWindow(xavaWinWindow);
-    UnregisterClass(szAppName, xavaWinModule);
-    //CloseHandle(xavaWinModule);
+    timeEndPeriod(wavaPeriod.wPeriodMin);
+    ReleaseDC(wavaWinWindow, wavaWinFrame);
+    DestroyWindow(wavaWinWindow);
+    UnregisterClass(szAppName, wavaWinModule);
+    //CloseHandle(wavaWinModule);
 }
 
-EXP_FUNC void xavaOutputLoadConfig(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC void wavaOutputLoadConfig(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
 
     #ifdef GL
         // VSync is a must due to shit Windows timers
         conf->vsync = 1;
-        GLConfigLoad(xava);
+        GLConfigLoad(wava);
     #endif
     #ifdef CAIRO
         conf->vsync = 0;
-        xavaCairoHandle = __internal_xava_output_cairo_load_config(xava);
+        wavaCairoHandle = __internal_wava_output_cairo_load_config(wava);
     #endif
 }
 

@@ -15,7 +15,7 @@ typedef struct {
     SAMPLE      *recordedSamples;
 } paTestData;
 
-static XAVA_AUDIO *audio;
+static WAVA_AUDIO *audio;
 static uint32_t n = 0;
 
 static int recordCallback(const void *inputBuffer, void *outputBuffer,
@@ -70,8 +70,8 @@ static int recordCallback(const void *inputBuffer, void *outputBuffer,
     return finished;
 }
 
-EXP_FUNC void* xavaInput(void *audiodata) {
-    audio = (XAVA_AUDIO *)audiodata;
+EXP_FUNC void* wavaInput(void *audiodata) {
+    audio = (WAVA_AUDIO *)audiodata;
 
     PaStreamParameters inputParameters;
     PaStream* stream;
@@ -80,13 +80,13 @@ EXP_FUNC void* xavaInput(void *audiodata) {
 
     // start portaudio
     err = Pa_Initialize();
-    xavaBailCondition(err != paNoError,
+    wavaBailCondition(err != paNoError,
             "Unable to initialize portaudio: %s", Pa_GetErrorText(err));
 
     // get portaudio device
     int deviceNum = -1, numOfDevices = Pa_GetDeviceCount();
     if(!strcmp(audio->source, "list")) {
-        xavaErrorCondition(numOfDevices<0, "PortAudio was not able to find any audio devices (code 0x%x)",
+        wavaErrorCondition(numOfDevices<0, "PortAudio was not able to find any audio devices (code 0x%x)",
                 numOfDevices);
         for(int i = 0; i < numOfDevices; i++) {
             const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(i);
@@ -101,10 +101,10 @@ EXP_FUNC void* xavaInput(void *audiodata) {
     } else if(!strcmp(audio->source, "auto")) {
         deviceNum = Pa_GetDefaultInputDevice();
 
-        xavaBailCondition(deviceNum == paNoDevice,
+        wavaBailCondition(deviceNum == paNoDevice,
                 "PortAudio was not able to find any input devices!");
     } else if(sscanf(audio->source,"%d", &deviceNum)) {
-        xavaBailCondition(deviceNum>numOfDevices,
+        wavaBailCondition(deviceNum>numOfDevices,
                 "Invalid input device!");
         deviceNum--;
     } else {
@@ -115,7 +115,7 @@ EXP_FUNC void* xavaInput(void *audiodata) {
                 break;
             }
         }
-        xavaBailCondition(deviceNum==-1,
+        wavaBailCondition(deviceNum==-1,
                 "No such device '%s'", audio->source);
     }
     inputParameters.device = deviceNum;
@@ -125,7 +125,7 @@ EXP_FUNC void* xavaInput(void *audiodata) {
     data.maxFrameIndex = audioLenght;
     data.recordedSamples = (SAMPLE *)malloc(audioLenght*sizeof(SAMPLE)*audio->channels);
 
-    xavaBailCondition(!data.recordedSamples,
+    wavaBailCondition(!data.recordedSamples,
             "Memory allocation error!");
     memset(data.recordedSamples, 0x00, audio->channels*audioLenght);
 
@@ -138,14 +138,14 @@ EXP_FUNC void* xavaInput(void *audiodata) {
     err = Pa_OpenStream(&stream, &inputParameters, NULL, audio->rate, audioLenght,
         paClipOff, recordCallback, &data);
 
-    xavaBailCondition(err!=paNoError, "Failure in opening stream (0x%x)", err);
+    wavaBailCondition(err!=paNoError, "Failure in opening stream (0x%x)", err);
 
     // main loop
     while(1) {
         // start recording
         data.frameIndex = 0;
         err = Pa_StartStream(stream);
-        xavaBailCondition(err!=paNoError, "Failure in starting stream (0x%x)", err);
+        wavaBailCondition(err!=paNoError, "Failure in starting stream (0x%x)", err);
 
         //  record
         while((err = Pa_IsStreamActive(stream)) == 1) {
@@ -154,13 +154,13 @@ EXP_FUNC void* xavaInput(void *audiodata) {
         }
 
         // check for errors
-        xavaBailCondition(err<0, "Failure during audio recording (%x)", err);
+        wavaBailCondition(err<0, "Failure during audio recording (%x)", err);
 
         // check if it bailed
         if(audio->terminate == 1) break;
     }
     // close stream
-    xavaBailCondition((err = Pa_CloseStream(stream)) != paNoError,
+    wavaBailCondition((err = Pa_CloseStream(stream)) != paNoError,
             "Failure in closing stream (0x%x)", err);
 
     Pa_Terminate();
@@ -168,9 +168,9 @@ EXP_FUNC void* xavaInput(void *audiodata) {
     return 0;
 }
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
-    audio->source = (char*)xavaConfigGetString(config, "input", "source", "auto");
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
+    audio->source = (char*)wavaConfigGetString(config, "input", "source", "auto");
 }
 

@@ -9,9 +9,9 @@
 #include "main.h"
 #include "xdg.h"
 
-struct wl_registry *xavaWLRegistry;
+struct wl_registry *wavaWLRegistry;
 
-static void xava_wl_registry_global_listener(void *data, struct wl_registry *wl_registry,
+static void wava_wl_registry_global_listener(void *data, struct wl_registry *wl_registry,
         uint32_t name, const char *interface, uint32_t version) {
     struct waydata *wd = data;
 
@@ -27,22 +27,22 @@ static void xava_wl_registry_global_listener(void *data, struct wl_registry *wl_
         wd->compositor = wl_registry_bind(
             wl_registry, name, &wl_compositor_interface, 4);
     } else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
-        xavaXDGWMBase = wl_registry_bind(
+        wavaXDGWMBase = wl_registry_bind(
             wl_registry, name, &xdg_wm_base_interface, 1);
-        xdg_wm_base_add_listener(xavaXDGWMBase,
+        xdg_wm_base_add_listener(wavaXDGWMBase,
             &xdg_wm_base_listener, NULL);
     } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
-        xavaWLRLayerShell = wl_registry_bind(xavaWLRegistry, name,
+        wavaWLRLayerShell = wl_registry_bind(wavaWLRegistry, name,
                 &zwlr_layer_shell_v1_interface, 1);
     } else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
-        xavaXDGOutputManager = wl_registry_bind(xavaWLRegistry, name,
+        wavaXDGOutputManager = wl_registry_bind(wavaWLRegistry, name,
             &zxdg_output_manager_v1_interface, 2);
     } else if (strcmp(interface, wl_output_interface.name) == 0) {
-        if(!xavaXDGOutputManager)
+        if(!wavaXDGOutputManager)
             return;
 
         struct wlOutput *output = malloc(sizeof(struct wlOutput));
-        output->output = wl_registry_bind(xavaWLRegistry, name,
+        output->output = wl_registry_bind(wavaWLRegistry, name,
                 &wl_output_interface, 3);
         output->id     = name;
 
@@ -50,13 +50,13 @@ static void xava_wl_registry_global_listener(void *data, struct wl_registry *wl_
         wl_list_insert(&wd->outputs, &output->link);
 
         output->xdg_output = zxdg_output_manager_v1_get_xdg_output(
-            xavaXDGOutputManager, output->output);
+            wavaXDGOutputManager, output->output);
         zxdg_output_v1_add_listener(output->xdg_output,
             &xdg_output_listener, output);
     }
 }
 
-static void xava_wl_registry_global_remove(void *data, struct wl_registry *wl_registry,
+static void wava_wl_registry_global_remove(void *data, struct wl_registry *wl_registry,
         uint32_t name) {
     UNUSED(wl_registry);
     UNUSED(name);
@@ -64,13 +64,13 @@ static void xava_wl_registry_global_remove(void *data, struct wl_registry *wl_re
     struct waydata           *wd   = data;
 
     // This sometimes happens when displays get reconfigured
-    pushXAVAEventStack(wd->events, XAVA_RELOAD);
+    pushWAVAEventStack(wd->events, WAVA_RELOAD);
 
-    xavaLog("wl_registry died");
+    wavaLog("wl_registry died");
 }
 
-const struct wl_registry_listener xava_wl_registry_listener = {
-    .global = xava_wl_registry_global_listener,
-    .global_remove = xava_wl_registry_global_remove,
+const struct wl_registry_listener wava_wl_registry_listener = {
+    .global = wava_wl_registry_global_listener,
+    .global_remove = wava_wl_registry_global_remove,
 };
 

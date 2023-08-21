@@ -31,7 +31,7 @@ int num_bar_heights = (sizeof(bar_heights) / sizeof(bar_heights[0]));
 // static struct colors the_color_redefinitions[MAX_COLOR_REDEFINITION];
 
 // general: cleanup
-EXP_FUNC void xavaOutputCleanup(XAVA *xava) {
+EXP_FUNC void wavaOutputCleanup(WAVA *wava) {
     echo();
     system("setfont  >/dev/null 2>&1");
     system("setfont /usr/share/consolefonts/Lat2-Fixed16.psf.gz  >/dev/null 2>&1");
@@ -53,8 +53,8 @@ EXP_FUNC void xavaOutputCleanup(XAVA *xava) {
 static void parse_color(char *color_string, struct colors *color) {
     if (color_string[0] == '#') {
         if (!can_change_color()) {
-            xavaOutputCleanup(NULL); // lol
-            xavaBail("Your terminal cannot change color definitions, "
+            wavaOutputCleanup(NULL); // lol
+            wavaBail("Your terminal cannot change color definitions, "
                     "please use one of the predefined colors.\n");
         }
         color->color = COLOR_REDEFINITION;
@@ -92,8 +92,8 @@ static NCURSES_COLOR_T change_color_definition(NCURSES_COLOR_T color_number,
     return return_color_number;
 }
 
-EXP_FUNC int xavaInitOutput(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC int wavaInitOutput(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
     initscr();
     curs_set(0);
     timeout(0);
@@ -103,9 +103,9 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
 
     int neww, newh;
     getmaxyx(stdscr, newh, neww);
-    calculate_win_geo(xava, neww, newh);
-    xava->bar_space.w = xava->inner.w;
-    xava->bar_space.h = xava->inner.h;
+    calculate_win_geo(wava, neww, newh);
+    wava->bar_space.w = wava->inner.w;
+    wava->bar_space.h = wava->inner.h;
     clear();
 
     NCURSES_COLOR_T color_pair_number = 16;
@@ -126,7 +126,7 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
         short unsigned int rgb[2 * conf->gradients - 1][3];
         char next_color[14];
 
-        gradient_size = xava->outer.h;
+        gradient_size = wava->outer.h;
 
         if (gradient_size > COLORS)
             gradient_size = COLORS - 1;
@@ -191,8 +191,8 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
     if (bg_color_number != -1)
         bkgd(COLOR_PAIR(color_pair_number));
 
-    for (int y = 0; y < xava->outer.h/8; y++) {
-        for (int x = 0; x < xava->outer.h; x++) {
+    for (int y = 0; y < wava->outer.h/8; y++) {
+        for (int x = 0; x < wava->outer.h; x++) {
             mvaddch(y, x, ' ');
         }
     }
@@ -211,28 +211,28 @@ void change_colors(int cur_height, int tot_height) {
     attron(COLOR_PAIR(cur_height + 16));
 }
 
-EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC XG_EVENT wavaOutputHandleInput(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
     char ch = getch();
 
     int neww,newh;
     getmaxyx(stdscr, newh, neww);
     newh*=8;
-    if(neww!=xava->outer.w||newh!=xava->outer.h) {
-        calculate_win_geo(xava, neww, newh);
-        xava->bar_space.w = xava->inner.w;
-        xava->bar_space.h = xava->inner.h;
-        return XAVA_RESIZE;
+    if(neww!=wava->outer.w||newh!=wava->outer.h) {
+        calculate_win_geo(wava, neww, newh);
+        wava->bar_space.w = wava->inner.w;
+        wava->bar_space.h = wava->inner.h;
+        return WAVA_RESIZE;
     }
 
     switch (ch) {
         case 'a':
             conf->bs++;
-            return XAVA_RESIZE;
+            return WAVA_RESIZE;
         case 's':
             if(conf->bs > 0)
                 conf->bs--;
-            return XAVA_RESIZE;
+            return WAVA_RESIZE;
         case 65: // key up
             conf->sens = conf->sens * 1.05;
             break;
@@ -241,64 +241,64 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
             break;
         case 68: // key right
             conf->bw++;
-            return XAVA_RESIZE;
+            return WAVA_RESIZE;
         case 67: // key left
             if (conf->bw > 1)
                 conf->bw--;
-            return XAVA_RESIZE;
+            return WAVA_RESIZE;
         case 'r': // reload config
-            return XAVA_RELOAD;
+            return WAVA_RELOAD;
         case 'f': // change forground color
             if (conf->col < 7)
                 conf->col++;
             else
                 conf->col = 0;
-            return XAVA_RESIZE;
+            return WAVA_RESIZE;
         case 'b': // change backround color
             if (conf->bgcol < 7)
                 conf->bgcol++;
             else
                 conf->bgcol = 0;
-            return XAVA_REDRAW;
+            return WAVA_REDRAW;
         case 'q':
-            return XAVA_QUIT;
+            return WAVA_QUIT;
     }
 
-    return XAVA_IGNORE;
+    return WAVA_IGNORE;
 }
 
-EXP_FUNC void xavaOutputClear(XAVA *xava) {
+EXP_FUNC void wavaOutputClear(WAVA *wava) {
     system("clear");
     clear();
 }
 
-EXP_FUNC void xavaOutputApply(XAVA *xava) {
-    xavaOutputClear(xava);
+EXP_FUNC void wavaOutputApply(WAVA *wava) {
+    wavaOutputClear(wava);
 }
 
 #define TERMINAL_RESIZED -1
 
-EXP_FUNC int xavaOutputDraw(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC int wavaOutputDraw(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
 
-    int height = xava->outer.h/8-1;
+    int height = wava->outer.h/8-1;
 
-    for(int i=0; i<xava->bars; i++) {
-        int diff=xava->f[i]-xava->fl[i];
+    for(int i=0; i<wava->bars; i++) {
+        int diff=wava->f[i]-wava->fl[i];
         if(diff==0) continue;
 
-        int xoffset = xava->rest+(conf->bw+conf->bs)*i;
+        int xoffset = wava->rest+(conf->bw+conf->bs)*i;
         if(diff>0) {
-            for(int k=greatestDivisible(xava->fl[i], 8); k<xava->f[i]; k+=8) {
+            for(int k=greatestDivisible(wava->fl[i], 8); k<wava->f[i]; k+=8) {
                 //change_colors(k, height);
-                int kdiff=xava->f[i]-k; if(kdiff > 8) kdiff = 8;
+                int kdiff=wava->f[i]-k; if(kdiff > 8) kdiff = 8;
                 for(int j=0; j<conf->bw; j++) {
                     mvaddch(height-k/8, xoffset+j, 0x40 + kdiff);
                 }
             }
         } else {
-            for(int k=greatestDivisible(xava->f[i], 8); k<xava->fl[i]; k+=8) {
-                int kdiff=xava->f[i]-k;
+            for(int k=greatestDivisible(wava->f[i], 8); k<wava->fl[i]; k+=8) {
+                int kdiff=wava->f[i]-k;
                 //change_colors(k, height);
                 for(int j=0; j<conf->bw; j++) {
                     if(kdiff<=0)
@@ -378,6 +378,6 @@ EXP_FUNC int xavaOutputDraw(XAVA *xava) {
     return 0;
 }
 
-EXP_FUNC void xavaOutputLoadConfig(XAVA *xava) {
+EXP_FUNC void wavaOutputLoadConfig(WAVA *wava) {
     // noop
 }

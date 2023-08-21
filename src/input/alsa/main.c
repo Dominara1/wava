@@ -7,12 +7,12 @@
 
 // input: ALSA
 
-static void initialize_audio_parameters(snd_pcm_t** handle, XAVA_AUDIO* audio,
+static void initialize_audio_parameters(snd_pcm_t** handle, WAVA_AUDIO* audio,
 snd_pcm_uframes_t* frames) {
     // alsa: open device to capture audio
     int err = snd_pcm_open(handle, audio->source, SND_PCM_STREAM_CAPTURE, 0);
-    xavaBailCondition(err<0, "Error opening ALSA stream: %s", snd_strerror(err));
-    xavaSpam("Opening ALSA stream successful");
+    wavaBailCondition(err<0, "Error opening ALSA stream: %s", snd_strerror(err));
+    wavaSpam("Opening ALSA stream successful");
 
     snd_pcm_hw_params_t* params;
     snd_pcm_hw_params_alloca(&params); // assembling params
@@ -32,10 +32,10 @@ snd_pcm_uframes_t* frames) {
     // number of frames pr read
     snd_pcm_hw_params_set_period_size_near(*handle, params, frames, NULL);
     err = snd_pcm_hw_params(*handle, params); // attempting to set params
-    xavaBailCondition(err<0, "Failed to set hardware parameters: %s",
+    wavaBailCondition(err<0, "Failed to set hardware parameters: %s",
             snd_strerror(err));
 
-    xavaBailCondition((err = snd_pcm_prepare(*handle))<0,
+    wavaBailCondition((err = snd_pcm_prepare(*handle))<0,
             "Failed to prepare audio interface for use: %s", snd_strerror(err));
 
     // getting actual format
@@ -65,7 +65,7 @@ static int get_certain_frame(signed char* buffer, int buffer_index, int adjustme
     return temp;
 }
 
-static void fill_audio_outs(XAVA_AUDIO* audio, signed char* buffer,
+static void fill_audio_outs(WAVA_AUDIO* audio, signed char* buffer,
     const int size) {
     int radj = audio->format / 4; // adjustments for interleaved
     int ladj = audio->format / 8;
@@ -104,9 +104,9 @@ static _Bool directory_exists(const char * path) {
     return exists;
 }
 
-EXP_FUNC void* xavaInput(void* data) {
+EXP_FUNC void* wavaInput(void* data) {
     int err;
-    XAVA_AUDIO* audio = (XAVA_AUDIO*)data;
+    WAVA_AUDIO* audio = (WAVA_AUDIO*)data;
     snd_pcm_t* handle;
     snd_pcm_uframes_t buffer_size;
     snd_pcm_uframes_t period_size;
@@ -114,7 +114,7 @@ EXP_FUNC void* xavaInput(void* data) {
 
     if(is_loop_device_for_sure(audio->source)) {
         if(directory_exists("/sys/")) {
-            xavaBailCondition(!directory_exists("/sys/module/snd_aloop/"),
+            wavaBailCondition(!directory_exists("/sys/module/snd_aloop/"),
                     "Linux kernel module 'snd_aloop' does not seem to be loaded!\n"
                     "Maybe run \"sudo modprobe snd_aloop\"");
         }
@@ -127,7 +127,7 @@ EXP_FUNC void* xavaInput(void* data) {
     frames = period_size / ((audio->format / 8) * audio->channels);
     audio->latency = period_size;\
 
-    xavaSpam("channels: %d, samplerate: %d, latency: %d",
+    wavaSpam("channels: %d, samplerate: %d, latency: %d",
             audio->channels, audio->rate, audio->latency);
 
     // frames * bits/8 * channels
@@ -162,12 +162,12 @@ EXP_FUNC void* xavaInput(void* data) {
 
         if(err == -EPIPE) {
             /* EPIPE means overrun */
-            xavaError("Buffer overrun detected!\n");
+            wavaError("Buffer overrun detected!\n");
             snd_pcm_prepare(handle);
         } else if(err < 0) {
-            xavaError("Read error: %s", snd_strerror(err));
+            wavaError("Read error: %s", snd_strerror(err));
         } else if(err != (int)frames) {
-            xavaError("Short read. Read %d instead of %d frames!", err, (int)frames);
+            wavaError("Short read. Read %d instead of %d frames!", err, (int)frames);
         }
 
         if (audio->terminate == 1) {
@@ -178,9 +178,9 @@ EXP_FUNC void* xavaInput(void* data) {
     }
 }
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
-    audio->source = (char*)xavaConfigGetString(config, "input", "source", "Loopback,1");
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
+    audio->source = (char*)wavaConfigGetString(config, "input", "source", "Loopback,1");
 }
 

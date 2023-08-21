@@ -15,7 +15,7 @@ typedef enum uri_type {
     URI_TYPE_AUDIO_FILE
 } uri_type;
 
-size_t xava_util_download_artwork(void *ptr, size_t size, size_t nmemb,
+size_t wava_util_download_artwork(void *ptr, size_t size, size_t nmemb,
         struct artwork *artwork) {
     if(artwork->file_data == NULL) {
         artwork->file_data = malloc(size*nmemb);
@@ -31,7 +31,7 @@ size_t xava_util_download_artwork(void *ptr, size_t size, size_t nmemb,
     return nmemb*size;
 }
 
-void xava_util_artwork_destroy(struct artwork *artwork) {
+void wava_util_artwork_destroy(struct artwork *artwork) {
     // reset artwork if already allocated
     if(artwork->ready) {
         // needs to be set early because stupid computers
@@ -45,30 +45,30 @@ void xava_util_artwork_destroy(struct artwork *artwork) {
     artwork->file_data = NULL;
 }
 
-bool xava_util_artwork_update_by_download(const char *url,
+bool wava_util_artwork_update_by_download(const char *url,
         struct artwork *artwork, CURL *curl) {
     CURLcode res;
 
     curl_easy_setopt(curl, CURLOPT_URL,           url);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA,     artwork);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-            xava_util_download_artwork);
+            wava_util_download_artwork);
 
     res = curl_easy_perform(curl);
 
     if(res != CURLE_OK) {
-        xavaLog("Failed to download '%s'", url);
+        wavaLog("Failed to download '%s'", url);
         return true;
     }
 
     return false;
 }
 
-bool xava_util_artwork_update_by_file(const char *url, struct artwork *artwork) {
+bool wava_util_artwork_update_by_file(const char *url, struct artwork *artwork) {
     const char *filename = &url[strlen(URI_HEADER_FILE)];
     FILE *fp = fopen(filename, "rb");
 
-    xavaReturnWarnCondition(fp == NULL, true, "Failed to open '%s'", filename);
+    wavaReturnWarnCondition(fp == NULL, true, "Failed to open '%s'", filename);
 
     fseek(fp, 0, SEEK_END);
     size_t size = ftell(fp);
@@ -83,9 +83,9 @@ bool xava_util_artwork_update_by_file(const char *url, struct artwork *artwork) 
     return false;
 }
 
-void xava_util_artwork_update(const char *url,
+void wava_util_artwork_update(const char *url,
         struct artwork *artwork, CURL *curl) {
-    xava_util_artwork_destroy(artwork);
+    wava_util_artwork_destroy(artwork);
 
     uri_type type = URI_TYPE_DOWNLOAD;
 
@@ -98,20 +98,20 @@ void xava_util_artwork_update(const char *url,
     bool fail;
     switch(type) {
         case URI_TYPE_FILE:
-            fail = xava_util_artwork_update_by_file(url, artwork);
+            fail = wava_util_artwork_update_by_file(url, artwork);
             break;
         case URI_TYPE_DOWNLOAD:
-            fail = xava_util_artwork_update_by_download(url, artwork, curl);
+            fail = wava_util_artwork_update_by_download(url, artwork, curl);
             break;
         case URI_TYPE_AUDIO_FILE:
-            fail = xava_util_artwork_update_by_audio_file(url, artwork);
+            fail = wava_util_artwork_update_by_audio_file(url, artwork);
             break;
     }
     if(fail)
         return;
 
     if(artwork->size == 0) {
-        xavaLog("Failed to load '%s'", url);
+        wavaLog("Failed to load '%s'", url);
         return;
     }
 

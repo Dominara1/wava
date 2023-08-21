@@ -46,24 +46,24 @@ sys systems[] = {
 };
 
 struct functions {
-    void     (*cleanup)     (XAVA *xava);
-    int      (*init)        (XAVA *xava);
-    void     (*clear)       (XAVA *xava);
-    int      (*apply)       (XAVA *xava);
-    XG_EVENT (*handle_input)(XAVA *xava);
-    void     (*draw)        (XAVA *xava);
-    void     (*load_config) (XAVA *xava);
+    void     (*cleanup)     (WAVA *wava);
+    int      (*init)        (WAVA *wava);
+    void     (*clear)       (WAVA *wava);
+    int      (*apply)       (WAVA *wava);
+    XG_EVENT (*handle_input)(WAVA *wava);
+    void     (*draw)        (WAVA *wava);
+    void     (*load_config) (WAVA *wava);
 } functions;
 
-XAVAMODULE *module;
+WAVAMODULE *module;
 
-EXP_FUNC void xavaOutputLoadConfig(XAVA *xava) {
+EXP_FUNC void wavaOutputLoadConfig(WAVA *wava) {
     int supported_systems = sizeof(systems)/sizeof(sys);
 
     char *system = NULL;
     int i = 0;
 
-    xava_output_module_default_find_any_remaining:
+    wava_output_module_default_find_any_remaining:
     for(; i < supported_systems; i++) {
         if(systems[i].test_func()) {
             #ifdef CAIRO
@@ -79,7 +79,7 @@ EXP_FUNC void xavaOutputLoadConfig(XAVA *xava) {
         }
     }
 
-    xavaBailCondition(system == NULL,
+    wavaBailCondition(system == NULL,
         "No supported output methods found for '%s'",
     #if defined(CAIRO)
         "cairo"
@@ -91,53 +91,53 @@ EXP_FUNC void xavaOutputLoadConfig(XAVA *xava) {
     #endif
         );
 
-    module = xava_module_output_load(system);
-    if(!xava_module_valid(module)) {
+    module = wava_module_output_load(system);
+    if(!wava_module_valid(module)) {
         // execution halts here if the condition fails btw
-        xavaBailCondition(i == supported_systems-1,
-            "xava module failed to load (definitely bug): %s",
-            xava_module_error_get(module));
+        wavaBailCondition(i == supported_systems-1,
+            "wava module failed to load (definitely bug): %s",
+            wava_module_error_get(module));
 
-        xavaLog("xava module failed to load (probably bug): %s",
-            xava_module_error_get(module));
-        goto xava_output_module_default_find_any_remaining;
+        wavaLog("wava module failed to load (probably bug): %s",
+            wava_module_error_get(module));
+        goto wava_output_module_default_find_any_remaining;
     }
 
 
-    functions.cleanup      = xava_module_symbol_address_get(module, "xavaOutputCleanup");
-    functions.init         = xava_module_symbol_address_get(module, "xavaInitOutput");
-    functions.clear        = xava_module_symbol_address_get(module, "xavaOutputClear");
-    functions.apply        = xava_module_symbol_address_get(module, "xavaOutputApply");
-    functions.handle_input = xava_module_symbol_address_get(module, "xavaOutputHandleInput");
-    functions.draw         = xava_module_symbol_address_get(module, "xavaOutputDraw");
-    functions.load_config  = xava_module_symbol_address_get(module, "xavaOutputLoadConfig");
+    functions.cleanup      = wava_module_symbol_address_get(module, "wavaOutputCleanup");
+    functions.init         = wava_module_symbol_address_get(module, "wavaInitOutput");
+    functions.clear        = wava_module_symbol_address_get(module, "wavaOutputClear");
+    functions.apply        = wava_module_symbol_address_get(module, "wavaOutputApply");
+    functions.handle_input = wava_module_symbol_address_get(module, "wavaOutputHandleInput");
+    functions.draw         = wava_module_symbol_address_get(module, "wavaOutputDraw");
+    functions.load_config  = wava_module_symbol_address_get(module, "wavaOutputLoadConfig");
 
-    functions.load_config(xava);
+    functions.load_config(wava);
 }
 
-EXP_FUNC void xavaOutputCleanup(XAVA *xava) {
-    functions.cleanup(xava);
+EXP_FUNC void wavaOutputCleanup(WAVA *wava) {
+    functions.cleanup(wava);
 
-    xava_module_free(module);
+    wava_module_free(module);
 }
 
-EXP_FUNC int xavaInitOutput(XAVA *xava) {
-    return functions.init(xava);
+EXP_FUNC int wavaInitOutput(WAVA *wava) {
+    return functions.init(wava);
 }
 
-EXP_FUNC void xavaOutputClear(XAVA *xava) {
-    functions.clear(xava);
+EXP_FUNC void wavaOutputClear(WAVA *wava) {
+    functions.clear(wava);
 }
 
-EXP_FUNC int xavaOutputApply(XAVA *xava) {
-    return functions.apply(xava);
+EXP_FUNC int wavaOutputApply(WAVA *wava) {
+    return functions.apply(wava);
 }
 
-EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
-    return functions.handle_input(xava);
+EXP_FUNC XG_EVENT wavaOutputHandleInput(WAVA *wava) {
+    return functions.handle_input(wava);
 }
 
-EXP_FUNC void xavaOutputDraw(XAVA *xava) {
-    functions.draw(xava);
+EXP_FUNC void wavaOutputDraw(WAVA *wava) {
+    functions.draw(wava);
 }
 

@@ -14,16 +14,16 @@
 
 #include "config.h"
 
-void *xava_cairo_module_file_load(
-        xava_cairo_file_type      type,
-        xava_cairo_module_handle *module,
+void *wava_cairo_module_file_load(
+        wava_cairo_file_type      type,
+        wava_cairo_module_handle *module,
         const char               *file_name,
         char                     *returned_path) {
 
     char file_path[MAX_PATH];
     void *pointer = NULL;
 
-    xava_config_source config;
+    wava_config_source config;
 
     // "cairo/module/$module_name"
     strcpy(file_path, module->prefix);
@@ -31,40 +31,40 @@ void *xava_cairo_module_file_load(
     // add file name
     strcat(file_path, file_name);
 
-    enum XAVA_FILE_TYPE xava_io_file_type;
+    enum WAVA_FILE_TYPE wava_io_file_type;
     switch(type) {
-        case XAVA_CAIRO_FILE_INSTALL_READ:
-            xava_io_file_type = XAVA_FILE_TYPE_PACKAGE;
+        case WAVA_CAIRO_FILE_INSTALL_READ:
+            wava_io_file_type = WAVA_FILE_TYPE_PACKAGE;
             break;
         default:
-            xava_io_file_type = XAVA_FILE_TYPE_CONFIG;
+            wava_io_file_type = WAVA_FILE_TYPE_CONFIG;
             break;
     }
 
     // get REAL path
     char *actual_path;
-    xavaReturnErrorCondition(
-        xavaFindAndCheckFile(xava_io_file_type,
+    wavaReturnErrorCondition(
+        wavaFindAndCheckFile(wava_io_file_type,
             file_path, &actual_path) == false,
         NULL,
         "Failed to find or open '%s'", file_path);
 
     switch(type) {
-        case XAVA_CAIRO_FILE_CONFIG:
-            config = xavaConfigOpen(actual_path);
-            pointer = malloc(sizeof(xava_config_source));
-            xavaBailCondition(pointer == NULL, "Memory error");
-            ((xava_config_source*)pointer)[0] = config;
+        case WAVA_CAIRO_FILE_CONFIG:
+            config = wavaConfigOpen(actual_path);
+            pointer = malloc(sizeof(wava_config_source));
+            wavaBailCondition(pointer == NULL, "Memory error");
+            ((wava_config_source*)pointer)[0] = config;
             break;
-        case XAVA_CAIRO_FILE_INSTALL_READ:
-        case XAVA_CAIRO_FILE_CONFIG_CUSTOM_READ:
+        case WAVA_CAIRO_FILE_INSTALL_READ:
+        case WAVA_CAIRO_FILE_CONFIG_CUSTOM_READ:
             pointer = fopen(file_path, "rb");
             break;
-        case XAVA_CAIRO_FILE_CONFIG_CUSTOM_WRITE:
+        case WAVA_CAIRO_FILE_CONFIG_CUSTOM_WRITE:
             pointer = fopen(file_path, "wb");
             break;
         default:
-            xavaReturnError(NULL, "Invalid file type");
+            wavaReturnError(NULL, "Invalid file type");
     }
 
     if(returned_path != NULL) {

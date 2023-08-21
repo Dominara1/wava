@@ -19,19 +19,19 @@ if(WINAPI)
                 find_library(GLEW glew32)
 
                 # add winapi test
-                list(APPEND DEFAULT_OUTPUT_SOURCES "${XAVA_MODULE_DIR}/test.c")
+                list(APPEND DEFAULT_OUTPUT_SOURCES "${WAVA_MODULE_DIR}/test.c")
                 #list(APPEND DEFAULT_OUTPUT_LINKDIR "${WIN_LIBRARY_DIRS}")
                 #list(APPEND DEFAULT_OUTPUT_LINKLIB "${WIN_LIBRARIES}")
                 #list(APPEND DEFAULT_OUTPUT_INCDIR  "${WIN_INCLUDE_DIRS}")
                 list(APPEND DEFAULT_OUTPUT_DEF     "-DWINDOWS")
 
                 if(WGL_LIB AND GLEW)
-                    add_library(out_win_opengl SHARED "${XAVA_MODULE_DIR}/main.c"
+                    add_library(out_win_opengl SHARED "${WAVA_MODULE_DIR}/main.c"
                         "src/output/shared/graphical.c"
                         "src/output/shared/gl/glew.c"
                         "src/output/shared/gl/main.c"
                         "${GLOBAL_FUNCTION_SOURCES}")
-                    target_link_libraries(out_win_opengl xava-shared
+                    target_link_libraries(out_win_opengl wava-shared
                         "-lglew32 -lgdi32 -lwinmm -lopengl32 -ldwmapi")
                     target_compile_definitions(out_win_opengl PUBLIC -DWIN -DGL)
                     set_target_properties(out_win_opengl PROPERTIES PREFIX "")
@@ -43,14 +43,14 @@ if(WINAPI)
 
                 pkg_check_modules(CAIRO QUIET cairo)
                 if(CAIRO_FOUND)
-                    add_library(out_win_cairo SHARED "${XAVA_MODULE_DIR}/main.c"
+                    add_library(out_win_cairo SHARED "${WAVA_MODULE_DIR}/main.c"
                         "src/output/shared/graphical.c"
                         "src/output/shared/cairo/main.c"
                         "src/output/shared/cairo/util/module.c"
                         "src/output/shared/cairo/util/feature_compat.c"
                         "src/output/shared/cairo/util/region.c"
                         "${GLOBAL_FUNCTION_SOURCES}")
-                    target_link_libraries(out_win_cairo xava-shared "-lgdi32"
+                    target_link_libraries(out_win_cairo wava-shared "-lgdi32"
                         "-lwinmm -ldwmapi" ${CAIRO_LIBRARIES})
                     target_link_directories(out_win_cairo PRIVATE
                         ${CAIRO_LIBRARY_DIRS})

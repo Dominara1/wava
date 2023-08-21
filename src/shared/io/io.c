@@ -21,7 +21,7 @@
 #include "shared/io/unix.h"
 #endif
 
-EXP_FUNC int xavaMkdir(const char *dir) {
+EXP_FUNC int wavaMkdir(const char *dir) {
     /* Stolen from: https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
     /* Adapted from http://stackoverflow.com/a/2336245/119527 */
     const size_t len = strlen(dir);
@@ -64,7 +64,7 @@ EXP_FUNC int xavaMkdir(const char *dir) {
 }
 
 // returned in UNIX time except milliseconds
-EXP_FUNC unsigned long xavaGetTime(void) {
+EXP_FUNC unsigned long wavaGetTime(void) {
     #ifdef WIN
         return timeGetTime();
     #else
@@ -76,7 +76,7 @@ EXP_FUNC unsigned long xavaGetTime(void) {
 
 #ifdef __WIN32__
 // sleep in 100ns intervals
-BOOLEAN __internal_xava_shared_io_sleep_windows(LONGLONG ns) {
+BOOLEAN __internal_wava_shared_io_sleep_windows(LONGLONG ns) {
     /* Declarations */
     HANDLE timer;   /* Timer handle */
     LARGE_INTEGER li;   /* Time defintion */
@@ -98,20 +98,20 @@ BOOLEAN __internal_xava_shared_io_sleep_windows(LONGLONG ns) {
 }
 #endif
 
-EXP_FUNC unsigned long xavaSleep(unsigned long oldTime, int framerate) {
+EXP_FUNC unsigned long wavaSleep(unsigned long oldTime, int framerate) {
     unsigned long newTime = 0;
     if(framerate) {
     #ifdef WIN
-        newTime = xavaGetTime();
+        newTime = wavaGetTime();
         if(newTime-oldTime<1000/framerate&&newTime>oldTime)
-            __internal_xava_shared_io_sleep_windows(
+            __internal_wava_shared_io_sleep_windows(
                 (1000/framerate-(newTime-oldTime)) * 10000);
-        return xavaGetTime();
+        return wavaGetTime();
     #else
-        newTime = xavaGetTime();
+        newTime = wavaGetTime();
         if(oldTime+1000/framerate>newTime)
             usleep((1000/framerate+oldTime-newTime)*1000);
-        return xavaGetTime();
+        return wavaGetTime();
     #endif
     }
     #ifdef WIN
@@ -123,9 +123,9 @@ EXP_FUNC unsigned long xavaSleep(unsigned long oldTime, int framerate) {
 }
 
 
-// XAVA event stack
-EXP_FUNC void pushXAVAEventStack(XG_EVENT_STACK *stack, XG_EVENT event) {
-    xavaSpam("XAVA event %d added (id=%d)", stack->pendingEvents, event);
+// WAVA event stack
+EXP_FUNC void pushWAVAEventStack(XG_EVENT_STACK *stack, XG_EVENT event) {
+    wavaSpam("WAVA event %d added (id=%d)", stack->pendingEvents, event);
 
     stack->pendingEvents++;
 
@@ -135,7 +135,7 @@ EXP_FUNC void pushXAVAEventStack(XG_EVENT_STACK *stack, XG_EVENT event) {
     stack->events[stack->pendingEvents-1] = event;
 }
 
-EXP_FUNC XG_EVENT popXAVAEventStack(XG_EVENT_STACK *stack) {
+EXP_FUNC XG_EVENT popWAVAEventStack(XG_EVENT_STACK *stack) {
     XG_EVENT *newStack;
     XG_EVENT event = stack->events[0];
 
@@ -147,30 +147,30 @@ EXP_FUNC XG_EVENT popXAVAEventStack(XG_EVENT_STACK *stack) {
     newStack = realloc(stack->events, MIN(stack->pendingEvents, 1)*sizeof(XG_EVENT));
     stack->events = newStack;
 
-    xavaSpam("XAVA event %d destroyed (id=%d)", stack->pendingEvents, event);
+    wavaSpam("WAVA event %d destroyed (id=%d)", stack->pendingEvents, event);
 
     return event;
 }
 
-EXP_FUNC XG_EVENT_STACK *newXAVAEventStack() {
+EXP_FUNC XG_EVENT_STACK *newWAVAEventStack() {
     XG_EVENT_STACK *stack = calloc(1, sizeof(XG_EVENT_STACK));
     stack->pendingEvents = 0;
     stack->events = malloc(1); // needs a valid pointer here
     return stack;
 }
 
-EXP_FUNC void destroyXAVAEventStack(XG_EVENT_STACK *stack) {
+EXP_FUNC void destroyWAVAEventStack(XG_EVENT_STACK *stack) {
     free(stack->events);
     free(stack);
 }
 
-EXP_FUNC bool pendingXAVAEventStack(XG_EVENT_STACK *stack) {
+EXP_FUNC bool pendingWAVAEventStack(XG_EVENT_STACK *stack) {
     return (stack->pendingEvents > 0) ? true : false;
 }
 
 // used for blocking in case an processing an event at the wrong
 // time can cause disaster
-EXP_FUNC bool isEventPendingXAVA(XG_EVENT_STACK *stack, XG_EVENT event) {
+EXP_FUNC bool isEventPendingWAVA(XG_EVENT_STACK *stack, XG_EVENT event) {
     for(int i = 0; i < stack->pendingEvents; i++) {
         if(stack->events[i] == event) return true;
     }
@@ -180,32 +180,32 @@ EXP_FUNC bool isEventPendingXAVA(XG_EVENT_STACK *stack, XG_EVENT event) {
 
 // this function is an abstraction for checking whether or not a certain file is usable
 // You define what kind of behaviour a certain file should have, then it's filename
-// inside of the "file container" (for configs that would be ~/.config/xava/...) and
+// inside of the "file container" (for configs that would be ~/.config/wava/...) and
 // actualPath (if successful) will return the path where that file could be found
 // (this string is heap allocated, so a free is a must)
-EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **actualPath) {
+EXP_FUNC bool wavaFindAndCheckFile(XF_TYPE type, const char *filename, char **actualPath) {
     bool writeCheck = false;
     switch(type) {
-        case XAVA_FILE_TYPE_CACHE:
+        case WAVA_FILE_TYPE_CACHE:
             writeCheck = true;
 
             // TODO: When you use it, FINISH IT!
             {
-                xavaError("XAVA_FILE_TYPE_CACHE is not implemented yet!");
+                wavaError("WAVA_FILE_TYPE_CACHE is not implemented yet!");
                 return false;
             }
             break;
-        case XAVA_FILE_TYPE_CONFIG:
-        case XAVA_FILE_TYPE_OPTIONAL_CONFIG:
+        case WAVA_FILE_TYPE_CONFIG:
+        case WAVA_FILE_TYPE_OPTIONAL_CONFIG:
         {
             #if defined(__unix__) // FOSS-y/Linux-y implementation
                 char *configHome = getenv("XDG_CONFIG_HOME");
 
                 if(configHome == NULL) {
-                    xavaLog("XDG_CONFIG_HOME is not set. Assuming it's in the default path per XDG-spec.");
+                    wavaLog("XDG_CONFIG_HOME is not set. Assuming it's in the default path per XDG-spec.");
 
                     char *homeDir;
-                    xavaErrorCondition((homeDir = getenv("HOME")) == NULL,
+                    wavaErrorCondition((homeDir = getenv("HOME")) == NULL,
                             "This system is $HOME-less. Aborting execution...");
 
                     configHome = malloc(MAX_PATH);
@@ -226,7 +226,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 
                 // you must have a really broken system for this to be false
                 if((homeDir = getenv("HOME")) == NULL) {
-                    xavaError("macOS is $HOME-less. Bailing out!!!");
+                    wavaError("macOS is $HOME-less. Bailing out!!!");
                     free(configHome);
                     return false;
                 }
@@ -239,7 +239,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 
                 // stop using windows 98 ffs
                 if((homeDir = getenv("APPDATA")) == NULL) {
-                    xavaError("XAVA could not find \%AppData\%! Something's REALLY wrong.");
+                    wavaError("WAVA could not find \%AppData\%! Something's REALLY wrong.");
                     free(configHome);
                     return false;
                 }
@@ -253,7 +253,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
             writeCheck = true;
             break;
         }
-        case XAVA_FILE_TYPE_PACKAGE:
+        case WAVA_FILE_TYPE_PACKAGE:
         {
             #if defined(__APPLE__)||defined(__unix__)
                 // TODO: Support non-installed configurations
@@ -292,16 +292,16 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
             writeCheck = false;
             break;
         }
-        case XAVA_FILE_TYPE_CUSTOM_WRITE:
+        case WAVA_FILE_TYPE_CUSTOM_WRITE:
             writeCheck = true;
             goto yeet;
-        case XAVA_FILE_TYPE_CUSTOM_READ:
+        case WAVA_FILE_TYPE_CUSTOM_READ:
         yeet:
             CALLOC_SELF((*actualPath), MAX_PATH);
             break;
         default:
-        case XAVA_FILE_TYPE_NONE:
-            xavaBail("Your code broke. The file type is invalid");
+        case WAVA_FILE_TYPE_NONE:
+            wavaBail("Your code broke. The file type is invalid");
             break;
     }
 
@@ -326,18 +326,18 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 
     // config: create directory
     if(writeCheck)
-        xavaMkdir((*actualPath));
+        wavaMkdir((*actualPath));
 
     // add filename
     switch(type) {
-        case XAVA_FILE_TYPE_PACKAGE:
-        case XAVA_FILE_TYPE_CONFIG:
-        case XAVA_FILE_TYPE_OPTIONAL_CONFIG:
-        case XAVA_FILE_TYPE_CACHE:
+        case WAVA_FILE_TYPE_PACKAGE:
+        case WAVA_FILE_TYPE_CONFIG:
+        case WAVA_FILE_TYPE_OPTIONAL_CONFIG:
+        case WAVA_FILE_TYPE_CACHE:
             strcat((*actualPath), new_filename);
             break;
-        case XAVA_FILE_TYPE_CUSTOM_READ:
-        case XAVA_FILE_TYPE_CUSTOM_WRITE:
+        case WAVA_FILE_TYPE_CUSTOM_READ:
+        case WAVA_FILE_TYPE_CUSTOM_WRITE:
             (*actualPath) = (char*)filename;
             break;
         default:
@@ -346,13 +346,13 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
     }
 
     switch(type) {
-        case XAVA_FILE_TYPE_OPTIONAL_CONFIG:
-        case XAVA_FILE_TYPE_CONFIG:
+        case WAVA_FILE_TYPE_OPTIONAL_CONFIG:
+        case WAVA_FILE_TYPE_CONFIG:
         {
             // don't be surprised if you find a lot of bugs here, beware!
             FILE *fp = fopen((*actualPath), "rb"), *fn;
             if (!fp) {
-                xavaLog("File '%s' does not exist! Trying to make a new one...", (*actualPath));
+                wavaLog("File '%s' does not exist! Trying to make a new one...", (*actualPath));
 
                 // if that particular config file does not exist, try copying the default one
                 char *found;
@@ -367,9 +367,9 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
                 char *defaultConfigFileName = malloc(strlen(filename)+1+strlen(EXAMPLE_FILE_EXT));
                 sprintf(defaultConfigFileName, "%s" EXAMPLE_FILE_EXT, filename);
 
-                if(xavaFindAndCheckFile(XAVA_FILE_TYPE_PACKAGE, defaultConfigFileName, &found) == false) {
-                    if(type == XAVA_FILE_TYPE_CONFIG) // error only if it's necesary
-                        xavaError("Could not find the file within the XAVA installation! Bailing out...");
+                if(wavaFindAndCheckFile(WAVA_FILE_TYPE_PACKAGE, defaultConfigFileName, &found) == false) {
+                    if(type == WAVA_FILE_TYPE_CONFIG) // error only if it's necesary
+                        wavaError("Could not find the file within the WAVA installation! Bailing out...");
                     free((*actualPath));
                     return false;
                 }
@@ -380,10 +380,10 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
                 fp = fopen((*actualPath), "wb");
                 fn = fopen(found, "rb"); // don't bother checking, it'll succeed anyway
 
-                xavaMkdir((*actualPath));
+                wavaMkdir((*actualPath));
 
                 if(fp==NULL) {
-                    xavaError("Failed to save the default config file '%s' to '%s'!",
+                    wavaError("Failed to save the default config file '%s' to '%s'!",
                             found, (*actualPath));
                     free(found);
                     free((*actualPath));
@@ -403,7 +403,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
                 // allocate buffer
                 void *fileBuffer = malloc(filesize);
                 if(fileBuffer == NULL) {
-                    xavaError("Could not allocate config file!");
+                    wavaError("Could not allocate config file!");
                     fclose(fn);
                     fclose(fp);
                     free(found);
@@ -422,7 +422,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
                 // close the default location string
                 free(found);
 
-                xavaLog("Successfully created default config file on '%s'!", (*actualPath));
+                wavaLog("Successfully created default config file on '%s'!", (*actualPath));
             }
             fclose(fp);
 
@@ -436,10 +436,10 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
             if(writeCheck) {
                 fp = fopen((*actualPath), "ab");
                 if(fp == NULL) {
-                    xavaLog("Could not open '%s' for writing!", (*actualPath));
+                    wavaLog("Could not open '%s' for writing!", (*actualPath));
                     switch(type) {
-                        case XAVA_FILE_TYPE_PACKAGE:
-                        case XAVA_FILE_TYPE_CACHE:
+                        case WAVA_FILE_TYPE_PACKAGE:
+                        case WAVA_FILE_TYPE_CACHE:
                             free((*actualPath));
                             break;
                         default:
@@ -450,10 +450,10 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
             } else {
                 fp = fopen((*actualPath), "rb");
                 if(fp == NULL) {
-                    xavaLog("Could not open '%s' for reading!", (*actualPath));
+                    wavaLog("Could not open '%s' for reading!", (*actualPath));
                     switch(type) {
-                        case XAVA_FILE_TYPE_PACKAGE:
-                        case XAVA_FILE_TYPE_CACHE:
+                        case WAVA_FILE_TYPE_PACKAGE:
+                        case WAVA_FILE_TYPE_CACHE:
                             free((*actualPath));
                             break;
                         default:
@@ -471,7 +471,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
     return false; // if you somehow ended up here, it's probably something breaking so "failure" it is
 }
 
-EXP_FUNC RawData *xavaReadFile(const char *file) {
+EXP_FUNC RawData *wavaReadFile(const char *file) {
     RawData *data = malloc(sizeof(RawData));
 
     FILE *fp = fopen(file, "rb");
@@ -494,7 +494,7 @@ EXP_FUNC RawData *xavaReadFile(const char *file) {
     ((char*)data->data)[data->size] = 0x00;
 
     #ifdef DEBUG
-        xavaSpam("File %s start of size %d", file, data->size);
+        wavaSpam("File %s start of size %d", file, data->size);
     #endif
 
     // makes sure to include the NULL byte
@@ -505,12 +505,12 @@ EXP_FUNC RawData *xavaReadFile(const char *file) {
     return data;
 }
 
-EXP_FUNC void xavaCloseFile(RawData *file) {
+EXP_FUNC void wavaCloseFile(RawData *file) {
     free(file->data);
     free(file);
 }
 
-EXP_FUNC void *xavaDuplicateMemory(void *memory, size_t size) {
+EXP_FUNC void *wavaDuplicateMemory(void *memory, size_t size) {
     void *duplicate = malloc(size+1);
     memcpy(duplicate, memory, size);
     return duplicate;

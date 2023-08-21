@@ -17,8 +17,8 @@
     #include "cairo.h"
 #endif
 
-static struct zwlr_layer_surface_v1 *xavaWLRLayerSurface;
-struct zwlr_layer_shell_v1 *xavaWLRLayerShell;
+static struct zwlr_layer_surface_v1 *wavaWLRLayerSurface;
+struct zwlr_layer_shell_v1 *wavaWLRLayerShell;
 
 struct zwlr_alignment_info {
     int32_t width_margin;
@@ -30,10 +30,10 @@ static void layer_surface_configure(void *data,
         struct zwlr_layer_surface_v1 *surface,
         uint32_t serial, uint32_t width, uint32_t height) {
     struct waydata *wd = data;
-    XAVA *xava = wd->hand;
+    WAVA *wava = wd->hand;
 
     if(width != 0 && height != 0) {
-        calculate_win_geo(xava, width, height);
+        calculate_win_geo(wava, width, height);
 
         #ifdef EGL
             waylandEGLWindowResize(wd, width, height);
@@ -44,11 +44,11 @@ static void layer_surface_configure(void *data,
         #endif
 
         #ifdef CAIRO
-            xava_output_wayland_cairo_resize(wd);
+            wava_output_wayland_cairo_resize(wd);
         #endif
 
-        pushXAVAEventStack(wd->events, XAVA_REDRAW);
-        pushXAVAEventStack(wd->events, XAVA_RESIZE);
+        pushWAVAEventStack(wd->events, WAVA_REDRAW);
+        pushWAVAEventStack(wd->events, WAVA_RESIZE);
     }
 
     // Respond to compositor
@@ -64,7 +64,7 @@ static void layer_surface_closed(void *data,
     UNUSED(data);
     UNUSED(surface);
     //destroy_swaybg_output(output);
-    xavaLog("zwlr_layer_surface lost");
+    wavaLog("zwlr_layer_surface lost");
 }
 
 const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
@@ -78,7 +78,7 @@ const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
  * enough functionality for this to work
  * It assumes clients are able to pick their own positions
 **/
-static struct zwlr_alignment_info handle_window_alignment(XAVA_CONFIG *p) {
+static struct zwlr_alignment_info handle_window_alignment(WAVA_CONFIG *p) {
     const uint32_t top = ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
     const uint32_t bottom = ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
     const uint32_t left = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT;
@@ -127,13 +127,13 @@ static struct zwlr_alignment_info handle_window_alignment(XAVA_CONFIG *p) {
 }
 
 void zwlr_init(struct waydata *wd) {
-    XAVA     *hand   = wd->hand;
-    XAVA_CONFIG   *p      = &hand->conf;
+    WAVA     *hand   = wd->hand;
+    WAVA_CONFIG   *p      = &hand->conf;
     struct wlOutput        *output = wl_output_get_desired();
 
     // Create a "wallpaper" surface
-    xavaWLRLayerSurface = zwlr_layer_shell_v1_get_layer_surface(
-        xavaWLRLayerShell, wd->surface, output->output,
+    wavaWLRLayerSurface = zwlr_layer_shell_v1_get_layer_surface(
+        wavaWLRLayerShell, wd->surface, output->output,
         ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM, "bottom");
 
     uint32_t width = p->w, height = p->h;
@@ -147,22 +147,22 @@ void zwlr_init(struct waydata *wd) {
     }
 
     // adjust position and properties accordingly
-    zwlr_layer_surface_v1_set_size(xavaWLRLayerSurface, width, height);
-    zwlr_layer_surface_v1_set_anchor(xavaWLRLayerSurface,
+    zwlr_layer_surface_v1_set_size(wavaWLRLayerSurface, width, height);
+    zwlr_layer_surface_v1_set_anchor(wavaWLRLayerSurface,
             align.anchor);
-    zwlr_layer_surface_v1_set_margin(xavaWLRLayerSurface,
+    zwlr_layer_surface_v1_set_margin(wavaWLRLayerSurface,
             align.height_margin, -align.width_margin,
             -align.height_margin, align.width_margin);
-    zwlr_layer_surface_v1_set_exclusive_zone(xavaWLRLayerSurface, -1);
+    zwlr_layer_surface_v1_set_exclusive_zone(wavaWLRLayerSurface, -1);
 
     // same stuff as xdg_surface_add_listener, but for zwlr_layer_surface
-    zwlr_layer_surface_v1_add_listener(xavaWLRLayerSurface,
+    zwlr_layer_surface_v1_add_listener(wavaWLRLayerSurface,
         &layer_surface_listener, wd);
 }
 
 void zwlr_cleanup(struct waydata *wd) {
     UNUSED(wd);
-    zwlr_layer_surface_v1_destroy(xavaWLRLayerSurface);
-    zwlr_layer_shell_v1_destroy(xavaWLRLayerShell);
+    zwlr_layer_surface_v1_destroy(wavaWLRLayerSurface);
+    zwlr_layer_shell_v1_destroy(wavaWLRLayerShell);
 }
 

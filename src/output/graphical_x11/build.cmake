@@ -9,7 +9,7 @@ if(X11)
         pkg_check_modules(X11 x11 xfixes xrender xrandr xext)
         if(X11_FOUND)
             # add winapi test
-            list(APPEND DEFAULT_OUTPUT_SOURCES "${XAVA_MODULE_DIR}/test.c")
+            list(APPEND DEFAULT_OUTPUT_SOURCES "${WAVA_MODULE_DIR}/test.c")
             list(APPEND DEFAULT_OUTPUT_LINKDIR "${X11_LIBRARY_DIRS}")
             list(APPEND DEFAULT_OUTPUT_LINKLIB "${X11_LIBRARIES}")
             list(APPEND DEFAULT_OUTPUT_INCDIR  "${X11_INCLUDE_DIRS}")
@@ -18,7 +18,7 @@ if(X11)
             # OpenGL/GLX
             pkg_check_modules(GLX QUIET gl glew)
             if(GLX_FOUND)
-                add_library(out_x11_opengl SHARED "${XAVA_MODULE_DIR}/main.c"
+                add_library(out_x11_opengl SHARED "${WAVA_MODULE_DIR}/main.c"
                                             "src/output/shared/graphical.c"
                                             "src/output/shared/gl/glew.c"
                                             "src/output/shared/gl/main.c"
@@ -27,11 +27,11 @@ if(X11)
                     "${GLX_LIBRARY_DIRS}" "${X11_LIBRARY_DIRS}")
                 target_include_directories(out_x11_opengl PRIVATE
                     "${GLX_INCLUDE_DIRS}" "${X11_INCLUDE_DIRS}")
-                target_link_libraries(out_x11_opengl xava-shared
+                target_link_libraries(out_x11_opengl wava-shared
                     "${GLX_LIBRARIES}" "${X11_LIBRARIES}")
                 target_compile_definitions(out_x11_opengl PUBLIC -DGL)
                 set_target_properties(out_x11_opengl PROPERTIES PREFIX "")
-                install(TARGETS out_x11_opengl DESTINATION lib/xava)
+                install(TARGETS out_x11_opengl DESTINATION lib/wava)
 
                 # Maybe GL license?
             else()
@@ -41,7 +41,7 @@ if(X11)
             # EGL
             pkg_check_modules(EGL QUIET egl glesv2 glew)
             if(EGL_FOUND)
-                add_library(out_x11_egl SHARED "${XAVA_MODULE_DIR}/main.c"
+                add_library(out_x11_egl SHARED "${WAVA_MODULE_DIR}/main.c"
                                             "src/output/shared/graphical.c"
                                             "src/output/shared/gl/egl.c"
                                             "src/output/shared/gl/main.c"
@@ -50,11 +50,11 @@ if(X11)
                     "${EGL_LIBRARY_DIRS}" "${X11_LIBRARY_DIRS}")
                 target_include_directories(out_x11_egl PRIVATE
                     "${EGL_INCLUDE_DIRS}" "${X11_INCLUDE_DIRS}")
-                target_link_libraries(out_x11_egl xava-shared GLEW
+                target_link_libraries(out_x11_egl wava-shared GLEW
                     "${EGL_LIBRARIES}" "${X11_LIBRARIES}")
                 target_compile_definitions(out_x11_egl PUBLIC -DEGL)
                 set_target_properties(out_x11_egl PROPERTIES PREFIX "")
-                install(TARGETS out_x11_egl DESTINATION lib/xava)
+                install(TARGETS out_x11_egl DESTINATION lib/wava)
 
                 # Maybe EGL license?
             else()
@@ -63,7 +63,7 @@ if(X11)
 
             pkg_check_modules(CAIRO QUIET cairo)
             if(CAIRO_FOUND)
-                add_library(out_x11_cairo SHARED "${XAVA_MODULE_DIR}/main.c"
+                add_library(out_x11_cairo SHARED "${WAVA_MODULE_DIR}/main.c"
                                             "src/output/shared/graphical.c"
                                             "src/output/shared/cairo/main.c"
                                             "src/output/shared/cairo/util/module.c"
@@ -74,11 +74,11 @@ if(X11)
                     "${CAIRO_LIBRARY_DIRS}" "${X11_LIBRARY_DIRS}")
                 target_include_directories(out_x11_cairo PRIVATE
                     "${CAIRO_INCLUDE_DIRS}" "${X11_INCLUDE_DIRS}")
-                target_link_libraries(out_x11_cairo xava-shared
+                target_link_libraries(out_x11_cairo wava-shared
                     "${CAIRO_LIBRARIES}" "${X11_LIBRARIES}")
                 target_compile_definitions(out_x11_cairo PUBLIC -DCAIRO)
                 set_target_properties(out_x11_cairo PROPERTIES PREFIX "")
-                install(TARGETS out_x11_cairo DESTINATION lib/xava)
+                install(TARGETS out_x11_cairo DESTINATION lib/wava)
 
                 # Maybe EGL license?
             else()

@@ -1,5 +1,5 @@
-#ifndef __XAVA_SHARED_H
-#define __XAVA_SHARED_H
+#ifndef __WAVA_SHARED_H
+#define __WAVA_SHARED_H
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -8,8 +8,8 @@
 // different audio, audio systems and operating systems
 // This value is used to properly calibrate the sensitivity
 // for a certain platform or setup in the Makefile
-#ifndef XAVA_PREDEFINED_SENS_VALUE
-    #define XAVA_PREDEFINED_SENS_VALUE 0.0005
+#ifndef WAVA_PREDEFINED_SENS_VALUE
+    #define WAVA_PREDEFINED_SENS_VALUE 0.0005
 #endif
 
 // Some common comparision macros
@@ -28,7 +28,7 @@
 #define CALLOC_SELF(x, y) (x)=calloc((y), sizeof(*x))
 #define MALLOC_SELF(x, y)  (x)=malloc(sizeof(*x)*(y))
 #define REALLOC_SELF(x, y) { void (*z)=realloc((x), sizeof(*x)*(y)); \
-    xavaBailCondition(!(z), "Failed to reallocate memory"); (x)=(z); }
+    wavaBailCondition(!(z), "Failed to reallocate memory"); (x)=(z); }
 
 #ifdef __WIN32__
     #define EXP_FUNC __declspec(dllexport) __attribute__ ((visibility ("default")))
@@ -48,34 +48,34 @@
 
 
 // configuration parameters
-typedef struct XAVA_CONFIG {
+typedef struct WAVA_CONFIG {
     // for internal use only
-    XAVA_CONFIG_OPTION(f64,  sens);
-    XAVA_CONFIG_OPTION(i32,  fixedbars);
-    XAVA_CONFIG_OPTION(bool, autobars);
-    XAVA_CONFIG_OPTION(bool, stereo);
-    XAVA_CONFIG_OPTION(bool, autosens);
+    WAVA_CONFIG_OPTION(f64,  sens);
+    WAVA_CONFIG_OPTION(i32,  fixedbars);
+    WAVA_CONFIG_OPTION(bool, autobars);
+    WAVA_CONFIG_OPTION(bool, stereo);
+    WAVA_CONFIG_OPTION(bool, autosens);
 
-    XAVA_CONFIG_OPTION(u32, fftsize);
+    WAVA_CONFIG_OPTION(u32, fftsize);
 
     // input/output related options
 
     // 1 - colors
-    XAVA_CONFIG_OPTION(char*, color);
-    XAVA_CONFIG_OPTION(char*, bcolor);           // pointer to color string
+    WAVA_CONFIG_OPTION(char*, color);
+    WAVA_CONFIG_OPTION(char*, bcolor);           // pointer to color string
     // col = foreground color, bgcol = background color
-    XAVA_CONFIG_OPTION(u32, col);
-    XAVA_CONFIG_OPTION(u32, bgcol);                 // ARGB 32-bit value
-    XAVA_CONFIG_OPTION(f64, foreground_opacity);
-    XAVA_CONFIG_OPTION(f64, background_opacity);    // range 0.0-1.0
+    WAVA_CONFIG_OPTION(u32, col);
+    WAVA_CONFIG_OPTION(u32, bgcol);                 // ARGB 32-bit value
+    WAVA_CONFIG_OPTION(f64, foreground_opacity);
+    WAVA_CONFIG_OPTION(f64, background_opacity);    // range 0.0-1.0
 
     // 2 - gradients
-    XAVA_CONFIG_OPTION(char**, gradients); // array of pointers to color string
+    WAVA_CONFIG_OPTION(char**, gradients); // array of pointers to color string
 
     // 3 - timing
-    XAVA_CONFIG_OPTION(i32, framerate); // limit xava to a specific framerate
+    WAVA_CONFIG_OPTION(i32, framerate); // limit wava to a specific framerate
                                         // (can be changed mid-run)
-    XAVA_CONFIG_OPTION(i32, vsync);     // 0 = disabled, while enabled, XAVA
+    WAVA_CONFIG_OPTION(i32, vsync);     // 0 = disabled, while enabled, WAVA
                                         // will rely upon the timer function
                                         // provided by your Vsync call
                                         // (PLEASE DESIGN YOUR IMPLEMENTATION
@@ -85,75 +85,75 @@ typedef struct XAVA_CONFIG {
                                         // -1 = Adaptive Vsync
 
     // 4 - geometry
-    XAVA_CONFIG_OPTION(u32, bw);
-    XAVA_CONFIG_OPTION(u32, bs);        // bar width and spacing
-    XAVA_CONFIG_OPTION(u32, w);
-    XAVA_CONFIG_OPTION(u32, h);         // configured window width and height
-    XAVA_CONFIG_OPTION(i32, x);
-    XAVA_CONFIG_OPTION(i32, y);         // x and y padding
+    WAVA_CONFIG_OPTION(u32, bw);
+    WAVA_CONFIG_OPTION(u32, bs);        // bar width and spacing
+    WAVA_CONFIG_OPTION(u32, w);
+    WAVA_CONFIG_OPTION(u32, h);         // configured window width and height
+    WAVA_CONFIG_OPTION(i32, x);
+    WAVA_CONFIG_OPTION(i32, y);         // x and y padding
 
-    XAVA_CONFIG_OPTION(char*, winA);    // pointer to a string of alignment
+    WAVA_CONFIG_OPTION(char*, winA);    // pointer to a string of alignment
 
     // 5 - audio
-    XAVA_CONFIG_OPTION(u32, inputsize); // size of the input audio buffer
+    WAVA_CONFIG_OPTION(u32, inputsize); // size of the input audio buffer
                                                     // must be a power of 2
-    XAVA_CONFIG_OPTION(u32, samplerate);    // the rate at which the audio is sampled
-    XAVA_CONFIG_OPTION(u32, samplelatency); // input will try to keep to copy chunks of this size
+    WAVA_CONFIG_OPTION(u32, samplerate);    // the rate at which the audio is sampled
+    WAVA_CONFIG_OPTION(u32, samplelatency); // input will try to keep to copy chunks of this size
 
     // 6 - special flags
     struct {
-        XAVA_CONFIG_OPTION(bool, fullscreen);
-        XAVA_CONFIG_OPTION(bool, transparency);
-        XAVA_CONFIG_OPTION(bool, border);
-        XAVA_CONFIG_OPTION(bool, beneath);
-        XAVA_CONFIG_OPTION(bool, interact);
-        XAVA_CONFIG_OPTION(bool, taskbar);
-        XAVA_CONFIG_OPTION(bool, holdSize);
+        WAVA_CONFIG_OPTION(bool, fullscreen);
+        WAVA_CONFIG_OPTION(bool, transparency);
+        WAVA_CONFIG_OPTION(bool, border);
+        WAVA_CONFIG_OPTION(bool, beneath);
+        WAVA_CONFIG_OPTION(bool, interact);
+        WAVA_CONFIG_OPTION(bool, taskbar);
+        WAVA_CONFIG_OPTION(bool, holdSize);
 
-        // not real config options, soom to be moved to the XAVA handle
-        XAVA_CONFIG_OPTION(bool, skipFilter);
-        XAVA_CONFIG_OPTION(bool, ignoreWindowSize);
+        // not real config options, soom to be moved to the WAVA handle
+        WAVA_CONFIG_OPTION(bool, skipFilter);
+        WAVA_CONFIG_OPTION(bool, ignoreWindowSize);
     } flag;
-} XAVA_CONFIG;
+} WAVA_CONFIG;
 
-typedef struct XAVA_FILTER {
+typedef struct WAVA_FILTER {
     struct {
-        void (*load_config) (XAVA*);
-        int  (*init)        (XAVA*);
-        int  (*apply)       (XAVA*);
-        int  (*loop)        (XAVA*);
-        int  (*cleanup)     (XAVA*);
+        void (*load_config) (WAVA*);
+        int  (*init)        (WAVA*);
+        int  (*apply)       (WAVA*);
+        int  (*loop)        (WAVA*);
+        int  (*cleanup)     (WAVA*);
     } func;
 
-    XAVAMODULE *module;
+    WAVAMODULE *module;
     // i know void pointers are footguns but consider that this
     // pointer type is GURANTEED to be mutable
     void       *data;
-} XAVA_FILTER;
+} WAVA_FILTER;
 
-typedef struct XAVA_OUTPUT {
+typedef struct WAVA_OUTPUT {
     struct {
-        void     (*load_config)  (XAVA*);
-        int      (*init)         (XAVA*);
-        void     (*clear)        (XAVA*);
-        int      (*apply)        (XAVA*);
-        XG_EVENT (*handle_input) (XAVA*);
-        void     (*draw)         (XAVA*);
-        void     (*cleanup)      (XAVA*);
+        void     (*load_config)  (WAVA*);
+        int      (*init)         (WAVA*);
+        void     (*clear)        (WAVA*);
+        int      (*apply)        (WAVA*);
+        XG_EVENT (*handle_input) (WAVA*);
+        void     (*draw)         (WAVA*);
+        void     (*cleanup)      (WAVA*);
     } func;
 
-    XAVAMODULE *module;
+    WAVAMODULE *module;
     void       *data;
-} XAVA_OUTPUT;
+} WAVA_OUTPUT;
 
 // Shared audio data sturct
-typedef struct XAVA_AUDIO {
+typedef struct WAVA_AUDIO {
     struct {
-        void     (*load_config) (XAVA*);
+        void     (*load_config) (WAVA*);
         void*    (*loop)        (void*);
     } func;
 
-    XAVAMODULE *module;
+    WAVAMODULE *module;
     void       *data;
 
     float        *audio_out_r;
@@ -166,11 +166,11 @@ typedef struct XAVA_AUDIO {
     char         error_message[1024];
     uint32_t     inputsize, fftsize;    // inputsize and fftsize
     uint32_t     latency;               // try to keep (this) latency in samples
-} XAVA_AUDIO;
+} WAVA_AUDIO;
 
-// XAVA handle
-typedef struct XAVA {
-    // variables that XAVA outputs
+// WAVA handle
+typedef struct WAVA {
+    // variables that WAVA outputs
     uint32_t bars;        // number of output bars
     uint32_t rest;        // number of screen units until first bar
     uint32_t *f, *fl;    // array to bar data (f = current, fl = last frame)
@@ -179,15 +179,15 @@ typedef struct XAVA {
     bool pauseRendering;
 
     // handles to both config variables and the audio state
-    XAVA_AUDIO  audio;   // TODO: rename to input when brave enough
-    XAVA_FILTER filter;
-    XAVA_OUTPUT output;
+    WAVA_AUDIO  audio;   // TODO: rename to input when brave enough
+    WAVA_FILTER filter;
+    WAVA_OUTPUT output;
 
-    XAVA_CONFIG conf;
+    WAVA_CONFIG conf;
 
     struct config {
         // handle to the config file itself
-        xava_config_source        config;
+        wava_config_source        config;
     } default_config;
 
     // visualizer size INSIDE of the window
@@ -202,7 +202,7 @@ typedef struct XAVA {
         uint32_t w, h;
     } bar_space;
 
-    XAVAIONOTIFY ionotify;
-} XAVA;
+    WAVAIONOTIFY ionotify;
+} WAVA;
 
 #endif

@@ -23,14 +23,14 @@ if(CUBEB)
     file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/lib/cubeb/cmake_install.cmake")
 
     add_definitions(-DCUBEB)
-    add_library(in_cubeb SHARED "${XAVA_MODULE_DIR}/main.c"
+    add_library(in_cubeb SHARED "${WAVA_MODULE_DIR}/main.c"
                                 "${GLOBAL_FUNCTION_SOURCES}")
-    target_link_libraries(in_cubeb xava-shared "cubeb")
+    target_link_libraries(in_cubeb wava-shared "cubeb")
     target_include_directories(in_cubeb PRIVATE
         "${CMAKE_CURRENT_BINARY_DIR}/exports" lib/cubeb/include)
     set_target_properties(in_cubeb PROPERTIES PREFIX ""
         POSITION_INDEPENDENT_CODE ON)
-    install(TARGETS in_cubeb DESTINATION lib/xava)
+    install(TARGETS in_cubeb DESTINATION lib/wava)
 
     # Add legal disclaimer
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/LICENSE_cubeb.txt"

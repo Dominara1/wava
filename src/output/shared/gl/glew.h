@@ -6,13 +6,13 @@
 #include "shared.h"
 
 
-void            GLConfigLoad(XAVA *xava);
-void            GLInit(XAVA *xava);
-void            GLClear(XAVA *xava);
-void            GLApply(XAVA *xava);
-XG_EVENT_STACK *GLEvent(XAVA *xava);
-void            GLDraw(XAVA *xava);
-void            GLCleanup(XAVA *xava);
+void            GLConfigLoad(WAVA *wava);
+void            GLInit(WAVA *wava);
+void            GLClear(WAVA *wava);
+void            GLApply(WAVA *wava);
+XG_EVENT_STACK *GLEvent(WAVA *wava);
+void            GLDraw(WAVA *wava);
+void            GLCleanup(WAVA *wava);
 
 #endif
 

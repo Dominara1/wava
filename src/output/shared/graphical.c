@@ -3,26 +3,26 @@
 #include "graphical.h"
 
 #define SET_INNER_X(val) \
-    xava->inner.x = ((xava->outer.w == xava->inner.w)? 0 : (val))
+    wava->inner.x = ((wava->outer.w == wava->inner.w)? 0 : (val))
 #define SET_INNER_Y(val) \
-    xava->inner.y = ((xava->outer.h == xava->inner.h)? 0 : (val))
+    wava->inner.y = ((wava->outer.h == wava->inner.h)? 0 : (val))
 
-void __internal_xava_graphical_calculate_win_pos_keep(XAVA *xava,
+void __internal_wava_graphical_calculate_win_pos_keep(WAVA *wava,
                                             uint32_t winW, uint32_t winH) {
-    XAVA_CONFIG *conf = &xava->conf;
+    WAVA_CONFIG *conf = &wava->conf;
 
-    xava->outer.w = winW;
-    xava->outer.h = winH;
-    xava->inner.w = conf->w;
-    xava->inner.h = conf->h;
+    wava->outer.w = winW;
+    wava->outer.h = winH;
+    wava->inner.w = conf->w;
+    wava->inner.h = conf->h;
     // skip resetting the outer x, as those can be troublesome
-    xava->inner.x = 0;
-    xava->inner.y = 0;
+    wava->inner.x = 0;
+    wava->inner.y = 0;
 
-    if(xava->outer.w <= conf->w)
-        xava->inner.w = xava->outer.w;
-    if(xava->outer.h <= conf->h)
-        xava->inner.h = xava->outer.h;
+    if(wava->outer.w <= conf->w)
+        wava->inner.w = wava->outer.w;
+    if(wava->outer.h <= conf->h)
+        wava->inner.h = wava->outer.h;
 
     if(!strcmp(conf->winA, "top")) {
         SET_INNER_X((winW - conf->w) / 2 + conf->x);
@@ -54,83 +54,83 @@ void __internal_xava_graphical_calculate_win_pos_keep(XAVA *xava,
     }
 }
 
-void __internal_xava_graphical_calculate_win_pos_nokeep(XAVA *xava,
+void __internal_wava_graphical_calculate_win_pos_nokeep(WAVA *wava,
                                         uint32_t winW, uint32_t winH) {
-    xava->outer.w = winW;
-    xava->outer.h = winH;
-    xava->inner.w = winW;
-    xava->inner.h = winH;
-    xava->inner.x = 0;
-    xava->inner.y = 0;
+    wava->outer.w = winW;
+    wava->outer.h = winH;
+    wava->inner.w = winW;
+    wava->inner.h = winH;
+    wava->inner.x = 0;
+    wava->inner.y = 0;
 }
 
-void calculate_win_geo(XAVA *xava, uint32_t winW, uint32_t winH) {
-    if(xava->conf.flag.holdSize) {
-        __internal_xava_graphical_calculate_win_pos_keep(xava, winW, winH);
+void calculate_win_geo(WAVA *wava, uint32_t winW, uint32_t winH) {
+    if(wava->conf.flag.holdSize) {
+        __internal_wava_graphical_calculate_win_pos_keep(wava, winW, winH);
     } else {
-        xava->outer.w = winW;
-        xava->outer.h = winH;
-        xava->inner.w = winW;
-        xava->inner.h = winH;
+        wava->outer.w = winW;
+        wava->outer.h = winH;
+        wava->inner.w = winW;
+        wava->inner.h = winH;
         // skip resetting the outer x, as those can be troublesome
-        xava->inner.x = 0;
-        xava->inner.y = 0;
+        wava->inner.x = 0;
+        wava->inner.y = 0;
     }
 }
 
-void calculate_win_pos(XAVA *xava, uint32_t scrW, uint32_t scrH,
+void calculate_win_pos(WAVA *wava, uint32_t scrW, uint32_t scrH,
                         uint32_t winW, uint32_t winH) {
-    XAVA_CONFIG *conf = &xava->conf;
+    WAVA_CONFIG *conf = &wava->conf;
 
-    xava->outer.x = 0;
-    xava->outer.y = 0;
+    wava->outer.x = 0;
+    wava->outer.y = 0;
 
-    if(xava->conf.flag.holdSize) {
-        if(xava->conf.flag.fullscreen) {
-            __internal_xava_graphical_calculate_win_pos_keep(xava, scrW, scrH);
+    if(wava->conf.flag.holdSize) {
+        if(wava->conf.flag.fullscreen) {
+            __internal_wava_graphical_calculate_win_pos_keep(wava, scrW, scrH);
         } else {
-            __internal_xava_graphical_calculate_win_pos_keep(xava, winW, winH);
+            __internal_wava_graphical_calculate_win_pos_keep(wava, winW, winH);
         }
     } else {
-        if(xava->conf.flag.fullscreen) {
-            __internal_xava_graphical_calculate_win_pos_nokeep(xava, scrW, scrH);
+        if(wava->conf.flag.fullscreen) {
+            __internal_wava_graphical_calculate_win_pos_nokeep(wava, scrW, scrH);
         } else {
-            __internal_xava_graphical_calculate_win_pos_nokeep(xava, winW, winH);
+            __internal_wava_graphical_calculate_win_pos_nokeep(wava, winW, winH);
         }
     }
 
-    if(xava->conf.flag.fullscreen == false) {
+    if(wava->conf.flag.fullscreen == false) {
         if(!strcmp(conf->winA, "top")) {
-            xava->outer.x = (int32_t)(scrW - winW) / 2 + conf->x;
+            wava->outer.x = (int32_t)(scrW - winW) / 2 + conf->x;
         } else if(!strcmp(conf->winA, "bottom")) {
-            xava->outer.x = (int32_t)(scrW - winW) / 2 + conf->x;
-            xava->outer.y = (int32_t)(scrH - winH)     - conf->y;
+            wava->outer.x = (int32_t)(scrW - winW) / 2 + conf->x;
+            wava->outer.y = (int32_t)(scrH - winH)     - conf->y;
         } else if(!strcmp(conf->winA, "top_left")) {
             // noop
         } else if(!strcmp(conf->winA, "top_right")) {
-            xava->outer.x = (int32_t)(scrW - winW)     - conf->x;
+            wava->outer.x = (int32_t)(scrW - winW)     - conf->x;
         } else if(!strcmp(conf->winA, "left")) {
-            xava->outer.y = (int32_t)(scrH - winH) / 2;
+            wava->outer.y = (int32_t)(scrH - winH) / 2;
         } else if(!strcmp(conf->winA, "right")) {
-            xava->outer.x = (int32_t)(scrW - winW)     - conf->x;
-            xava->outer.y = (int32_t)(scrH - winH) / 2 + conf->y;
+            wava->outer.x = (int32_t)(scrW - winW)     - conf->x;
+            wava->outer.y = (int32_t)(scrH - winH) / 2 + conf->y;
         } else if(!strcmp(conf->winA, "bottom_left")) {
-            xava->outer.y = (int32_t)(scrH - winH)     - conf->y;
+            wava->outer.y = (int32_t)(scrH - winH)     - conf->y;
         } else if(!strcmp(conf->winA, "bottom_right")) {
-            xava->outer.x = (int32_t)(scrW - winW)     - conf->x;
-            xava->outer.y = (int32_t)(scrH - winH)     - conf->y;
+            wava->outer.x = (int32_t)(scrW - winW)     - conf->x;
+            wava->outer.y = (int32_t)(scrH - winH)     - conf->y;
         } else if(!strcmp(conf->winA, "center")) {
-            xava->outer.x = (int32_t)(scrW - winW) / 2 + conf->x;
-            xava->outer.y = (int32_t)(scrH - winH) / 2 + conf->y;
+            wava->outer.x = (int32_t)(scrW - winW) / 2 + conf->x;
+            wava->outer.y = (int32_t)(scrH - winH) / 2 + conf->y;
         }
     }
 
     // Some error checking
-    xavaLogCondition(xava->outer.x > (int)(scrW-winW),
+    wavaLogCondition(wava->outer.x > (int)(scrW-winW),
             "Screen out of bounds (X axis) (%d %d %d %d)",
-            scrW, scrH, xava->outer.x, winW);
-    xavaLogCondition(xava->outer.y > (int)(scrH-winH),
+            scrW, scrH, wava->outer.x, winW);
+    wavaLogCondition(wava->outer.y > (int)(scrH-winH),
             "Screen out of bounds (Y axis) (%d %d %d %d)",
-            scrW, scrH, xava->outer.y, winH);
+            scrW, scrH, wava->outer.y, winH);
 }
 

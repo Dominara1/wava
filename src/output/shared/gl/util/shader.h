@@ -15,11 +15,11 @@ typedef enum sgl_shader_stage {
     SGL_CONFIG
 } sgl_shader_stage;
 
-GLint xava_gl_module_shader_build(struct shader *shader, GLenum shader_type);
-void xava_gl_module_program_create(xava_gl_module_program *program);
-void xava_gl_module_program_destroy(xava_gl_module_program *program);
-void xava_gl_module_shader_load(xava_gl_module_program *program,
+GLint wava_gl_module_shader_build(struct shader *shader, GLenum shader_type);
+void wava_gl_module_program_create(wava_gl_module_program *program);
+void wava_gl_module_program_destroy(wava_gl_module_program *program);
+void wava_gl_module_shader_load(wava_gl_module_program *program,
         sgl_shader_type type, sgl_shader_stage stage,
-        const char *name, XAVAGLModule *module, XAVA *xava);
+        const char *name, WAVAGLModule *module, WAVA *wava);
 #endif
 

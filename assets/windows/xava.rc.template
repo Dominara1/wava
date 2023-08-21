@@ -4,11 +4,11 @@
 #define STRINGIZED_HELPER( a ) #a
 #define STRINGIZED( a ) STRINGIZED_HELPER( a )
 
-#define DEMO_VER_STR               STRINGIZED(@xava_VERSION_MAJOR@) "." STRINGIZED(@xava_VERSION_MINOR@) "." STRINGIZED(@xava_VERSION_PATCH@) "." STRINGIZED(@xava_VERSION_TWEAK@) "\0"
-#define FILEVER                     @xava_VERSION_MAJOR@,@xava_VERSION_MINOR@,@xava_VERSION_PATCH@,@xava_VERSION_TWEAK@
-#define PRODUCTVER                  @xava_VERSION_MAJOR@,@xava_VERSION_MINOR@,@xava_VERSION_PATCH@,@xava_VERSION_TWEAK@
-#define VS_PACKAGE_FILEVER          @xava_VERSION_MAJOR@,@xava_VERSION_MINOR@,@xava_VERSION_PATCH@,@xava_VERSION_TWEAK@
-#define VS_PACKAGE_PRODUCTVER       @xava_VERSION_MAJOR@,@xava_VERSION_MINOR@,@xava_VERSION_PATCH@,@xava_VERSION_TWEAK@
+#define DEMO_VER_STR               STRINGIZED(@wava_VERSION_MAJOR@) "." STRINGIZED(@wava_VERSION_MINOR@) "." STRINGIZED(@wava_VERSION_PATCH@) "." STRINGIZED(@wava_VERSION_TWEAK@) "\0"
+#define FILEVER                     @wava_VERSION_MAJOR@,@wava_VERSION_MINOR@,@wava_VERSION_PATCH@,@wava_VERSION_TWEAK@
+#define PRODUCTVER                  @wava_VERSION_MAJOR@,@wava_VERSION_MINOR@,@wava_VERSION_PATCH@,@wava_VERSION_TWEAK@
+#define VS_PACKAGE_FILEVER          @wava_VERSION_MAJOR@,@wava_VERSION_MINOR@,@wava_VERSION_PATCH@,@wava_VERSION_TWEAK@
+#define VS_PACKAGE_PRODUCTVER       @wava_VERSION_MAJOR@,@wava_VERSION_MINOR@,@wava_VERSION_PATCH@,@wava_VERSION_TWEAK@
 #define STRFILEVER                  DEMO_VER_STR
 #define STRPRODUCTVER               DEMO_VER_STR
 #define VS_PACKAGE_STRFILEVER       DEMO_VER_STR
@@ -16,12 +16,12 @@
 #define STRCOMPANYNAME              L"Nikola Pavlica\0"
 #define STRCOPYRIGHT                L"(C) 2016-2021 Nikola Pavlica\0"
 #define STRFILEDESCRIPTION          L"Audio Visualizer\0"
-#define STRPRODUCTNAME              L"XAVA\0"
-#define VS_PACKAGE_STRPRODUCTNAME   L"XAVA\0"
-#define ORIGINAL_FILENAME           L"xava.exe\0"
+#define STRPRODUCTNAME              L"WAVA\0"
+#define VS_PACKAGE_STRPRODUCTNAME   L"WAVA\0"
+#define ORIGINAL_FILENAME           L"wava.exe\0"
 #define DEMO_BRANCH                 STRFILEVER
 
-id ICON "@xava_EXECUTABLE_WINDOWS_ICO_PATH@"
+id ICON "@wava_EXECUTABLE_WINDOWS_ICO_PATH@"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION FILEVER

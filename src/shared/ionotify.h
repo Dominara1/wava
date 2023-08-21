@@ -1,37 +1,37 @@
-#ifndef __XAVA_SHARED_IONOTIFY_H
-#define __XAVA_SHARED_IONOTIFY_H
+#ifndef __WAVA_SHARED_IONOTIFY_H
+#define __WAVA_SHARED_IONOTIFY_H
 
 #include <stdbool.h>
 
-typedef void*                             XAVAIONOTIFY;
-typedef struct xava_ionotify_watch_setup* XAVAIONOTIFYWATCHSETUP;
+typedef void*                             WAVAIONOTIFY;
+typedef struct wava_ionotify_watch_setup* WAVAIONOTIFYWATCHSETUP;
 
 // make the compilers shuttings up
-typedef struct XAVA XAVA;
+typedef struct WAVA WAVA;
 
-// doubt that XAVA_IONOTIFY_DELETED ever be implemented, but I don't care
-typedef enum xava_ionotify_event {
-    XAVA_IONOTIFY_NOTHING,
-    XAVA_IONOTIFY_ERROR,
-    XAVA_IONOTIFY_CHANGED,
-    XAVA_IONOTIFY_DELETED,
-    XAVA_IONOTIFY_CLOSED
-} XAVA_IONOTIFY_EVENT;
+// doubt that WAVA_IONOTIFY_DELETED ever be implemented, but I don't care
+typedef enum wava_ionotify_event {
+    WAVA_IONOTIFY_NOTHING,
+    WAVA_IONOTIFY_ERROR,
+    WAVA_IONOTIFY_CHANGED,
+    WAVA_IONOTIFY_DELETED,
+    WAVA_IONOTIFY_CLOSED
+} WAVA_IONOTIFY_EVENT;
 
-struct xava_ionotify_watch_setup {
-    XAVAIONOTIFY       ionotify;
+struct wava_ionotify_watch_setup {
+    WAVAIONOTIFY       ionotify;
     int                id;
     char               *filename;
-    XAVA *xava;
-    void               (*xava_ionotify_func)(XAVA_IONOTIFY_EVENT,
+    WAVA *wava;
+    void               (*wava_ionotify_func)(WAVA_IONOTIFY_EVENT,
                                             const char *filename,
                                             int id,
-                                            XAVA*);
+                                            WAVA*);
 };
 
-extern XAVAIONOTIFY      xavaIONotifySetup(void);
-extern bool              xavaIONotifyAddWatch(XAVAIONOTIFYWATCHSETUP setup);
-extern bool              xavaIONotifyStart(const XAVAIONOTIFY ionotify);
-extern void              xavaIONotifyKill(const XAVAIONOTIFY ionotify);
+extern WAVAIONOTIFY      wavaIONotifySetup(void);
+extern bool              wavaIONotifyAddWatch(WAVAIONOTIFYWATCHSETUP setup);
+extern bool              wavaIONotifyStart(const WAVAIONOTIFY ionotify);
+extern void              wavaIONotifyKill(const WAVAIONOTIFY ionotify);
 #endif
 

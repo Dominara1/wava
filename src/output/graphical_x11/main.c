@@ -34,26 +34,26 @@
 // random magic values go here
 #define SCREEN_CONNECTED 0
 
-static XEvent xavaXEvent;
-static Colormap xavaXColormap;
-static Display *xavaXDisplay;
-static Screen *xavaXScreen;
-static Window xavaXWindow, xavaXRoot;
-static GC xavaXGraphics;
+static XEvent wavaXEvent;
+static Colormap wavaXColormap;
+static Display *wavaXDisplay;
+static Screen *wavaXScreen;
+static Window wavaXWindow, wavaXRoot;
+static GC wavaXGraphics;
 
-static XVisualInfo xavaVInfo;
-static XSetWindowAttributes xavaAttr;
+static XVisualInfo wavaVInfo;
+static XSetWindowAttributes wavaAttr;
 static Atom wm_delete_window, wmState, fullScreen, mwmHintsProperty, wmStateBelow, taskbar;
-static XClassHint xavaXClassHint;
-static XWMHints xavaXWMHints;
+static XClassHint wavaXClassHint;
+static XWMHints wavaXWMHints;
 static XEvent xev;
-static Bool xavaSupportsRR;
-static int xavaRREventBase;
+static Bool wavaSupportsRR;
+static int wavaRREventBase;
 
 static XWindowAttributes  windowAttribs;
-static XRRScreenResources *xavaXScreenResources;
-static XRROutputInfo      *xavaXOutputInfo;
-static XRRCrtcInfo        *xavaXCrtcInfo;
+static XRRScreenResources *wavaXScreenResources;
+static XRROutputInfo      *wavaXOutputInfo;
+static XRRCrtcInfo        *wavaXCrtcInfo;
 
 static char *monitorName;
 static bool overrideRedirectEnabled;
@@ -72,8 +72,8 @@ static bool reloadOnDisplayConfigure;
         None
     };
 
-    GLXContext xavaGLXContext;
-    GLXFBConfig* xavaFBConfig;
+    GLXContext wavaGLXContext;
+    GLXFBConfig* wavaFBConfig;
 
     static XRenderPictFormat *pict_format;
 
@@ -88,10 +88,10 @@ static bool reloadOnDisplayConfigure;
 #endif
 
 #ifdef CAIRO
-    Drawable xavaXCairoDrawable;
-    cairo_surface_t *xavaXCairoSurface;
-    //cairo_t *xavaCairoHandle;
-    xava_cairo_handle *xavaCairoHandle;
+    Drawable wavaXCairoDrawable;
+    cairo_surface_t *wavaXCairoSurface;
+    //cairo_t *wavaCairoHandle;
+    wava_cairo_handle *wavaCairoHandle;
 #endif
 
 // mwmHints helps us comunicate with the window manager
@@ -103,7 +103,7 @@ struct mwmHints {
     unsigned long status;
 };
 
-static int xavaXScreenNumber;
+static int wavaXScreenNumber;
 
 // Some window manager definitions
 enum {
@@ -122,12 +122,12 @@ enum {
 #define _NET_WM_STATE_TOGGLE 2
 
 #ifdef GL
-int XGLInit(XAVA_CONFIG *conf) {
+int XGLInit(WAVA_CONFIG *conf) {
     UNUSED(conf);
 
     // we will use the existing VisualInfo for this, because I'm not messing around with FBConfigs
-    xavaGLXContext = glXCreateContext(xavaXDisplay, &xavaVInfo, NULL, 1);
-    glXMakeCurrent(xavaXDisplay, xavaXWindow, xavaGLXContext);
+    wavaGLXContext = glXCreateContext(wavaXDisplay, &wavaVInfo, NULL, 1);
+    glXMakeCurrent(wavaXDisplay, wavaXWindow, wavaGLXContext);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
@@ -137,12 +137,12 @@ int XGLInit(XAVA_CONFIG *conf) {
 
 // Pull from the terminal colors, and afterwards, do the usual
 void snatchColor(char *name, char *colorStr, unsigned int *colorNum, char *databaseName,
-        XrmDatabase *xavaXResDB) {
+        XrmDatabase *wavaXResDB) {
     XrmValue value;
     char *type;
     char strings_are_a_pain_in_c[32];
 
-    sprintf(strings_are_a_pain_in_c, "XAVA.%s", name);
+    sprintf(strings_are_a_pain_in_c, "WAVA.%s", name);
 
     if(strcmp(colorStr, "default"))
         return; // default not selected
@@ -150,32 +150,32 @@ void snatchColor(char *name, char *colorStr, unsigned int *colorNum, char *datab
     if(!databaseName)
         return; // invalid database specified
 
-    if(XrmGetResource(*xavaXResDB, strings_are_a_pain_in_c,
+    if(XrmGetResource(*wavaXResDB, strings_are_a_pain_in_c,
                 strings_are_a_pain_in_c, &type, &value))
         goto get_color; // XrmGetResource succeeded
 
     sprintf(strings_are_a_pain_in_c, "*.%s", name);
 
-    if(!XrmGetResource(*xavaXResDB, name, NULL, &type, &value))
+    if(!XrmGetResource(*wavaXResDB, name, NULL, &type, &value))
         return; // XrmGetResource failed
 
     get_color:
     sscanf(value.addr, "#%06X", colorNum);
 }
 
-void calculateColors(XAVA_CONFIG *conf) {
+void calculateColors(WAVA_CONFIG *conf) {
     XrmInitialize();
-    XrmDatabase xavaXResDB = NULL;
-    char *databaseName = XResourceManagerString(xavaXDisplay);
+    XrmDatabase wavaXResDB = NULL;
+    char *databaseName = XResourceManagerString(wavaXDisplay);
     if(databaseName) {
-        xavaXResDB = XrmGetStringDatabase(databaseName);
+        wavaXResDB = XrmGetStringDatabase(databaseName);
     }
-    snatchColor("color5", conf->color, &conf->col, databaseName, &xavaXResDB);
-    snatchColor("color4", conf->bcolor, &conf->bgcol, databaseName, &xavaXResDB);
+    snatchColor("color5", conf->color, &conf->col, databaseName, &wavaXResDB);
+    snatchColor("color4", conf->bcolor, &conf->bgcol, databaseName, &wavaXResDB);
 }
 
-EXP_FUNC int xavaInitOutput(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC int wavaInitOutput(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
 
     // NVIDIA CPU cap utilization in Vsync fix
     setenv("__GL_YIELD", "USLEEP", 0);
@@ -183,50 +183,50 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
     // workarounds go above if they're required to run before anything else
 
     // connect to the X server
-    xavaXDisplay = XOpenDisplay(NULL);
-    xavaBailCondition(!xavaXDisplay, "Could not find X11 display");
+    wavaXDisplay = XOpenDisplay(NULL);
+    wavaBailCondition(!wavaXDisplay, "Could not find X11 display");
 
-    xavaXScreen = DefaultScreenOfDisplay(xavaXDisplay);
-    xavaXScreenNumber = DefaultScreen(xavaXDisplay);
-    xavaXRoot = RootWindow(xavaXDisplay, xavaXScreenNumber);
+    wavaXScreen = DefaultScreenOfDisplay(wavaXDisplay);
+    wavaXScreenNumber = DefaultScreen(wavaXDisplay);
+    wavaXRoot = RootWindow(wavaXDisplay, wavaXScreenNumber);
 
     // select appropriate screen
-    xavaXScreenResources = XRRGetScreenResources(xavaXDisplay,
-        DefaultRootWindow(xavaXDisplay));
+    wavaXScreenResources = XRRGetScreenResources(wavaXDisplay,
+        DefaultRootWindow(wavaXDisplay));
     char *screenname = NULL; // potential bugfix if X server has no displays
 
-    xavaSpam("Number of detected screens: %d", xavaXScreenResources->noutput);
+    wavaSpam("Number of detected screens: %d", wavaXScreenResources->noutput);
 
     int screenwidth=0, screenheight=0, screenx=0, screeny=0;
-    for(int i = 0; i < xavaXScreenResources->noutput; i++) {
-        xavaXOutputInfo = XRRGetOutputInfo(xavaXDisplay, xavaXScreenResources,
-            xavaXScreenResources->outputs[i]);
+    for(int i = 0; i < wavaXScreenResources->noutput; i++) {
+        wavaXOutputInfo = XRRGetOutputInfo(wavaXDisplay, wavaXScreenResources,
+            wavaXScreenResources->outputs[i]);
 
-        if(xavaXOutputInfo->connection != SCREEN_CONNECTED) // display is not connected
+        if(wavaXOutputInfo->connection != SCREEN_CONNECTED) // display is not connected
             continue;
 
-        if(xavaXOutputInfo->crtc == 0) // display doesnt have a mode enabled
+        if(wavaXOutputInfo->crtc == 0) // display doesnt have a mode enabled
             continue;
 
-        xavaXCrtcInfo = XRRGetCrtcInfo(xavaXDisplay, xavaXScreenResources,
-            xavaXOutputInfo->crtc);
+        wavaXCrtcInfo = XRRGetCrtcInfo(wavaXDisplay, wavaXScreenResources,
+            wavaXOutputInfo->crtc);
 
-        screenwidth  = xavaXCrtcInfo->width;
-        screenheight = xavaXCrtcInfo->height;
-        screenx      = xavaXCrtcInfo->x;
-        screeny      = xavaXCrtcInfo->y;
-        screenname   = strdup(xavaXOutputInfo->name);
+        screenwidth  = wavaXCrtcInfo->width;
+        screenheight = wavaXCrtcInfo->height;
+        screenx      = wavaXCrtcInfo->x;
+        screeny      = wavaXCrtcInfo->y;
+        screenname   = strdup(wavaXOutputInfo->name);
 
-        XRRFreeCrtcInfo(xavaXCrtcInfo);
-        XRRFreeOutputInfo(xavaXOutputInfo);
+        XRRFreeCrtcInfo(wavaXCrtcInfo);
+        XRRFreeOutputInfo(wavaXOutputInfo);
 
         if(!strcmp(screenname, monitorName)) {
-            calculate_win_pos(xava, screenwidth, screenheight,
+            calculate_win_pos(wava, screenwidth, screenheight,
                     conf->w, conf->h);
 
             // correct window offsets
-            xava->outer.x += screenx;
-            xava->outer.y += screeny;
+            wava->outer.x += screenx;
+            wava->outer.y += screeny;
             break;
         } else {
             free(screenname);
@@ -234,16 +234,16 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
             screenname = NULL;
         }
     }
-    XRRFreeScreenResources(xavaXScreenResources);
+    XRRFreeScreenResources(wavaXScreenResources);
 
     // in case that no screen matches, just use default behavior
     if(screenname == NULL) {
-        calculate_win_pos(xava,
-                xavaXScreen->width, xavaXScreen->height,
+        calculate_win_pos(wava,
+                wavaXScreen->width, wavaXScreen->height,
                 conf->w, conf->h);
-        //xavaLog("%d %d %d %d",
-        //        xavaXScreen->width,
-        //        xavaXScreen->height,
+        //wavaLog("%d %d %d %d",
+        //        wavaXScreen->width,
+        //        wavaXScreen->height,
         //        conf->w,
         //        conf->h);
     }
@@ -251,14 +251,14 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
     // 32 bit color means alpha channel support
     #ifdef GL
     if(conf->flag.transparency) {
-        fbconfigs = glXChooseFBConfig(xavaXDisplay, xavaXScreenNumber, VisData, &numfbconfigs);
+        fbconfigs = glXChooseFBConfig(wavaXDisplay, wavaXScreenNumber, VisData, &numfbconfigs);
         fbconfig = 0;
         for(int i = 0; i<numfbconfigs; i++) {
-            XVisualInfo *visInfo = glXGetVisualFromFBConfig(xavaXDisplay, fbconfigs[i]);
+            XVisualInfo *visInfo = glXGetVisualFromFBConfig(wavaXDisplay, fbconfigs[i]);
             if(!visInfo) continue;
-            else xavaVInfo = *visInfo;
+            else wavaVInfo = *visInfo;
 
-            pict_format = XRenderFindVisualFormat(xavaXDisplay, xavaVInfo.visual);
+            pict_format = XRenderFindVisualFormat(wavaXDisplay, wavaVInfo.visual);
             if(!pict_format) continue;
 
             fbconfig = fbconfigs[i];
@@ -267,72 +267,72 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
         }
     } else
     #endif
-        XMatchVisualInfo(xavaXDisplay, xavaXScreenNumber,
-                conf->flag.transparency ? 32 : 24, TrueColor, &xavaVInfo);
+        XMatchVisualInfo(wavaXDisplay, wavaXScreenNumber,
+                conf->flag.transparency ? 32 : 24, TrueColor, &wavaVInfo);
 
-    xavaAttr.colormap = XCreateColormap(xavaXDisplay,
-            DefaultRootWindow(xavaXDisplay), xavaVInfo.visual, AllocNone);
-    xavaXColormap = xavaAttr.colormap;
+    wavaAttr.colormap = XCreateColormap(wavaXDisplay,
+            DefaultRootWindow(wavaXDisplay), wavaVInfo.visual, AllocNone);
+    wavaXColormap = wavaAttr.colormap;
     calculateColors(conf);
-    xavaAttr.background_pixel = 0;
-    xavaAttr.border_pixel = 0;
+    wavaAttr.background_pixel = 0;
+    wavaAttr.border_pixel = 0;
 
-    xavaAttr.backing_store = Always;
+    wavaAttr.backing_store = Always;
     // make it so that the window CANNOT be reordered by the WM
-    xavaAttr.override_redirect = overrideRedirectEnabled;
+    wavaAttr.override_redirect = overrideRedirectEnabled;
 
-    int xavaWindowFlags = CWOverrideRedirect | CWBackingStore |  CWEventMask |
+    int wavaWindowFlags = CWOverrideRedirect | CWBackingStore |  CWEventMask |
         CWColormap | CWBorderPixel | CWBackPixel;
 
-    xavaXWindow = XCreateWindow(xavaXDisplay,
-        xavaXRoot,
-        xava->outer.x, xava->outer.y,
-        xava->outer.w, xava->outer.h,
+    wavaXWindow = XCreateWindow(wavaXDisplay,
+        wavaXRoot,
+        wava->outer.x, wava->outer.y,
+        wava->outer.w, wava->outer.h,
         0,
-        xavaVInfo.depth,
+        wavaVInfo.depth,
         InputOutput,
-        xavaVInfo.visual,
-        xavaWindowFlags,
-        &xavaAttr);
+        wavaVInfo.visual,
+        wavaWindowFlags,
+        &wavaAttr);
 
-    XStoreName(xavaXDisplay, xavaXWindow, "XAVA");
+    XStoreName(wavaXDisplay, wavaXWindow, "WAVA");
 
     // The "X" button is handled by the window manager and not Xorg, so we set up a Atom
-    wm_delete_window = XInternAtom (xavaXDisplay, "WM_DELETE_WINDOW", 0);
-    XSetWMProtocols(xavaXDisplay, xavaXWindow, &wm_delete_window, 1);
+    wm_delete_window = XInternAtom (wavaXDisplay, "WM_DELETE_WINDOW", 0);
+    XSetWMProtocols(wavaXDisplay, wavaXWindow, &wm_delete_window, 1);
 
-    xavaXClassHint.res_name = (char *)"XAVA";
-    //xavaXWMHints.flags = InputHint | StateHint;
-    //xavaXWMHints.initial_state = NormalState;
-    xavaXClassHint.res_class = (char *)"XAVA";
-    XmbSetWMProperties(xavaXDisplay, xavaXWindow, NULL, NULL, NULL, 0, NULL,
-            &xavaXWMHints, &xavaXClassHint);
+    wavaXClassHint.res_name = (char *)"WAVA";
+    //wavaXWMHints.flags = InputHint | StateHint;
+    //wavaXWMHints.initial_state = NormalState;
+    wavaXClassHint.res_class = (char *)"WAVA";
+    XmbSetWMProperties(wavaXDisplay, wavaXWindow, NULL, NULL, NULL, 0, NULL,
+            &wavaXWMHints, &wavaXClassHint);
 
-    XSelectInput(xavaXDisplay, xavaXWindow, RRScreenChangeNotifyMask |
+    XSelectInput(wavaXDisplay, wavaXWindow, RRScreenChangeNotifyMask |
             VisibilityChangeMask | StructureNotifyMask | ExposureMask |
             KeyPressMask | KeymapNotify);
 
     #ifdef GL
-        xavaBailCondition(XGLInit(conf), "Failed to load GLX extensions");
-        GLInit(xava);
+        wavaBailCondition(XGLInit(conf), "Failed to load GLX extensions");
+        GLInit(wava);
     #endif
 
     #ifdef EGL
-        ESContext.native_window = xavaXWindow;
-        ESContext.native_display = xavaXDisplay;
-        EGLCreateContext(xava, &ESContext);
-        EGLInit(xava);
+        ESContext.native_window = wavaXWindow;
+        ESContext.native_display = wavaXDisplay;
+        EGLCreateContext(wava, &ESContext);
+        EGLInit(wava);
     #endif
 
-    XMapWindow(xavaXDisplay, xavaXWindow);
-    xavaXGraphics = XCreateGC(xavaXDisplay, xavaXWindow, 0, 0);
+    XMapWindow(wavaXDisplay, wavaXWindow);
+    wavaXGraphics = XCreateGC(wavaXDisplay, wavaXWindow, 0, 0);
 
     // Set up atoms
-    wmState = XInternAtom(xavaXDisplay, "_NET_WM_STATE", 0);
-    taskbar = XInternAtom(xavaXDisplay, "_NET_WM_STATE_SKIP_TASKBAR", 0);
-    fullScreen = XInternAtom(xavaXDisplay, "_NET_WM_STATE_FULLSCREEN", 0);
-    mwmHintsProperty = XInternAtom(xavaXDisplay, "_MOTIF_WM_HINTS", 0);
-    wmStateBelow = XInternAtom(xavaXDisplay, "_NET_WM_STATE_BELOW", 1);
+    wmState = XInternAtom(wavaXDisplay, "_NET_WM_STATE", 0);
+    taskbar = XInternAtom(wavaXDisplay, "_NET_WM_STATE_SKIP_TASKBAR", 0);
+    fullScreen = XInternAtom(wavaXDisplay, "_NET_WM_STATE_FULLSCREEN", 0);
+    mwmHintsProperty = XInternAtom(wavaXDisplay, "_MOTIF_WM_HINTS", 0);
+    wmStateBelow = XInternAtom(wavaXDisplay, "_NET_WM_STATE_BELOW", 1);
 
     /**
      * Set up window properties through Atoms,
@@ -348,7 +348,7 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
      *  other data.l[] elements = 0
     **/
     xev.xclient.type = ClientMessage;
-    xev.xclient.window = xavaXWindow;
+    xev.xclient.window = wavaXWindow;
     xev.xclient.message_type = wmState;
     xev.xclient.format = 32;
     xev.xclient.data.l[2] = 0;
@@ -359,37 +359,37 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
     xev.xclient.data.l[0] = conf->flag.beneath ?
         _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
     xev.xclient.data.l[1] = wmStateBelow;
-    XSendEvent(xavaXDisplay, xavaXRoot, 0,
+    XSendEvent(wavaXDisplay, wavaXRoot, 0,
             SubstructureRedirectMask | SubstructureNotifyMask, &xev);
-    if(conf->flag.beneath) XLowerWindow(xavaXDisplay, xavaXWindow);
+    if(conf->flag.beneath) XLowerWindow(wavaXDisplay, wavaXWindow);
 
     // remove window from taskbar
     xev.xclient.data.l[0] = conf->flag.taskbar ?
         _NET_WM_STATE_REMOVE : _NET_WM_STATE_ADD;
     xev.xclient.data.l[1] = taskbar;
-    XSendEvent(xavaXDisplay, xavaXRoot, 0,
+    XSendEvent(wavaXDisplay, wavaXRoot, 0,
             SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 
     // Setting window options
     struct mwmHints hints;
     hints.flags = (1L << 1);
     hints.decorations = conf->flag.border;
-    XChangeProperty(xavaXDisplay, xavaXWindow, mwmHintsProperty,
+    XChangeProperty(wavaXDisplay, wavaXWindow, mwmHintsProperty,
             mwmHintsProperty, 32, PropModeReplace, (unsigned char *)&hints, 5);
 
     // move the window in case it didn't by default
     XWindowAttributes xwa;
-    XGetWindowAttributes(xavaXDisplay, xavaXWindow, &xwa);
+    XGetWindowAttributes(wavaXDisplay, wavaXWindow, &xwa);
     if(strcmp(conf->winA, "none"))
-        XMoveWindow(xavaXDisplay, xavaXWindow, xava->outer.x, xava->outer.y);
+        XMoveWindow(wavaXDisplay, wavaXWindow, wava->outer.x, wava->outer.y);
 
     // query for the RR extension in X11
     int error;
-    xavaSupportsRR = XRRQueryExtension(xavaXDisplay, &xavaRREventBase, &error);
-    if(xavaSupportsRR) {
+    wavaSupportsRR = XRRQueryExtension(wavaXDisplay, &wavaRREventBase, &error);
+    if(wavaSupportsRR) {
         int rr_major, rr_minor;
 
-        if(XRRQueryVersion(xavaXDisplay, &rr_major, &rr_minor)) {
+        if(XRRQueryVersion(wavaXDisplay, &rr_major, &rr_minor)) {
             int rr_mask = RRScreenChangeNotifyMask;
             if(rr_major == 1 && rr_minor <= 1) {
                 rr_mask &= ~(RRCrtcChangeNotifyMask |
@@ -399,49 +399,49 @@ EXP_FUNC int xavaInitOutput(XAVA *xava) {
 
             // listen for display configure events only if enabled
             if(reloadOnDisplayConfigure)
-                XRRSelectInput(xavaXDisplay, xavaXWindow, rr_mask);
+                XRRSelectInput(wavaXDisplay, wavaXWindow, rr_mask);
         }
     }
 
     #if defined(CAIRO)
-        xavaXCairoSurface = cairo_xlib_surface_create(xavaXDisplay,
-            xavaXWindow, xwa.visual,
-            xava->outer.w, xava->outer.h);
-        cairo_xlib_surface_set_size(xavaXCairoSurface,
-                xava->outer.w, xava->outer.h);
-        __internal_xava_output_cairo_init(xavaCairoHandle,
-                cairo_create(xavaXCairoSurface));
+        wavaXCairoSurface = cairo_xlib_surface_create(wavaXDisplay,
+            wavaXWindow, xwa.visual,
+            wava->outer.w, wava->outer.h);
+        cairo_xlib_surface_set_size(wavaXCairoSurface,
+                wava->outer.w, wava->outer.h);
+        __internal_wava_output_cairo_init(wavaCairoHandle,
+                cairo_create(wavaXCairoSurface));
     #endif
 
     return 0;
 }
 
-EXP_FUNC void xavaOutputClear(XAVA *xava) {
+EXP_FUNC void wavaOutputClear(WAVA *wava) {
     #if defined(EGL)
-        EGLClear(xava);
+        EGLClear(wava);
     #elif defined(GL)
-        GLClear(xava);
+        GLClear(wava);
     #elif defined(CAIRO)
-        __internal_xava_output_cairo_clear(xavaCairoHandle);
-        UNUSED(xava);
+        __internal_wava_output_cairo_clear(wavaCairoHandle);
+        UNUSED(wava);
     #else
-        UNUSED(xava);
+        UNUSED(wava);
     #endif
 }
 
-EXP_FUNC int xavaOutputApply(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC int wavaOutputApply(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
 
     calculateColors(conf);
 
-    //Atom xa = XInternAtom(xavaXDisplay, "_NET_WM_WINDOW_TYPE", 0); May be used in the future
+    //Atom xa = XInternAtom(wavaXDisplay, "_NET_WM_WINDOW_TYPE", 0); May be used in the future
     //Atom prop;
 
     // change window type (this makes sure that compoziting managers don't mess with it)
     //if(xa != NULL)
     //{
-    //    prop = XInternAtom(xavaXDisplay, "_NET_WM_WINDOW_TYPE_DESKTOP", 0);
-    //    XChangeProperty(xavaXDisplay, xavaXWindow, xa, XA_ATOM, 32, PropModeReplace, (unsigned char *) &prop, 1);
+    //    prop = XInternAtom(wavaXDisplay, "_NET_WM_WINDOW_TYPE_DESKTOP", 0);
+    //    XChangeProperty(wavaXDisplay, wavaXWindow, xa, XA_ATOM, 32, PropModeReplace, (unsigned char *) &prop, 1);
     //}
     // The code above breaks stuff, please don't use it.
 
@@ -450,66 +450,66 @@ EXP_FUNC int xavaOutputApply(XAVA *xava) {
     xev.xclient.type=ClientMessage;
     xev.xclient.serial = 0;
     xev.xclient.send_event = 1;
-    xev.xclient.window = xavaXWindow;
+    xev.xclient.window = wavaXWindow;
     xev.xclient.message_type = wmState;
     xev.xclient.format = 32;
     xev.xclient.data.l[0] = conf->flag.fullscreen ?
         _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
     xev.xclient.data.l[1] = fullScreen;
     xev.xclient.data.l[2] = 0;
-    XSendEvent(xavaXDisplay, xavaXRoot, 0,
+    XSendEvent(wavaXDisplay, wavaXRoot, 0,
             SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 
-    xavaOutputClear(xava);
+    wavaOutputClear(wava);
 
     if(!conf->flag.interact) {
         XRectangle rect;
-        XserverRegion region = XFixesCreateRegion(xavaXDisplay, &rect, 1);
-        XFixesSetWindowShapeRegion(xavaXDisplay, xavaXWindow, ShapeInput, 0, 0, region);
-        XFixesDestroyRegion(xavaXDisplay, region);
+        XserverRegion region = XFixesCreateRegion(wavaXDisplay, &rect, 1);
+        XFixesSetWindowShapeRegion(wavaXDisplay, wavaXWindow, ShapeInput, 0, 0, region);
+        XFixesDestroyRegion(wavaXDisplay, region);
     }
 
-    XGetWindowAttributes(xavaXDisplay, xavaXWindow, &windowAttribs);
+    XGetWindowAttributes(wavaXDisplay, wavaXWindow, &windowAttribs);
 
     #if defined(EGL)
-        EGLApply(xava);
+        EGLApply(wava);
     #elif defined(GL)
-        GLApply(xava);
+        GLApply(wava);
     #elif defined(CAIRO)
-        __internal_xava_output_cairo_apply(xavaCairoHandle);
-        cairo_xlib_surface_set_size(xavaXCairoSurface,
-                xava->outer.w, xava->outer.h);
+        __internal_wava_output_cairo_apply(wavaCairoHandle);
+        cairo_xlib_surface_set_size(wavaXCairoSurface,
+                wava->outer.w, wava->outer.h);
     #endif
 
     return 0;
 }
 
-EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC XG_EVENT wavaOutputHandleInput(WAVA *wava) {
+    WAVA_CONFIG *conf = &wava->conf;
 
     // this way we avoid event stacking which requires a full frame to process a single event
-    XG_EVENT action = XAVA_IGNORE;
+    XG_EVENT action = WAVA_IGNORE;
 
-    while(XPending(xavaXDisplay)) {
-        XNextEvent(xavaXDisplay, &xavaXEvent);
-        switch(xavaXEvent.type) {
+    while(XPending(wavaXDisplay)) {
+        XNextEvent(wavaXDisplay, &wavaXEvent);
+        switch(wavaXEvent.type) {
             case KeyPress:
             {
                 KeySym key_symbol;
-                key_symbol = XkbKeycodeToKeysym(xavaXDisplay, (KeyCode)xavaXEvent.xkey.keycode, 0, xavaXEvent.xkey.state & ShiftMask ? 1 : 0);
+                key_symbol = XkbKeycodeToKeysym(wavaXDisplay, (KeyCode)wavaXEvent.xkey.keycode, 0, wavaXEvent.xkey.state & ShiftMask ? 1 : 0);
                 switch(key_symbol) {
                     // should_reload = 1
                     // resizeTerminal = 2
                     // bail = -1
                     case XK_a:
                         conf->bs++;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case XK_s:
                         if(conf->bs > 0) conf->bs--;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case XK_f: // fullscreen
                         conf->flag.fullscreen = !conf->flag.fullscreen;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case XK_Up:
                         conf->sens *= 1.05;
                         break;
@@ -518,29 +518,29 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
                         break;
                     case XK_Left:
                         conf->bw++;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case XK_Right:
                         if (conf->bw > 1) conf->bw--;
-                        return XAVA_RESIZE;
+                        return WAVA_RESIZE;
                     case XK_r: //reload config
-                        return XAVA_RELOAD;
+                        return WAVA_RELOAD;
                     case XK_q:
-                        return XAVA_QUIT;
+                        return WAVA_QUIT;
                     case XK_Escape:
-                        return XAVA_QUIT;
+                        return WAVA_QUIT;
                     case XK_b:
                         // WARNING: Assumes that alpha is the
                         // upper 8-bits and that rand is 16-bit
                         conf->bgcol &= 0xff00000;
                         conf->bgcol |= ((rand()<<16)|rand())&0x00ffffff;
-                        return XAVA_REDRAW;
+                        return WAVA_REDRAW;
                     case XK_c:
                         if(conf->gradients) break;
                         // WARNING: Assumes that alpha is the
                         // upper 8-bits and that rand is 16-bit
                         conf->col &= 0xff00000;
                         conf->col |= ((rand()<<16)|rand())&0x00ffffff;
-                        return XAVA_REDRAW;
+                        return WAVA_REDRAW;
             }
             break;
         }
@@ -551,33 +551,33 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
                 break;
 
             // This is needed to track the window size
-            XConfigureEvent trackedXavaXWindow;
-            trackedXavaXWindow = xavaXEvent.xconfigure;
-            if(xava->outer.w != (uint32_t)trackedXavaXWindow.width ||
-               xava->outer.h != (uint32_t)trackedXavaXWindow.height) {
-                calculate_win_geo(xava,
-                        trackedXavaXWindow.width,
-                        trackedXavaXWindow.height);
+            XConfigureEvent trackedWavaXWindow;
+            trackedWavaXWindow = wavaXEvent.xconfigure;
+            if(wava->outer.w != (uint32_t)trackedWavaXWindow.width ||
+               wava->outer.h != (uint32_t)trackedWavaXWindow.height) {
+                calculate_win_geo(wava,
+                        trackedWavaXWindow.width,
+                        trackedWavaXWindow.height);
             }
-            action = XAVA_RESIZE;
+            action = WAVA_RESIZE;
             break;
         }
         case Expose:
-            if(action != XAVA_RESIZE)
-                action = XAVA_REDRAW;
+            if(action != WAVA_RESIZE)
+                action = WAVA_REDRAW;
             break;
         case VisibilityNotify:
-            if(xavaXEvent.xvisibility.state == VisibilityUnobscured)
-                action = XAVA_RESIZE;
+            if(wavaXEvent.xvisibility.state == VisibilityUnobscured)
+                action = WAVA_RESIZE;
             break;
         case ClientMessage:
-            if((Atom)xavaXEvent.xclient.data.l[0] == wm_delete_window)
-                return XAVA_QUIT;
+            if((Atom)wavaXEvent.xclient.data.l[0] == wm_delete_window)
+                return WAVA_QUIT;
             break;
         default:
-            if(xavaXEvent.type == xavaRREventBase + RRScreenChangeNotify) {
-                xavaLog("Display change detected - Restarting...\n");
-                return XAVA_RELOAD;
+            if(wavaXEvent.type == wavaRREventBase + RRScreenChangeNotify) {
+                wavaLog("Display change detected - Restarting...\n");
+                return WAVA_RELOAD;
             }
         }
     }
@@ -585,79 +585,79 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *xava) {
     // yes this is violent C macro (ab)-use, live with it
     XG_EVENT_STACK *eventStack = 
     #if defined(CAIRO)
-        __internal_xava_output_cairo_event(xavaCairoHandle);
+        __internal_wava_output_cairo_event(wavaCairoHandle);
     #elif defined(EGL)
-        EGLEvent(xava);
+        EGLEvent(wava);
     #elif defined(GL)
-        GLEvent(xava);
+        GLEvent(wava);
     #endif
 
-    while(pendingXAVAEventStack(eventStack)) {
-        XG_EVENT event = popXAVAEventStack(eventStack);
-        if(event != XAVA_IGNORE)
+    while(pendingWAVAEventStack(eventStack)) {
+        XG_EVENT event = popWAVAEventStack(eventStack);
+        if(event != WAVA_IGNORE)
             return event;
     }
 
     return action;
 }
 
-EXP_FUNC void xavaOutputDraw(XAVA *xava) {
+EXP_FUNC void wavaOutputDraw(WAVA *wava) {
     #if defined(EGL)
-        EGLDraw(xava);
+        EGLDraw(wava);
         eglSwapBuffers(ESContext.display, ESContext.surface);
     #elif defined(GL)
-        GLDraw(xava);
-        glXSwapBuffers(xavaXDisplay, xavaXWindow);
+        GLDraw(wava);
+        glXSwapBuffers(wavaXDisplay, wavaXWindow);
         glXWaitGL();
     #elif defined(CAIRO)
-        __internal_xava_output_cairo_draw(xavaCairoHandle);
-        UNUSED(xava);
+        __internal_wava_output_cairo_draw(wavaCairoHandle);
+        UNUSED(wava);
     #else
-        UNUSED(xava);
+        UNUSED(wava);
     #endif
 
     return;
 }
 
-EXP_FUNC void xavaOutputCleanup(XAVA *xava) {
+EXP_FUNC void wavaOutputCleanup(WAVA *wava) {
     // Root mode leaves artifacts on screen even though the window is dead
-    XClearWindow(xavaXDisplay, xavaXWindow);
+    XClearWindow(wavaXDisplay, wavaXWindow);
 
     // make sure that all events are dead by this point
-    XSync(xavaXDisplay, 1);
+    XSync(wavaXDisplay, 1);
 
     #if defined(EGL)
-        EGLCleanup(xava, &ESContext);
+        EGLCleanup(wava, &ESContext);
     #elif defined(GL)
-        glXMakeCurrent(xavaXDisplay, 0, 0);
-        glXDestroyContext(xavaXDisplay, xavaGLXContext);
-        GLCleanup(xava);
+        glXMakeCurrent(wavaXDisplay, 0, 0);
+        glXDestroyContext(wavaXDisplay, wavaGLXContext);
+        GLCleanup(wava);
     #elif defined(CAIRO)
-        __internal_xava_output_cairo_cleanup(xavaCairoHandle);
-        UNUSED(xava);
+        __internal_wava_output_cairo_cleanup(wavaCairoHandle);
+        UNUSED(wava);
     #else
-        UNUSED(xava);
+        UNUSED(wava);
     #endif
 
-    XFreeGC(xavaXDisplay, xavaXGraphics);
-    XDestroyWindow(xavaXDisplay, xavaXWindow);
-    XFreeColormap(xavaXDisplay, xavaXColormap);
-    XCloseDisplay(xavaXDisplay);
+    XFreeGC(wavaXDisplay, wavaXGraphics);
+    XDestroyWindow(wavaXDisplay, wavaXWindow);
+    XFreeColormap(wavaXDisplay, wavaXColormap);
+    XCloseDisplay(wavaXDisplay);
     free(monitorName);
     return;
 }
 
-EXP_FUNC void xavaOutputLoadConfig(XAVA *xava) {
-    xava_config_source config = xava->default_config.config;
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC void wavaOutputLoadConfig(WAVA *wava) {
+    wava_config_source config = wava->default_config.config;
+    WAVA_CONFIG *conf = &wava->conf;
 
     UNUSED(conf);
 
-    reloadOnDisplayConfigure = xavaConfigGetBool
+    reloadOnDisplayConfigure = wavaConfigGetBool
         (config, "x11", "reload_on_display_configure", 0);
-    overrideRedirectEnabled = xavaConfigGetBool
+    overrideRedirectEnabled = wavaConfigGetBool
         (config, "x11", "override_redirect", 0);
-    monitorName = strdup(xavaConfigGetString
+    monitorName = strdup(wavaConfigGetString
         (config, "x11", "monitor_name", "none"));
 
     // Xquartz doesnt support ARGB windows
@@ -668,13 +668,13 @@ EXP_FUNC void xavaOutputLoadConfig(XAVA *xava) {
 
     #ifdef CAIRO
         conf->vsync = 0;
-        xavaCairoHandle = __internal_xava_output_cairo_load_config(xava);
+        wavaCairoHandle = __internal_wava_output_cairo_load_config(wava);
     #endif
 
     #if defined(EGL)
-        EGLConfigLoad(xava);
+        EGLConfigLoad(wava);
     #elif defined(GL)
-        GLConfigLoad(xava);
+        GLConfigLoad(wava);
     #endif
 }
 

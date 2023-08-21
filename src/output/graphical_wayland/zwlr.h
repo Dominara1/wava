@@ -6,7 +6,7 @@
 #include "main.h"
 
 extern const struct zwlr_layer_surface_v1_listener layer_surface_listener;
-extern struct zwlr_layer_shell_v1 *xavaWLRLayerShell;
+extern struct zwlr_layer_shell_v1 *wavaWLRLayerShell;
 
 void zwlr_init(struct waydata *s);
 void zwlr_cleanup(struct waydata *s);

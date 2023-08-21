@@ -3,7 +3,7 @@
 
 #include "output/shared/gl/main.h"
 
-float xava_gl_module_util_calculate_intensity(XAVA *xava);
-float xava_gl_module_util_obtain_time(void);
+float wava_gl_module_util_calculate_intensity(WAVA *wava);
+float wava_gl_module_util_obtain_time(void);
 #endif
 

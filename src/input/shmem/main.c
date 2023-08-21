@@ -34,9 +34,9 @@ typedef struct {
 
 
 //input: SHMEM
-EXP_FUNC void* xavaInput(void* data)
+EXP_FUNC void* wavaInput(void* data)
 {
-    XAVA_AUDIO *audio = (XAVA_AUDIO *)data;
+    WAVA_AUDIO *audio = (WAVA_AUDIO *)data;
     vis_t *mmap_area;
     int fd; /* file descriptor to mmaped area */
     int mmap_count = sizeof( vis_t);
@@ -49,16 +49,16 @@ EXP_FUNC void* xavaInput(void* data)
     int n = 0;
     int i;
 
-    xavaSpam("SHMEM source: %s", audio->source);
+    wavaSpam("SHMEM source: %s", audio->source);
 
     fd = shm_open(audio->source, O_RDWR, 0666);
 
-    xavaBailCondition(fd<0, "Could not open source '%s': %s", audio->source, strerror(errno));
+    wavaBailCondition(fd<0, "Could not open source '%s': %s", audio->source, strerror(errno));
 
     mmap_area = mmap(NULL, sizeof( vis_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    xavaBailCondition((intptr_t)mmap_area==-1, "mmap failed - check if squeezelite is running with visualization enabled");
+    wavaBailCondition((intptr_t)mmap_area==-1, "mmap failed - check if squeezelite is running with visualization enabled");
 
-    xavaSpam("bufs: %u / run: %u / rate: %u\n",mmap_area->buf_size, mmap_area->running, mmap_area->rate);
+    wavaSpam("bufs: %u / run: %u / rate: %u\n",mmap_area->buf_size, mmap_area->running, mmap_area->rate);
     audio->rate = mmap_area->rate;
 
     while (1) {
@@ -79,18 +79,18 @@ EXP_FUNC void* xavaInput(void* data)
     }
 
     // cleanup
-    xavaErrorCondition(fd<1, "Wrong file descriptor %d", fd);
-    xavaErrorCondition(close(fd)!=0, "Could not close file descriptor %d: %s", fd, strerror(errno));
+    wavaErrorCondition(fd<1, "Wrong file descriptor %d", fd);
+    wavaErrorCondition(close(fd)!=0, "Could not close file descriptor %d: %s", fd, strerror(errno));
 
-    xavaErrorCondition(munmap(mmap_area, mmap_count)!=0, "Could not munmap() area %p+%d. %s",
+    wavaErrorCondition(munmap(mmap_area, mmap_count)!=0, "Could not munmap() area %p+%d. %s",
             mmap_area, mmap_count, strerror(errno));
     return 0;
 }
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
     audio->rate = 44100;
-    audio->source = (char*)xavaConfigGetString(config, "input", "source", "/squeezelite-00:00:00:00:00:00");
+    audio->source = (char*)wavaConfigGetString(config, "input", "source", "/squeezelite-00:00:00:00:00:00");
 }
 

@@ -36,7 +36,7 @@ static _Bool backgroundLayer;
 
 uint32_t fgcol,bgcol;
 
-EXP_FUNC void xavaOutputCleanup(void *v) {
+EXP_FUNC void wavaOutputCleanup(void *v) {
     UNUSED(v);
 
     #ifdef EGL
@@ -45,7 +45,7 @@ EXP_FUNC void xavaOutputCleanup(void *v) {
                 wd.ESContext.native_window);
     #endif
     #ifdef CAIRO
-        __internal_xava_output_cairo_cleanup(wd.cairo_handle);
+        __internal_wava_output_cairo_cleanup(wd.cairo_handle);
         closeSHM(&wd);
     #endif
 
@@ -57,30 +57,30 @@ EXP_FUNC void xavaOutputCleanup(void *v) {
     wl_output_cleanup(&wd);
     wl_surface_destroy(wd.surface);
     wl_compositor_destroy(wd.compositor);
-    wl_registry_destroy(xavaWLRegistry);
+    wl_registry_destroy(wavaWLRegistry);
     wl_display_disconnect(wd.display);
     free(monitorName);
 }
 
-EXP_FUNC int xavaInitOutput(XAVA *hand) {
+EXP_FUNC int wavaInitOutput(WAVA *hand) {
     wd.hand   = hand;
-    wd.events = newXAVAEventStack();
+    wd.events = newWAVAEventStack();
 
     wd.display = wl_display_connect(NULL);
-    xavaBailCondition(!wd.display, "Failed to connect to Wayland server");
+    wavaBailCondition(!wd.display, "Failed to connect to Wayland server");
 
     // Before the registry shananigans, outputs must be initialized
     wl_output_init(&wd);
 
-    xavaWLRegistry = wl_display_get_registry(wd.display);
+    wavaWLRegistry = wl_display_get_registry(wd.display);
     // TODO: Check failure states
-    wl_registry_add_listener(xavaWLRegistry, &xava_wl_registry_listener, &wd);
+    wl_registry_add_listener(wavaWLRegistry, &wava_wl_registry_listener, &wd);
     wl_display_roundtrip(wd.display);
-    xavaBailCondition(!wd.compositor, "Your compositor doesn't support wl_compositor, failing...");
-    xavaBailCondition(!xavaXDGWMBase, "Your compositor doesn't support xdg_wm_base, failing...");
+    wavaBailCondition(!wd.compositor, "Your compositor doesn't support wl_compositor, failing...");
+    wavaBailCondition(!wavaXDGWMBase, "Your compositor doesn't support xdg_wm_base, failing...");
 
-    if(xavaWLRLayerShell == NULL || xavaXDGOutputManager == NULL) {
-        xavaWarn("Your compositor doesn't support some or any of the following:\n"
+    if(wavaWLRLayerShell == NULL || wavaXDGOutputManager == NULL) {
+        wavaWarn("Your compositor doesn't support some or any of the following:\n"
                 "zwlr_layer_shell_v1 and/or zwlr_output_manager_v1\n"
                 "This will DISABLE the ability to use the background layer for"
                 "safety reasons!");
@@ -99,7 +99,7 @@ EXP_FUNC int xavaInitOutput(XAVA *hand) {
         xdg_init(&wd);
     }
 
-    //wl_surface_set_buffer_scale(xavaWLSurface, 3);
+    //wl_surface_set_buffer_scale(wavaWLSurface, 3);
 
     // process all of this, FINALLY
     wl_surface_commit(wd.surface);
@@ -108,7 +108,7 @@ EXP_FUNC int xavaInitOutput(XAVA *hand) {
         // creates everything EGL related
         waylandEGLCreateWindow(&wd);
 
-        xavaBailCondition(EGLCreateContext(wd.hand, &wd.ESContext) == EGL_FALSE,
+        wavaBailCondition(EGLCreateContext(wd.hand, &wd.ESContext) == EGL_FALSE,
                 "Failed to create EGL context");
 
         calculate_win_geo(hand, hand->conf.w, hand->conf.h);
@@ -128,7 +128,7 @@ EXP_FUNC int xavaInitOutput(XAVA *hand) {
         reallocSHM(&wd);
     #endif
     #ifdef CAIRO
-        xava_output_wayland_cairo_init(&wd);
+        wava_output_wayland_cairo_init(&wd);
     #endif
 
     #ifdef SHM
@@ -140,10 +140,10 @@ EXP_FUNC int xavaInitOutput(XAVA *hand) {
     return EXIT_SUCCESS;
 }
 
-EXP_FUNC void xavaOutputClear(XAVA *hand) {
+EXP_FUNC void wavaOutputClear(WAVA *hand) {
     #ifdef CAIRO
         UNUSED(hand);
-        __internal_xava_output_cairo_clear(wd.cairo_handle);
+        __internal_wava_output_cairo_clear(wd.cairo_handle);
     #elif defined(EGL)
         EGLClear(hand);
     #else
@@ -153,40 +153,40 @@ EXP_FUNC void xavaOutputClear(XAVA *hand) {
 
 }
 
-EXP_FUNC int xavaOutputApply(XAVA *hand) {
+EXP_FUNC int wavaOutputApply(WAVA *hand) {
     // TODO: Fullscreen support
-    //if(p->fullF) xdg_toplevel_set_fullscreen(xavaWLSurface, NULL);
-    //else        xdg_toplevel_unset_fullscreen(xavaWLSurface);
+    //if(p->fullF) xdg_toplevel_set_fullscreen(wavaWLSurface, NULL);
+    //else        xdg_toplevel_unset_fullscreen(wavaWLSurface);
     
     // process new size
     wl_display_roundtrip(wd.display);
 
-    xavaOutputClear(hand);
+    wavaOutputClear(hand);
 
     #ifdef EGL
         EGLApply(hand);
     #endif
     #ifdef CAIRO
-        __internal_xava_output_cairo_apply(wd.cairo_handle);
+        __internal_wava_output_cairo_apply(wd.cairo_handle);
     #endif
 
     return EXIT_SUCCESS;
 }
 
-EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *hand) {
+EXP_FUNC XG_EVENT wavaOutputHandleInput(WAVA *hand) {
     UNUSED(hand);
-    //XAVA_CONFIG     *p    = &s->conf;
+    //WAVA_CONFIG     *p    = &s->conf;
 
-    XG_EVENT event = XAVA_IGNORE;
+    XG_EVENT event = WAVA_IGNORE;
 
-    while(pendingXAVAEventStack(wd.events)) {
-        event = popXAVAEventStack(wd.events);
+    while(pendingWAVAEventStack(wd.events)) {
+        event = popWAVAEventStack(wd.events);
 
         switch(event) {
-            case XAVA_RESIZE:
-                return XAVA_RESIZE;
-            case XAVA_QUIT:
-                return XAVA_QUIT;
+            case WAVA_RESIZE:
+                return WAVA_RESIZE;
+            case WAVA_QUIT:
+                return WAVA_QUIT;
             default:
                 break;
         }
@@ -194,21 +194,21 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(XAVA *hand) {
 
     XG_EVENT_STACK *eventStack = 
     #if defined(CAIRO)
-        __internal_xava_output_cairo_event(wd.cairo_handle);
+        __internal_wava_output_cairo_event(wd.cairo_handle);
     #elif defined(EGL)
         EGLEvent(hand);
     #endif
 
-    while(pendingXAVAEventStack(eventStack)) {
-        XG_EVENT event = popXAVAEventStack(eventStack);
-        if(event != XAVA_IGNORE)
+    while(pendingWAVAEventStack(eventStack)) {
+        XG_EVENT event = popWAVAEventStack(eventStack);
+        if(event != WAVA_IGNORE)
             return event;
     }
 
     return event;
 }
 
-EXP_FUNC void xavaOutputDraw(XAVA *hand) {
+EXP_FUNC void wavaOutputDraw(WAVA *hand) {
     UNUSED(hand);
 
     #ifdef EGL
@@ -218,7 +218,7 @@ EXP_FUNC void xavaOutputDraw(XAVA *hand) {
         wl_surface_commit(wd.surface);
     #endif
     #ifdef CAIRO
-        __internal_xava_output_cairo_draw(wd.cairo_handle);
+        __internal_wava_output_cairo_draw(wd.cairo_handle);
     #endif
 
     #ifdef SHM
@@ -229,13 +229,13 @@ EXP_FUNC void xavaOutputDraw(XAVA *hand) {
     wl_display_dispatch_pending(wd.display);
 }
 
-EXP_FUNC void xavaOutputLoadConfig(XAVA *hand) {
-    XAVA_CONFIG *p = &hand->conf;
-    xava_config_source config = hand->default_config.config;
+EXP_FUNC void wavaOutputLoadConfig(WAVA *hand) {
+    WAVA_CONFIG *p = &hand->conf;
+    wava_config_source config = hand->default_config.config;
 
-    backgroundLayer = xavaConfigGetBool
+    backgroundLayer = wavaConfigGetBool
         (config, "wayland", "background_layer", 1);
-    monitorName = strdup(xavaConfigGetString
+    monitorName = strdup(wavaConfigGetString
         (config, "wayland", "monitor_name", "ignore"));
 
     #ifdef EGL
@@ -243,7 +243,7 @@ EXP_FUNC void xavaOutputLoadConfig(XAVA *hand) {
     #endif
 
     #ifdef CAIRO
-        wd.cairo_handle = __internal_xava_output_cairo_load_config(hand);
+        wd.cairo_handle = __internal_wava_output_cairo_load_config(hand);
     #endif
 
     // Vsync is implied, although system timers must be used

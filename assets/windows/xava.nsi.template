@@ -3,20 +3,20 @@
 # Set project name
 Name "X.A.V.A."
 
-!define PRODUCT_VERSION "@xava_VERSION@"
-!define VERSION "@xava_VERSION@"
+!define PRODUCT_VERSION "@wava_VERSION@"
+!define VERSION "@wava_VERSION@"
 
-VIProductVersion "@xava_VERSION@"
-VIFileVersion "@xava_VERSION@"
-VIAddVersionKey "FileVersion" "@xava_VERSION@"
+VIProductVersion "@wava_VERSION@"
+VIFileVersion "@wava_VERSION@"
+VIAddVersionKey "FileVersion" "@wava_VERSION@"
 VIAddVersionKey "LegalCopyright" "(C) Nikola Pavlica"
 VIAddVersionKey "FileDescription" "Graphical audio visualizer"
 
 # installer filename
-OutFile "xava-win-installer.exe"
+OutFile "wava-win-installer.exe"
 
 # installation directory
-InstallDir $PROGRAMFILES64\xava
+InstallDir $PROGRAMFILES64\wava
 
 # Get admin priviledges
 RequestExecutionLevel admin
@@ -27,15 +27,15 @@ Section
     SetOutPath $INSTDIR
 
     # include these files
-    File xava.exe
+    File wava.exe
     File *.dll
     File /nonfatal /r gl
     File /nonfatal /r cairo
-    File @xava_EXAMPLE_FILES_NSIS@\config
+    File @wava_EXAMPLE_FILES_NSIS@\config
     File final-LICENSE.txt
     File README.txt
 
-    SetOutPath $APPDATA\xava\
+    SetOutPath $APPDATA\wava\
 
     Rename "$INSTDIR\config" "$INSTDIR\config.cfg"
     Rename "$INSTDIR\final-LICENSE.txt" "$INSTDIR\LICENSE.txt"
@@ -45,16 +45,16 @@ Section
 
     # create a shortcut named "new shortcut" in the start menu programs directory
     # point the new shortcut at the program uninstaller
-    CreateDirectory "$SMPROGRAMS\XAVA"
-    CreateShortCut "$SMPROGRAMS\XAVA\XAVA.lnk" "$INSTDIR\xava.exe" "" "$INSTDIR\xava.ico"
-    CreateShortCut "$SMPROGRAMS\XAVA\Configure XAVA.lnk" "notepad.exe" "%APPDATA%\xava\config.cfg"
-    CreateShortCut "$SMPROGRAMS\XAVA\Uninstall XAVA.lnk" "$INSTDIR\uninstall.exe"
+    CreateDirectory "$SMPROGRAMS\WAVA"
+    CreateShortCut "$SMPROGRAMS\WAVA\WAVA.lnk" "$INSTDIR\wava.exe" "" "$INSTDIR\wava.ico"
+    CreateShortCut "$SMPROGRAMS\WAVA\Configure WAVA.lnk" "notepad.exe" "%APPDATA%\wava\config.cfg"
+    CreateShortCut "$SMPROGRAMS\WAVA\Uninstall WAVA.lnk" "$INSTDIR\uninstall.exe"
 SectionEnd
 
 # uninstaller section start
 Section "uninstall"
     # first, remove the link from the start menu
-    RMDir /r "$SMPROGRAMS\XAVA"
+    RMDir /r "$SMPROGRAMS\WAVA"
 
     # second, delete the program
     RMDir /r "$INSTDIR"
@@ -81,13 +81,13 @@ Function OpenREADME
 FunctionEnd
 
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\xava.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\wava.exe"
   !define MUI_FINISHPAGE_RUN_NOTCHECKED
 !define MUI_FINISHPAGE_SHOWREADME
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION 'OpenREADME'
 !define MUI_FINISHPAGE_LINK 'Check out the project page'
-  !define MUI_FINISHPAGE_LINK_LOCATION https://www.github.com/nikp123/xava
+  !define MUI_FINISHPAGE_LINK_LOCATION https://www.github.com/nikp123/wava
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_LANGUAGE English
 

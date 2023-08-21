@@ -1,19 +1,19 @@
-XAVA @xava_VERSION@ README file
+WAVA @wava_VERSION@ README file
 ---
 
 Copyright MIT 2021 Nikola Pavlica
 
-XAVA is an audio visualizer that aims to aesthetically display music or any sound
+WAVA is an audio visualizer that aims to aesthetically display music or any sound
 playing on the computer.
 
 Using it is simple, just launch the appropriate application shortcut for the
 application to open. In case it doesn't open or you want to customize anything
-about the visualizer, please refer to https://github.com/nikp123/xava for further
+about the visualizer, please refer to https://github.com/nikp123/wava for further
 information.
 
 Since you're probably running Windows as your operating system of choice, the
-config file can be found at %APPDATA%\xava\config.cfg or just use the
-"Configure XAVA" shortcut found in your Start Menu.
+config file can be found at %APPDATA%\wava\config.cfg or just use the
+"Configure WAVA" shortcut found in your Start Menu.
 
 In case it is not there, just run the visualizer once again and it will
 automatically generate that file for you.

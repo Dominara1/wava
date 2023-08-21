@@ -1,5 +1,5 @@
-#ifndef XAVA_UTIL_MEDIA_INFO_MEDIA_DATA
-#define XAVA_UTIL_MEDIA_INFO_MEDIA_DATA
+#ifndef WAVA_UTIL_MEDIA_INFO_MEDIA_DATA
+#define WAVA_UTIL_MEDIA_INFO_MEDIA_DATA
 
 #include "artwork.h"
 
@@ -18,11 +18,11 @@ struct media_data {
 struct media_data_thread;
 
 struct media_data *
-xava_util_media_data_thread_data(struct media_data_thread *thread);
+wava_util_media_data_thread_data(struct media_data_thread *thread);
 struct media_data_thread *
-xava_util_media_data_thread_create(void);
+wava_util_media_data_thread_create(void);
 void
-xava_util_media_data_thread_destroy(struct media_data_thread *data);
+wava_util_media_data_thread_destroy(struct media_data_thread *data);
 
 #endif
 

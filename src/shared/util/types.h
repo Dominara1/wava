@@ -1,5 +1,5 @@
-#ifndef __XAVA_SHARED_TYPES_H 
-#define __XAVA_SHARED_TYPES_H 
+#ifndef __WAVA_SHARED_TYPES_H 
+#define __WAVA_SHARED_TYPES_H 
 
 #include <stdint.h>
 #include <stdbool.h>

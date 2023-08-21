@@ -1,4 +1,4 @@
-project(xava-shared C)
+project(wava-shared C)
 
 # Optional features
 set(ADDITIONAL_SHARED_SOURCES "")
@@ -26,8 +26,8 @@ else()
     message(FATAL_ERROR "Your OS/Platform does NOT support modules!")
 endif()
 
-# Build XAVA shared library
-add_library(xava-shared SHARED
+# Build WAVA shared library
+add_library(wava-shared SHARED
     src/shared/log.c
     src/shared/config/config.c
     src/shared/module/abstractions.c
@@ -36,14 +36,14 @@ add_library(xava-shared SHARED
     src/shared/util/version.c
     ${ADDITIONAL_SHARED_SOURCES}
 )
-set_target_properties(xava-shared PROPERTIES COMPILE_FLAGS "-fPIC")
-target_link_libraries(xava-shared PRIVATE ${ADDITIONAL_SHARED_LIBRARIES} iniparser pthread)
-target_compile_definitions(xava-shared PRIVATE ${ADDITIONAL_SHARED_DEFINITIONS})
-target_include_directories(xava-shared PRIVATE "${ADDITIONAL_SHARED_INCLUDE_DIRS}" lib/iniparser/src lib/x-watcher)
+set_target_properties(wava-shared PROPERTIES COMPILE_FLAGS "-fPIC")
+target_link_libraries(wava-shared PRIVATE ${ADDITIONAL_SHARED_LIBRARIES} iniparser pthread)
+target_compile_definitions(wava-shared PRIVATE ${ADDITIONAL_SHARED_DEFINITIONS})
+target_include_directories(wava-shared PRIVATE "${ADDITIONAL_SHARED_INCLUDE_DIRS}" lib/iniparser/src lib/x-watcher)
 
-install (TARGETS xava-shared DESTINATION lib)
+install (TARGETS wava-shared DESTINATION lib)
 
-find_and_copy_dlls(xava-shared)
+find_and_copy_dlls(wava-shared)
 
 # Add legal disclaimers
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/LICENSE_iniparser.txt"

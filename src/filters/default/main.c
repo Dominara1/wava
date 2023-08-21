@@ -18,7 +18,7 @@
 #define GRAVITY_SCALE    (50.0/100.0)
 #define INTEGRAL_SCALE   0.01
 
-typedef struct XAVA_FILTER_CONFIG {
+typedef struct WAVA_FILTER_CONFIG {
     const uint32_t lowcf, highcf; // low and high cutoff frequency
     const uint32_t overshoot;
     const uint32_t waves;
@@ -30,10 +30,10 @@ typedef struct XAVA_FILTER_CONFIG {
     const float gravity;
     const float eqBalance;
 
-    XAVA_CONFIG_OPTION(bool, oddoneout);
-} XAVA_FILTER_CONFIG;
+    WAVA_CONFIG_OPTION(bool, oddoneout);
+} WAVA_FILTER_CONFIG;
 
-typedef struct XAVA_FILTER_DATA {
+typedef struct WAVA_FILTER_DATA {
     // i wont even bother deciphering this mess
     float    *fpeak, *k, g;
 
@@ -50,15 +50,15 @@ typedef struct XAVA_FILTER_DATA {
     fftwf_complex *outl, *outr;
 
     bool senseLow;
-    const XAVA_FILTER_CONFIG config;
-    XAVA_FILTER_CONFIG state;
-} XAVA_FILTER_DATA;
+    const WAVA_FILTER_CONFIG config;
+    WAVA_FILTER_CONFIG state;
+} WAVA_FILTER_DATA;
 
 void separate_freq_bands(fftwf_complex *out,
         uint32_t channel,
         double sens,
         uint32_t fftsize,
-        XAVA_FILTER_DATA *data) {
+        WAVA_FILTER_DATA *data) {
     uint32_t o, i;
     double y[fftsize / 2 + 1];
     double temp;
@@ -84,7 +84,7 @@ void separate_freq_bands(fftwf_complex *out,
 
 
 void monstercat_filter(int bars,
-        XAVA_FILTER_DATA *data,
+        WAVA_FILTER_DATA *data,
         uint32_t *f) {
     int z;
 
@@ -118,10 +118,10 @@ void monstercat_filter(int bars,
     }
 }
 
-EXP_FUNC int xavaFilterInit(XAVA *xava) {
-    XAVA_AUDIO         *audio = &xava->audio;
-    XAVA_CONFIG            *p = &xava->conf;
-    XAVA_FILTER_DATA    *data = xava->filter.data;
+EXP_FUNC int wavaFilterInit(WAVA *wava) {
+    WAVA_AUDIO         *audio = &wava->audio;
+    WAVA_CONFIG            *p = &wava->conf;
+    WAVA_FILTER_DATA    *data = wava->filter.data;
 
     // fft: planning to rock
     CALLOC_SELF(data->outl, audio->fftsize/2+1);
@@ -132,56 +132,56 @@ EXP_FUNC int xavaFilterInit(XAVA *xava) {
         data->pr = fftwf_plan_dft_r2c_1d(audio->fftsize, audio->audio_out_r, data->outr, FFTW_MEASURE);
     }
 
-    xavaBailCondition(data->state.highcf > audio->rate / 2,
+    wavaBailCondition(data->state.highcf > audio->rate / 2,
             "Higher cutoff cannot be higher than the sample rate / 2");
 
-    MALLOC_SELF(data->fpeak,  xava->bars);
-    MALLOC_SELF(data->k,      xava->bars);
-    MALLOC_SELF(data->f,      xava->bars);
-    MALLOC_SELF(data->lcf,    xava->bars);
-    MALLOC_SELF(data->hcf,    xava->bars);
-    MALLOC_SELF(data->fmem,   xava->bars);
-    MALLOC_SELF(data->flast,  xava->bars);
-    MALLOC_SELF(data->flastd, xava->bars);
-    MALLOC_SELF(data->fall,   xava->bars);
-    MALLOC_SELF(data->fl,     xava->bars);
-    MALLOC_SELF(data->fr,     xava->bars);
+    MALLOC_SELF(data->fpeak,  wava->bars);
+    MALLOC_SELF(data->k,      wava->bars);
+    MALLOC_SELF(data->f,      wava->bars);
+    MALLOC_SELF(data->lcf,    wava->bars);
+    MALLOC_SELF(data->hcf,    wava->bars);
+    MALLOC_SELF(data->fmem,   wava->bars);
+    MALLOC_SELF(data->flast,  wava->bars);
+    MALLOC_SELF(data->flastd, wava->bars);
+    MALLOC_SELF(data->fall,   wava->bars);
+    MALLOC_SELF(data->fl,     wava->bars);
+    MALLOC_SELF(data->fr,     wava->bars);
 
     return 0;
 }
 
-EXP_FUNC void xavaFilterApply(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    XAVA_CONFIG *p  = &xava->conf;
-    XAVA_FILTER_DATA *data = xava->filter.data;
+EXP_FUNC void wavaFilterApply(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    WAVA_CONFIG *p  = &wava->conf;
+    WAVA_FILTER_DATA *data = wava->filter.data;
 
     // if fpeak is not cleared that means that the variables are not initialized
-    if(xava->bars == 0)
-        xava->bars = 1;
-    REALLOC_SELF(data->fpeak,  xava->bars);
-    REALLOC_SELF(data->k,      xava->bars);
-    REALLOC_SELF(data->f,      xava->bars);
-    REALLOC_SELF(data->lcf,    xava->bars);
-    REALLOC_SELF(data->hcf,    xava->bars);
-    REALLOC_SELF(data->fmem,   xava->bars);
-    REALLOC_SELF(data->flast,  xava->bars);
-    REALLOC_SELF(data->flastd, xava->bars);
-    REALLOC_SELF(data->fall,   xava->bars);
-    REALLOC_SELF(data->fl,     xava->bars);
-    REALLOC_SELF(data->fr,     xava->bars);
+    if(wava->bars == 0)
+        wava->bars = 1;
+    REALLOC_SELF(data->fpeak,  wava->bars);
+    REALLOC_SELF(data->k,      wava->bars);
+    REALLOC_SELF(data->f,      wava->bars);
+    REALLOC_SELF(data->lcf,    wava->bars);
+    REALLOC_SELF(data->hcf,    wava->bars);
+    REALLOC_SELF(data->fmem,   wava->bars);
+    REALLOC_SELF(data->flast,  wava->bars);
+    REALLOC_SELF(data->flastd, wava->bars);
+    REALLOC_SELF(data->fall,   wava->bars);
+    REALLOC_SELF(data->fl,     wava->bars);
+    REALLOC_SELF(data->fr,     wava->bars);
 
     // oddoneout only works if the number of bars is odd, go figure
     if(data->state.oddoneout) {
-        if (!(xava->bars%2))
-            xava->bars--;
+        if (!(wava->bars%2))
+            wava->bars--;
     }
 
     // update pointers for the main handle
-    xava->f  = data->f;
-    xava->fl = data->flastd;
+    wava->f  = data->f;
+    wava->fl = data->flastd;
 
-    u64 time = xavaGetTime();
-    for (uint32_t i = 0; i < xava->bars; i++) {
+    u64 time = wavaGetTime();
+    for (uint32_t i = 0; i < wava->bars; i++) {
         data->flast[i] = 0;
         data->flastd[i] = 0;
         data->fall[i] = time;
@@ -196,19 +196,19 @@ EXP_FUNC void xavaFilterApply(XAVA *xava) {
     }
 
     // process [smoothing]: calculate gravity
-    data->g = data->state.gravity * ((float)(xava->inner.h-1) / 2160);
+    data->g = data->state.gravity * ((float)(wava->inner.h-1) / 2160);
 
     // checks if there is stil extra room, will use this to center
-    xava->rest = MIN(0, (int32_t)(xava->inner.w - xava->bars * p->bw - xava->bars * p->bs + p->bs) / 2);
+    wava->rest = MIN(0, (int32_t)(wava->inner.w - wava->bars * p->bw - wava->bars * p->bs + p->bs) / 2);
 
-    if (p->stereo) xava->bars = xava->bars / 2; // in stereo onle half number of bars per channel
+    if (p->stereo) wava->bars = wava->bars / 2; // in stereo onle half number of bars per channel
 
-    if ((data->smcount > 0) && (xava->bars > 0)) {
-        data->smh = (double)(((double)data->smcount)/((double)xava->bars));
+    if ((data->smcount > 0) && (wava->bars > 0)) {
+        data->smh = (double)(((double)data->smcount)/((double)wava->bars));
     }
 
     // since oddoneout requires every odd bar, why not split them in half?
-    data->calcbars = data->state.oddoneout ? xava->bars/2+1 : xava->bars;
+    data->calcbars = data->state.oddoneout ? wava->bars/2+1 : wava->bars;
 
     // frequency constant that we'll use for logarithmic progression of frequencies
     double freqconst = log(data->state.highcf-data->state.lowcf) /
@@ -236,27 +236,27 @@ EXP_FUNC void xavaFilterApply(XAVA *xava) {
             //hfc holds the high cut frequency for each bar
 
             // I know it's not precise, but neither are integers
-            // You can see why in https://github.com/nikp123/xava/issues/29
+            // You can see why in https://github.com/nikp123/wava/issues/29
             // I did reverse the "next_bar_lcf-1" change
             data->hcf[n-1] = data->lcf[n];
         }
 
         // process: weigh signal to frequencies height and EQ
         data->k[n] = pow(fc, data->state.eqBalance);
-        data->k[n] *= (float)(xava->inner.h-1) / 100;
+        data->k[n] *= (float)(wava->inner.h-1) / 100;
         data->k[n] *= data->smooth[(int)floor(((double)n) * data->smh)];
     }
     if(data->calcbars > 1)
         data->hcf[n-1] = data->state.highcf*audio->fftsize/audio->rate;
 
     if (p->stereo)
-        xava->bars = xava->bars * 2;
+        wava->bars = wava->bars * 2;
 }
 
-EXP_FUNC void xavaFilterLoop(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    XAVA_CONFIG *p  = &xava->conf;
-    XAVA_FILTER_DATA *data = xava->filter.data;
+EXP_FUNC void wavaFilterLoop(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    WAVA_CONFIG *p  = &wava->conf;
+    WAVA_FILTER_DATA *data = wava->filter.data;
 
     // process: execute FFT and sort frequency bands
     if (p->stereo) {
@@ -271,8 +271,8 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
     }
 
     if(data->state.oddoneout) {
-        for(int i=xava->bars/2; i>0; i--) {
-            data->fl[i*2-1+xava->bars%2]=data->fl[i];
+        for(int i=wava->bars/2; i>0; i--) {
+            data->fl[i*2-1+wava->bars%2]=data->fl[i];
             data->fl[i]=0;
         }
     }
@@ -280,20 +280,20 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
     // process [smoothing]
     if (data->state.monstercat) {
         if (p->stereo) {
-            monstercat_filter(xava->bars / 2, data, data->fl);
-            monstercat_filter(xava->bars / 2, data, data->fr);
+            monstercat_filter(wava->bars / 2, data, data->fl);
+            monstercat_filter(wava->bars / 2, data, data->fr);
         } else {
             monstercat_filter(data->calcbars, data, data->fl);
         }
     }
 
     //preperaing signal for drawing
-    for (uint32_t i=0; i<xava->bars; i++) {
+    for (uint32_t i=0; i<wava->bars; i++) {
         if (p->stereo) {
-            if (i < xava->bars / 2) {
-                data->f[i] = data->fl[xava->bars / 2 - i - 1];
+            if (i < wava->bars / 2) {
+                data->f[i] = data->fl[wava->bars / 2 - i - 1];
             } else {
-                data->f[i] = data->fr[i - xava->bars / 2];
+                data->f[i] = data->fr[i - wava->bars / 2];
             }
         } else {
             data->f[i] = data->fl[i];
@@ -303,7 +303,7 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
 
     // process [smoothing]: falloff
     if (data->g > 0) {
-        for (uint32_t i = 0; i < xava->bars; i++) {
+        for (uint32_t i = 0; i < wava->bars; i++) {
             if ((int32_t)data->f[i] < data->flast[i]) {
                 /**
                  * Big explaination here, because if you touch this IT'LL break
@@ -316,7 +316,7 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
                  * the integral output and hence provides a better visualization
                  * experience.
                  **/
-                float time_diff = (xavaGetTime() - data->fall[i]) / 16.0f;
+                float time_diff = (wavaGetTime() - data->fall[i]) / 16.0f;
 
                 data->flast[i] = data->fpeak[i] -
                     (data->g * time_diff * time_diff);
@@ -331,11 +331,11 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
 
     // process [smoothing]: integral
     if (data->state.integral > 0) {
-        for (uint32_t i=0; i<xava->bars; i++) {
+        for (uint32_t i=0; i<wava->bars; i++) {
             data->f[i] = data->fmem[i] * data->state.integral + data->f[i];
             data->fmem[i] = data->f[i];
 
-            int diff = xava->inner.h - data->f[i];
+            int diff = wava->inner.h - data->f[i];
             if (diff < 0) diff = 0;
             double div = 1.0 / (double)(diff + 1);
             //f[o] = f[o] - pow(div, 10) * (height + 1);
@@ -345,10 +345,10 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
 
     // process [oddoneout]
     if(data->state.oddoneout) {
-        for(int32_t i=1; i<(int32_t)xava->bars-1; i+=2) {
+        for(int32_t i=1; i<(int32_t)wava->bars-1; i+=2) {
             data->f[i] = (data->f[i+1] + data->f[i-1])/2;
         }
-        for(int32_t i=(int32_t)xava->bars-3; i>1; i-=2) {
+        for(int32_t i=(int32_t)wava->bars-3; i>1; i-=2) {
             uint32_t sum = (data->f[i+1] + data->f[i-1])/2;
             if(sum>data->f[i]) data->f[i] = sum;
         }
@@ -357,11 +357,11 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
     data->senseLow = true;
 
     // automatic sens adjustment
-    if (p->autosens&&(!xava->pauseRendering)) {
+    if (p->autosens&&(!wava->pauseRendering)) {
         // don't adjust on complete silence
         // as when switching tracks for example
-        for (uint32_t i=0; i<xava->bars; i++) {
-            if (data->f[i] > ((xava->inner.h-1)*(100+data->state.overshoot)/100) ) {
+        for (uint32_t i=0; i<wava->bars; i++) {
+            if (data->f[i] > ((wava->inner.h-1)*(100+data->state.overshoot)/100) ) {
                 data->senseLow = false;
                 p->sens *= 0.985;
                 break;
@@ -373,9 +373,9 @@ EXP_FUNC void xavaFilterLoop(XAVA *xava) {
     }
 }
 
-EXP_FUNC void xavaFilterCleanup(XAVA *xava) {
-    XAVA_FILTER_DATA *data = xava->filter.data;
-    XAVA_CONFIG *p = &xava->conf;
+EXP_FUNC void wavaFilterCleanup(WAVA *wava) {
+    WAVA_FILTER_DATA *data = wava->filter.data;
+    WAVA_CONFIG *p = &wava->conf;
 
     free(data->outl);
     fftwf_destroy_plan(data->pl);
@@ -404,68 +404,68 @@ EXP_FUNC void xavaFilterCleanup(XAVA *xava) {
     free(data);
 }
 
-XAVA_FILTER_CONFIG generate_default_config(xava_config_source config) {
-    XAVA_CONFIG_OPTION(bool, oddoneout);
+WAVA_FILTER_CONFIG generate_default_config(wava_config_source config) {
+    WAVA_CONFIG_OPTION(bool, oddoneout);
 
-    XAVA_CONFIG_GET_BOOL(config, "filter", "oddoneout", true, oddoneout);
-    return (XAVA_FILTER_CONFIG) {
-        .lowcf     = xavaConfigGetI32(config, "filter", "lower_cutoff_freq",  26),
-        .highcf    = xavaConfigGetI32(config, "filter", "higher_cutoff_freq", 15000),
-        .overshoot = xavaConfigGetI32(config, "filter", "overshoot", 0),
+    WAVA_CONFIG_GET_BOOL(config, "filter", "oddoneout", true, oddoneout);
+    return (WAVA_FILTER_CONFIG) {
+        .lowcf     = wavaConfigGetI32(config, "filter", "lower_cutoff_freq",  26),
+        .highcf    = wavaConfigGetI32(config, "filter", "higher_cutoff_freq", 15000),
+        .overshoot = wavaConfigGetI32(config, "filter", "overshoot", 0),
 
-        .waves     = xavaConfigGetI32(config, "filter", "waves", 0),
+        .waves     = wavaConfigGetI32(config, "filter", "waves", 0),
 
-        .integral   = xavaConfigGetF64(config, "filter", "integral", 85)
+        .integral   = wavaConfigGetF64(config, "filter", "integral", 85)
             * INTEGRAL_SCALE,
 
-        .ignore     = xavaConfigGetF64(config, "filter", "ignore", 0),
-        .logScale   = xavaConfigGetF64(config, "filter", "log", 1.55),
+        .ignore     = wavaConfigGetF64(config, "filter", "ignore", 0),
+        .logScale   = wavaConfigGetF64(config, "filter", "log", 1.55),
 
-        .monstercat = xavaConfigGetF64(config, "filter", "monstercat", 0.0)
+        .monstercat = wavaConfigGetF64(config, "filter", "monstercat", 0.0)
             * MONSTERCAT_SCALE,
-        .gravity    = xavaConfigGetF64(config, "filter", "gravity", 100)
+        .gravity    = wavaConfigGetF64(config, "filter", "gravity", 100)
             * GRAVITY_SCALE,
 
         .oddoneout = oddoneout,
         .oddoneout_is_set_from_file = oddoneout_is_set_from_file,
 
-        .eqBalance  = xavaConfigGetF64(config, "filter", "eq_balance", 0.67),
+        .eqBalance  = wavaConfigGetF64(config, "filter", "eq_balance", 0.67),
     };
 }
 
-EXP_FUNC void xavaFilterLoadConfig(XAVA *xava) {
-    XAVA_CONFIG *p = &xava->conf;
-    XAVA_AUDIO  *a = &xava->audio;
+EXP_FUNC void wavaFilterLoadConfig(WAVA *wava) {
+    WAVA_CONFIG *p = &wava->conf;
+    WAVA_AUDIO  *a = &wava->audio;
 
-    xava_config_source config = xava->default_config.config;
+    wava_config_source config = wava->default_config.config;
 
     // scope made for safety reasons
     {
         // alloc the thing
-        XAVA_FILTER_DATA data = {
+        WAVA_FILTER_DATA data = {
             .config = generate_default_config(config),
             .state  = generate_default_config(config),
         };
 
-        xava->filter.data = malloc(sizeof(XAVA_FILTER_DATA));
-        memcpy(xava->filter.data, &data, sizeof(XAVA_FILTER_DATA));
+        wava->filter.data = malloc(sizeof(WAVA_FILTER_DATA));
+        memcpy(wava->filter.data, &data, sizeof(WAVA_FILTER_DATA));
     }
 
-    XAVA_FILTER_DATA *data = xava->filter.data;
-    XAVA_FILTER_CONFIG *state = &data->state;
+    WAVA_FILTER_DATA *data = wava->filter.data;
+    WAVA_FILTER_CONFIG *state = &data->state;
 
-    XAVA_CONFIG_GET_F64(config, "filter", "sensitivity", 100.0, p->sens);
-    p->sens *= XAVA_PREDEFINED_SENS_VALUE; // check shared.h for details
-    XAVA_CONFIG_GET_BOOL(config, "filter", "autosens", true, p->autosens);
+    WAVA_CONFIG_GET_F64(config, "filter", "sensitivity", 100.0, p->sens);
+    p->sens *= WAVA_PREDEFINED_SENS_VALUE; // check shared.h for details
+    WAVA_CONFIG_GET_BOOL(config, "filter", "autosens", true, p->autosens);
 
 
     // read & validate: eq
-    data->smcount = xavaConfigGetKeyNumber(config, "eq");
+    data->smcount = wavaConfigGetKeyNumber(config, "eq");
     if (data->smcount > 0) {
         MALLOC_SELF(data->smooth, data->smcount);
-        char **keys = xavaConfigGetKeys(config, "eq");
+        char **keys = wavaConfigGetKeys(config, "eq");
         for (uint32_t sk = 0; sk < data->smcount; sk++) {
-            data->smooth[sk] = xavaConfigGetF64(config, "eq", keys[sk], 1);
+            data->smooth[sk] = wavaConfigGetF64(config, "eq", keys[sk], 1);
         }
         free(keys);
     } else {
@@ -475,11 +475,11 @@ EXP_FUNC void xavaFilterLoadConfig(XAVA *xava) {
     }
 
     // validate: gravity
-    xavaBailCondition(state->gravity < 0, "Gravity cannot be below 0");
+    wavaBailCondition(state->gravity < 0, "Gravity cannot be below 0");
 
     // validate: oddoneout
     if(data->config.oddoneout && p->stereo) { // incompatible hence must be processed
-        xavaBailCondition(data->config.oddoneout_is_set_from_file && p->stereo_is_set_from_file,
+        wavaBailCondition(data->config.oddoneout_is_set_from_file && p->stereo_is_set_from_file,
             "Cannot have oddoneout and stereo enabled AT THE SAME TIME!");
 
         // fix config in both cases
@@ -489,19 +489,19 @@ EXP_FUNC void xavaFilterLoadConfig(XAVA *xava) {
         } else if(p->stereo_is_set_from_file) {
             state->oddoneout = false;
         } else {
-            xavaBail("[BUG] Tell nik to fix those stupid defaults!");
+            wavaBail("[BUG] Tell nik to fix those stupid defaults!");
         }
     }
 
     // validate: integral
-    xavaBailCondition(state->integral < 0,
+    wavaBailCondition(state->integral < 0,
         "Integral cannot be below 0");
-    xavaBailCondition(state->integral > 1,
+    wavaBailCondition(state->integral > 1,
         "Integral cannot be above 100");
 
     // validate: cutoff
-    xavaBailCondition(state->lowcf <= 0,
+    wavaBailCondition(state->lowcf <= 0,
         "Lower cutoff frequency CANNOT be 0 or below");
-    xavaBailCondition(state->lowcf > state->highcf,
+    wavaBailCondition(state->lowcf > state->highcf,
             "Lower frequency cutoff cannot be higher than the higher cutoff\n");
 }

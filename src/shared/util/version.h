@@ -1,28 +1,28 @@
-#ifndef __XAVA_SHARED_VERSION_H
-#define __XAVA_SHARED_VERSION_H
+#ifndef __WAVA_SHARED_VERSION_H
+#define __WAVA_SHARED_VERSION_H
 #include <stdbool.h>
 
-typedef enum XAVA_VERSION_COMPATIBILITY {
-    XAVA_VERSIONS_COMPATIBLE,
-    XAVA_VERSIONS_INCOMPATIBLE,
-    XAVA_VERSIONS_UNKNOWN,
-} XAVA_VERSION_COMPATIBILITY;
+typedef enum WAVA_VERSION_COMPATIBILITY {
+    WAVA_VERSIONS_COMPATIBLE,
+    WAVA_VERSIONS_INCOMPATIBLE,
+    WAVA_VERSIONS_UNKNOWN,
+} WAVA_VERSION_COMPATIBILITY;
 
-typedef struct xava_version {
+typedef struct wava_version {
     int major;
     int minor;
     int tweak;
     int patch;
-} xava_version;
+} wava_version;
 
-xava_version               xava_version_host_get(void);
-bool                       xava_version_less(xava_version host, xava_version target);
-bool                       xava_version_greater(xava_version host, xava_version target);
-bool                       xava_version_equal(xava_version host, xava_version target);
-bool                       xava_version_breaking_check(xava_version target);
-XAVA_VERSION_COMPATIBILITY xava_version_verify(xava_version target);
+wava_version               wava_version_host_get(void);
+bool                       wava_version_less(wava_version host, wava_version target);
+bool                       wava_version_greater(wava_version host, wava_version target);
+bool                       wava_version_equal(wava_version host, wava_version target);
+bool                       wava_version_breaking_check(wava_version target);
+WAVA_VERSION_COMPATIBILITY wava_version_verify(wava_version target);
 
-#define xava_version_get() (xava_version){XAVA_VERSION_MAJOR, XAVA_VERSION_MINOR, XAVA_VERSION_TWEAK, XAVA_VERSION_PATCH}
+#define wava_version_get() (wava_version){WAVA_VERSION_MAJOR, WAVA_VERSION_MINOR, WAVA_VERSION_TWEAK, WAVA_VERSION_PATCH}
 
 #endif
 

@@ -21,7 +21,7 @@ struct wlOutput {
     struct wl_list        link;
 };
 
-extern struct zxdg_output_manager_v1   *xavaXDGOutputManager;
+extern struct zxdg_output_manager_v1   *wavaXDGOutputManager;
 extern struct zxdg_output_v1_listener  xdg_output_listener;
 extern const struct wl_output_listener output_listener;
 

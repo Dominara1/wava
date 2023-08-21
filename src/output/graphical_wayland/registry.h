@@ -5,7 +5,7 @@
 
 #include "shared.h"
 
-extern struct wl_registry *xavaWLRegistry;
-extern const struct wl_registry_listener xava_wl_registry_listener;
+extern struct wl_registry *wavaWLRegistry;
+extern const struct wl_registry_listener wava_wl_registry_listener;
 
 #endif

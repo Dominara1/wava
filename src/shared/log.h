@@ -1,5 +1,5 @@
-#ifndef __XAVA_SHARED_LOG_H
-#define __XAVA_SHARED_LOG_H
+#ifndef __WAVA_SHARED_LOG_H
+#define __WAVA_SHARED_LOG_H
 
 // static analyser, please shut the fuck up
 #ifdef SOURCE_PATH_SIZE
@@ -8,82 +8,82 @@
     #define __FILENAME__ __FILE__
 #endif
 
-extern void __internal_xavaSpam (const char *func, const char *file, int line, const char *fmt, ...);
-extern void __internal_xavaLog  (const char *func, const char *file, int line, const char *fmt, ...);
-extern void __internal_xavaWarn (const char *func, const char *file, int line, const char *fmt, ...);
-extern void __internal_xavaError(const char *func, const char *file, int line, const char *fmt, ...);
-extern void __internal_xavaDie  (void);
+extern void __internal_wavaSpam (const char *func, const char *file, int line, const char *fmt, ...);
+extern void __internal_wavaLog  (const char *func, const char *file, int line, const char *fmt, ...);
+extern void __internal_wavaWarn (const char *func, const char *file, int line, const char *fmt, ...);
+extern void __internal_wavaError(const char *func, const char *file, int line, const char *fmt, ...);
+extern void __internal_wavaDie  (void);
 
 #ifdef DEBUG
-    #define xavaSpam(fmt, ...)  __internal_xavaSpam (__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
-    #define xavaLog(fmt, ...)   __internal_xavaLog  (__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
+    #define wavaSpam(fmt, ...)  __internal_wavaSpam (__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
+    #define wavaLog(fmt, ...)   __internal_wavaLog  (__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
 #else
-    #define xavaSpam(fmt, ...)  /** nothing lol **/
-    #define xavaLog(fmt, ...)   /** nothing lol **/
+    #define wavaSpam(fmt, ...)  /** nothing lol **/
+    #define wavaLog(fmt, ...)   /** nothing lol **/
 #endif
 
-#define xavaWarn(fmt, ...)  __internal_xavaWarn (__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
-#define xavaError(fmt, ...) __internal_xavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
-#define xavaBail(fmt, ...) { \
-    __internal_xavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
-    __internal_xavaDie(); \
+#define wavaWarn(fmt, ...)  __internal_wavaWarn (__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
+#define wavaError(fmt, ...) __internal_wavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);
+#define wavaBail(fmt, ...) { \
+    __internal_wavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+    __internal_wavaDie(); \
 }
 
-#define xavaReturnSpam(return_val, fmt, ...) { \
-    __internal_xavaSpam(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+#define wavaReturnSpam(return_val, fmt, ...) { \
+    __internal_wavaSpam(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
     return return_val; \
 }
-#define xavaReturnLog(return_val, fmt, ...) { \
-    __internal_xavaLog(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+#define wavaReturnLog(return_val, fmt, ...) { \
+    __internal_wavaLog(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
     return return_val; \
 }
-#define xavaReturnWarn(return_val, fmt, ...) { \
-    __internal_xavaWarn(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+#define wavaReturnWarn(return_val, fmt, ...) { \
+    __internal_wavaWarn(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
     return return_val; \
 }
-#define xavaReturnError(return_val, fmt, ...) { \
-    __internal_xavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+#define wavaReturnError(return_val, fmt, ...) { \
+    __internal_wavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
     return return_val; \
 }
 
 
-#define xavaReturnSpamCondition(condition, return_val, fmt, ...) { \
+#define wavaReturnSpamCondition(condition, return_val, fmt, ...) { \
     if(condition) { \
-        __internal_xavaSpam(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+        __internal_wavaSpam(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
         return return_val; \
     } \
 }
-#define xavaReturnLogCondition(condition, return_val, fmt, ...) { \
+#define wavaReturnLogCondition(condition, return_val, fmt, ...) { \
     if(condition) { \
-        __internal_xavaLog(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+        __internal_wavaLog(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
         return return_val; \
     } \
 }
-#define xavaReturnWarnCondition(condition, return_val, fmt, ...) { \
+#define wavaReturnWarnCondition(condition, return_val, fmt, ...) { \
     if(condition) { \
-        __internal_xavaWarn(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+        __internal_wavaWarn(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
         return return_val; \
     } \
 }
-#define xavaReturnErrorCondition(condition, return_val, fmt, ...) { \
+#define wavaReturnErrorCondition(condition, return_val, fmt, ...) { \
     if(condition) { \
-        __internal_xavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+        __internal_wavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
         return return_val; \
     } \
 }
 
-#define xavaSpamCondition(condition, fmt, ...) \
-    if((condition)) { __internal_xavaSpam(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
-#define xavaLogCondition(condition, fmt, ...) \
-    if((condition)) { __internal_xavaLog(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
-#define xavaWarnCondition(condition, fmt, ...) \
-    if((condition)) { __internal_xavaWarn(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
-#define xavaErrorCondition(condition, fmt, ...) \
-    if((condition)) { __internal_xavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
-#define xavaBailCondition(condition, fmt, ...) { \
+#define wavaSpamCondition(condition, fmt, ...) \
+    if((condition)) { __internal_wavaSpam(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
+#define wavaLogCondition(condition, fmt, ...) \
+    if((condition)) { __internal_wavaLog(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
+#define wavaWarnCondition(condition, fmt, ...) \
+    if((condition)) { __internal_wavaWarn(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
+#define wavaErrorCondition(condition, fmt, ...) \
+    if((condition)) { __internal_wavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); }
+#define wavaBailCondition(condition, fmt, ...) { \
     if((condition)) { \
-        __internal_xavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
-        __internal_xavaDie(); \
+        __internal_wavaError(__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__); \
+        __internal_wavaDie(); \
     } \
 }
 

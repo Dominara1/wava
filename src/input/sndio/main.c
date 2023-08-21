@@ -7,9 +7,9 @@
 
 #include "shared.h"
 
-EXP_FUNC void* xavaInput(void* data)
+EXP_FUNC void* wavaInput(void* data)
 {
-    XAVA_AUDIO *audio = (XAVA_AUDIO *)data;
+    WAVA_AUDIO *audio = (WAVA_AUDIO *)data;
     struct sio_par par;
     struct sio_hdl *hdl;
     int16_t buf[256];
@@ -26,18 +26,18 @@ EXP_FUNC void* xavaInput(void* data)
     par.rchan = channels;
     par.appbufsz = sizeof(buf) / channels;
 
-    xavaBailCondition((hdl = sio_open(audio->source, SIO_REC, 0)) == NULL,
+    wavaBailCondition((hdl = sio_open(audio->source, SIO_REC, 0)) == NULL,
         "Could not open sndio source: %s", audio->source);
 
-    xavaBailCondition(!sio_setpar(hdl, &par) || !sio_getpar(hdl, &par) || par.sig != 1
+    wavaBailCondition(!sio_setpar(hdl, &par) || !sio_getpar(hdl, &par) || par.sig != 1
             || par.le != 1 || par.rate != 44100 || par.rchan != channels,
             "Could not set required audio parameters");
 
-    xavaBailCondition(!sio_start(hdl), "sio_start() failed");
+    wavaBailCondition(!sio_start(hdl), "sio_start() failed");
 
     n = 0;
     while (audio->terminate != 1) {
-        xavaBailCondition(sio_read(hdl, buf, sizeof(buf)) == 0,
+        wavaBailCondition(sio_read(hdl, buf, sizeof(buf)) == 0,
             "sio_read() failed: %s\n", strerror(errno));
 
         for (i = 0; i < sizeof(buf)/sizeof(buf[0]); i += 2) {
@@ -58,10 +58,10 @@ EXP_FUNC void* xavaInput(void* data)
     return 0;
 }
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
     audio->rate = 44100;
-    audio->source = (char*)xavaConfigGetString(config, "input", "source", SIO_DEVANY);
+    audio->source = (char*)wavaConfigGetString(config, "input", "source", SIO_DEVANY);
 }
 

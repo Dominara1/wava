@@ -8,13 +8,13 @@ list(APPEND LINK_DIRS "${FFTW3_LIBRARY_DIRS}")
 
 if(FILTER_DEFAULT)
     message(STATUS "Default filter enabled!")
-    add_library(filter_default SHARED "${XAVA_MODULE_DIR}/main.c"
+    add_library(filter_default SHARED "${WAVA_MODULE_DIR}/main.c"
                                         "${GLOBAL_FUNCTION_SOURCES}")
-    target_link_libraries(filter_default xava-shared "${FFTW3_LIBRARIES}")
+    target_link_libraries(filter_default wava-shared "${FFTW3_LIBRARIES}")
     target_link_directories(filter_default PRIVATE "${FFTW3_LIBRARY_DIRS}")
     set_target_properties(filter_default PROPERTIES PREFIX "")
     target_include_directories(filter_default PRIVATE ${FFTW3_INCLUDE_DIRS})
-    install(TARGETS filter_default DESTINATION lib/xava)
+    install(TARGETS filter_default DESTINATION lib/wava)
 
     find_and_copy_dlls(filter_default)
 

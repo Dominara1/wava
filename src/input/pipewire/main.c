@@ -17,7 +17,7 @@ static int n = 0;
 struct pwdata {
     struct pw_main_loop *loop;
     struct pw_stream *stream;
-    XAVA_AUDIO *audio;
+    WAVA_AUDIO *audio;
     double accumulator;
 
     // C-based cringe
@@ -32,7 +32,7 @@ struct pwdata {
 static void on_process(void *userdata)
 {
     struct pwdata *pwdata = userdata;
-    XAVA_AUDIO *audio = pwdata->audio;
+    WAVA_AUDIO *audio = pwdata->audio;
     struct pw_buffer *b;
     struct spa_buffer *buf;
     int i, n_frames, stride;
@@ -88,7 +88,7 @@ static const struct pw_stream_events stream_events = {
     .process = on_process,
 };
 
-EXP_FUNC void* xavaInput(void *audiodata) {
+EXP_FUNC void* wavaInput(void *audiodata) {
     struct pwdata pwdata;
     const struct spa_pod *params[1];
     uint16_t buffer[1024];
@@ -100,9 +100,9 @@ EXP_FUNC void* xavaInput(void *audiodata) {
 
     pw_init(NULL, NULL);
 
-    xavaSpam("Compiled with libpipewire %s",
+    wavaSpam("Compiled with libpipewire %s",
             pw_get_headers_version());
-    xavaSpam("Linked with libpipewire %s",
+    wavaSpam("Linked with libpipewire %s",
             pw_get_library_version());
 
     // if different from default, the target is set
@@ -160,11 +160,11 @@ EXP_FUNC void* xavaInput(void *audiodata) {
     return 0;
 }
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
 
     // default to ignore or change to keep 'em searching
-    audio->source = (char*)xavaConfigGetString(config, "input", "source", "default");
+    audio->source = (char*)wavaConfigGetString(config, "input", "source", "default");
 }
 

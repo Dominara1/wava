@@ -1,15 +1,18 @@
-X.A.V.A.
+W.A.V.A.
 ====================
 
-[![Build status](https://github.com/nikp123/xava/actions/workflows/main.yaml/badge.svg)](https://github.com/nikp123/xava/actions/workflows/main.yaml)
+[![Build status](https://github.com/Dominara1/wava/actions/workflows/main.yaml/badge.svg)](https://github.com/Dominara1/wava/actions/workflows/main.yaml)
 
-**X**11 **A**udio **V**isualizer for **A**LSA
+**W**ayland **A**udio **V**isualizer for **A**ll
 
-also supports audio input from WASAPI (Windows), PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and sndio.
+Unofficial support for WASAPI (Windows), PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and sndio.
 
-[![Demo video](https://i.imgur.com/9fvqV2N.png)](http://www.youtube.com/watch?v=OkYrHAqu3fc)
+[![Demo video 1](https://wava-example-1.surge.sh/shot1.png)](https://wava-example-1.surge.sh/vid1.mp4)
+[![Demo video 2](https://wava-example-2.surge.sh/shot2.png)](https://wava-example-2.surge.sh/vid2.mp4)
+[![Demo video 3](https://wava-example-3.surge.sh/shot3.png)](https://wava-example-3.surge.sh/vid3.mp4)
 
-a fork of [Karl Stavestrand's](mailto:karl@stavestrand.no) [C.A.V.A.](https://github.com/karlstav/cava) by [Nikola Pavlica](mailto:pavlica.nikola@gmail.com)
+a fork of [Karl Stavestrand's](mailto:karl@stavestrand.no) [C.A.V.A.](https://github.com/karlstav/cava) as well as [Nikola Pavlica](mailto:pavlica.nikola@gmail.com) [X.A.V.A](https://github.com/nikp123/xava)  by [Dominara](https://github.com/Dominara1).
+
 
 - [What it is](#what-it-is)
 - [Getting started](#getting-started)
@@ -58,11 +61,12 @@ a fork of [Karl Stavestrand's](mailto:karl@stavestrand.no) [C.A.V.A.](https://gi
 What it is
 ----------
 
-X.A.V.A. is a bar spectrum audio visualizer in a graphical window
- (X11, Wayland (wlroots and xdg shell), Windows, SDL2).
+W.A.V.A. is a bar spectrum audio visualizer in a graphical window
+ (X11, Wayland (wlroots and xdg shell), Windows, SDL2) forked from
+ X.A.V.A.
 
 This program is not intended for scientific use. It's written
- to look responsive and aesthetic when used to visualize music. 
+ to look responsive and aesthetic when used to visualize music.
 
 
 Getting started
@@ -74,10 +78,10 @@ There should be an installer in the Releases page of this repository. Just
  download, install and run it. Non-release builds are unstable, so expect
  breakage.
 
-You can get them at the [Releases](https://github.com/nikp123/xava/releases)
+You can get them at the [Releases](https://github.com/Dominara1/wava/releases)
 page (labeled as "Development build").
 
-The configuration file is located in ``%appdata%\xava\config.cfg``
+The configuration file is located in ``%appdata%\wava\config.cfg``
 
 Technical notes:
 
@@ -104,7 +108,7 @@ method = portaudio
 source = "Background Music"
 ```
 And now, within "Background Music" change the audio source of
- XAVA to the speaker output that you want recorded.
+ WAVA to the speaker output that you want recorded.
 
 You are free to use either ``ncurses`` or ``x11_cairo`` output methods.
 
@@ -113,27 +117,18 @@ No OpenGL, because Apple likes to be Apple.
 
 ### Linux
 
-I recommend grabbing the AppImage, as it deals with all dependency issues upfront
-and all you **really** need to to is just download and run it.
 
-You can get it at the [Releases](https://github.com/nikp123/xava/releases)
+You can get it at the [Releases](https://github.com/Dominara1/wava/releases)
 page (labeled as "Development build").
 
 
-### Installing manually
-
-NOTE: I **strongly** advise you use the AppImage as it'll sort out everything.
-But if you want to build this, you're going to be on your own when it comes to
-build errors and messages.
-
-However, issues related to AUR packages are to be forwarded here (since I
-maintain them).
+### Installing manually (RECOMMENDED)
 
 After grabbing your basic build tools such as CMake, GCC and others you're
 supposed to follow this sequence of commands:
 ```
-git clone https://github.com/nikp123/xava
-cd xava
+git clone https://github.com/Dominara1/wava
+cd wava
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
@@ -150,16 +145,12 @@ Updating
 --------
 
 If you happen to be updating this program, just keep in mind that breaking
-changes DO occur sometimes. 
-
-In most cases, errors that show up might look like
-[issue #43](https://github.com/nikp123/xava/issues/43)
-which (likely) can be fixed with a simple config reset.
+changes can occur sometimes.
 
 In order to fix it I recommend just resetting your config by deleting:
 
-* ``%APPDATA%\xava`` on Windows
-* ``$HOME/.config/xava`` on Linux
+* ``%APPDATA%\wava`` on Windows
+* ``$HOME/.config/wava`` on Linux
 
 You will lose your modifications if you do this, so I'd recommend making a
 backup first.
@@ -177,8 +168,8 @@ In order to launch the application (in most cases), you'll be able to start it
 via a start menu entry or a desktop shortcut. If not, you can still choose to
 start it as a command-line executable:
 
-	Usage : xava [options]
-	Visualize audio input in terminal. 
+	Usage : wava [options]
+	Visualize audio input in terminal.
 
 	Options:
 		-p	path to config file
@@ -186,7 +177,9 @@ start it as a command-line executable:
 
 Exit by pressing Q, ESC or by closing the window ;)
 
-### Controls
+
+Controls
+-----
 
 | Key | Description |
 | --- | ----------- |
@@ -209,7 +202,7 @@ If you see latency issues, ie. visualizer not reacting on time,
  or just lower the ``fft_size`` and ``size`` (within ``[input]``), as
  increasing capture time creates a delay.
 
-If your audio device has a huge buffer, you might experience that xava
+If your audio device has a huge buffer, you might experience that wava
  is actually ahead than the audio you hear. This reduces the experience
  of the visualization. To fix this, try decreasing the buffer settings
  in your audio playing software. Or in case of MPD, just quickly pause
@@ -228,35 +221,27 @@ section of this README.
 
 ### How do I start the visualizer on system startup
 
-On Windows create a shortcut of the ``xava.exe`` 
+On Windows create a shortcut of the ``wava.exe``
 (which is in the install directory) and copy it to
 ``C:\Users\you\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\``
 
-To-do Linux instructions: But basically just make sure that the ``xava``
+To-do Linux instructions: But basically just make sure that the ``wava``
 executable or the AppImage one runs at startup.
 
 
 Configuration
 -------------
 
-<b>
-Important note:
-
-Starting from 0.7.0.0, the configuration layout has been SIGNIFICANTLY CHANGED.
-Please check ``examples_files/config`` before filing a bug. This has been done
-to ease further development.
-</b>
-
 If you're running Windows and you used the installer, you'll find a
-``Configure XAVA`` shortcut in your Start Menu. Use it to open the XAVA
+``Configure WAVA`` shortcut in your Start Menu. Use it to open the WAVA
 configuration.
 
-By default a configuration file is located in `$XDG_CONFIG_HOME/xava/config`, 
-`$HOME/.config/xava/config` or on Windows `%APPDATA%\xava\config`
+By default a configuration file is located in `$XDG_CONFIG_HOME/wava/config`,
+`$HOME/.config/wava/config` or on Windows `%APPDATA%\wava\config`
 
 The configurations are seperated into different categories such as ``[general]``
 or ``[window]`` which are used to configure how certain parts of the visualizer
-should function. 
+should function.
 
 For example: ``[filter]`` refers to options that control the behavior of the
 audio **filtering**/conversion to bars system, whilst ``[output]`` controls how
@@ -264,12 +249,12 @@ the output result should be drawn.
 
 By default the configurations are commented by a semi-colon ``;`` in front of
 the option. You'll need to remove this semi-colon for the configuration changes
-to be effective. 
+to be effective.
 
 
 ### Equalizer
 
-To change the amplitude of certain frequency ranges, XAVA features an equalizer
+To change the amplitude of certain frequency ranges, WAVA features an equalizer
 in the ``[eq]`` section of the config file to do so.
 
 The equalizer works by setting an amplitude value to a incremental
@@ -286,7 +271,7 @@ which refers to the part of the frequency spectrum.
 
 ![3_138](https://cloud.githubusercontent.com/assets/6376571/8670183/a54a851e-29e8-11e5-9eff-346bf6ed91e0.png)
 
-In this example the frequency spectrum is divided in 5 parts. 
+In this example the frequency spectrum is divided in 5 parts.
 You may be able to see that the 1st, 3rd and 5th parts have been totally disabled and
 you can see the result of it on the screenshot above.
 
@@ -299,7 +284,7 @@ you can see the result of it on the screenshot above.
 
 ![3_139](https://cloud.githubusercontent.com/assets/6376571/8670181/9db0ef50-29e8-11e5-81bc-3e2bb9892da0.png)
 
-And in this example you can see that the lower parts (1 and 2) 
+And in this example you can see that the lower parts (1 and 2)
 have been amplified while 5 is being lowered.
 
 
@@ -308,7 +293,7 @@ have been amplified while 5 is being lowered.
 The idea is that on most systems this should "just work" out of the box. If not,
 keep reading.
 
-The ``[input]`` section of the config file controls where and how XAVA captures
+The ``[input]`` section of the config file controls where and how WAVA captures
 it's "audio input".
 
 The ``method`` option describes which system should be used to capture the audio
@@ -319,7 +304,7 @@ audio input source.
 #### From WASAPI (Windows only, super easy)
 
 If you are on Windows, just use this.
- Don't even bother dealing with other options. 
+ Don't even bother dealing with other options.
 
 It's enabled by default if it detects compilation for Windows and if it's
  disabled go and set ``method`` to ``wasapi`` in the ``[input]``section of the
@@ -333,26 +318,26 @@ If you want to record loopback audio (that is "what you hear")
 #### From Pulseaudio monitor source (Easy as well, unsupported on macOS and Windows)
 
 First make sure you have installed pulseaudio dev files and
- that xava has been built with pulseaudio support (it should
+ that wava has been built with pulseaudio support (it should
  be automatically if the dev files are found).
 
 If you're lucky all you have to do is to set this line in the
  config file under the ``[input]`` section ``method = pulseaudio``.
- 
+
 If nothing happens you might have to use a different source
  than the default. The default might also be your microphone.
- Look at the config file for help. 
+ Look at the config file for help.
 
 #### From portaudio
 
-First make sure you have portaudio dev files and that xava was
+First make sure you have portaudio dev files and that wava was
  built with portaudio support. Since portaudio combines the
  functionality of all audio systems, it should be the most compatible.
 However, it is NOT "out of the box" because it requires some configuring.
 
 1. To enable just set ``method`` to  ``portaudio`` in the ``[input]`` section of
  your config. Afterwards change the portaudio input device, by setting ``source``
- to ``list`` temporarily and by running xava again.
+ to ``list`` temporarily and by running wava again.
 
 * It should list all of the available audio devices on your system
  (even that aren't input devices, watch out for that).
@@ -383,7 +368,7 @@ To make it presistent across boot add the line `snd-aloop` to
  You can replace '1' with whatever makes most sense in your audio setup.
 
 Playing the audio through your Loopback interface makes it
- possible for xava to to capture it, but there will be no sound
+ possible for wava to to capture it, but there will be no sound
  in your speakers. In order to play audio on the loopback interface
  and your actual interface you must make use of the ALSA multi channel.
 
@@ -391,7 +376,7 @@ Look at the included example file `example_files/etc/asound.conf`
  on how to use  the multi channel. I was able to make this work
  on my laptop (an Asus UX31 running Ubuntu), but I had no luck
  with the ALSA method on my Rasberry PI (Rasbian) with an USB DAC.
- The PulseAudio method however works perfectly on my PI. 
+ The PulseAudio method however works perfectly on my PI.
 
 Read more about the ALSA method [here](http://stackoverflow.com/questions/12984089/capture-playback-on-play-only-sound-card-with-alsa).
 
@@ -437,8 +422,8 @@ To test it
 $ sndiod -dd -s default -m mon -s monitor
 
 # Set the AUDIODEVICE environment variable to override the default
-# sndio device and run xava
-$ AUDIODEVICE=snd/0.monitor xava
+# sndio device and run wava
+$ AUDIODEVICE=snd/0.monitor wava
 ```
 
 #### squeezelite
@@ -446,7 +431,7 @@ $ AUDIODEVICE=snd/0.monitor xava
 [squeezelite](https://en.wikipedia.org/wiki/Squeezelite) is one of several
  software clients available for the Logitech Media Server. Squeezelite can
  export it's audio data as shared memory, which is what this input module uses.
-Configure XAVA with the `-DSHMEM=ON` (cmake) option, then adapt your config:
+Configure WAVA with the `-DSHMEM=ON` (cmake) option, then adapt your config:
 ```
 method = shmem
 source = /squeezelite-AA:BB:CC:DD:EE:FF
@@ -465,7 +450,7 @@ Since 0.7.1.1 the output methods have been sorted into three categories:
  * Unsupported output methods (basically those that don't have **good** support)
 
 In the ``[output]`` section of the config there's an parameter named ``method``.
-This "method" determines what drawing system you will like XAVA to use for it's
+This "method" determines what drawing system you will like WAVA to use for it's
 visualizations. That can be either ``cairo`` or ``opengl``.
 
  * ``opengl`` uses your GPU for accelerated graphics (but can be demanding on
@@ -498,13 +483,13 @@ seperate plugins that allow further customization. They are enabled by adding
 options from module_1 to module_(however many you need) and are drawn in that
 order. That means that the module_1's pixels could get overwritten by module_2.
 
-Modules currently included in XAVA are:
+Modules currently included in WAVA are:
  * ``bars`` (default) - draws the usual horizontal bar layout
  * ``stars`` - a pre-2016 Monstercat inspired star effect
  * ``bars_circle`` - same as ``bars`` but drawn in a circle
 
 Each of these modules has it's seperate config file which can be found under:
-xava config directory > gl > module > *module's name* > config.ini
+wava config directory > gl > module > *module's name* > config.ini
 
 If it's not there, it's most that configuration is likely NOT supported by said
 module.
@@ -602,7 +587,7 @@ and may introduce problems on older software/hardware (fxp. Windows XP),
 #### Transparency
 
 You can enable transparent windows:
-     
+
 	transparency = *true or false*
 
 And with transparency comes the ability to change the opacity of the background and the bars:
@@ -613,7 +598,7 @@ And with transparency comes the ability to change the opacity of the background 
 #### Advanced window behaviour
 
 Force the window to be behind any window (may not work):
-    
+
 	keep_below = *true or false*
 
 Set window properties (useful for scripts relying on window class information):
@@ -622,11 +607,11 @@ Set window properties (useful for scripts relying on window class information):
 
 This changes the X11 window type so that the compositor doesn't
 apply shadows and blur onto the window. However, this is not
-guaranteed to work, plus additional breakage may occur. 
+guaranteed to work, plus additional breakage may occur.
 
 Make the window not react on mouse input (it just lets the click
  go through the window):
-    
+
 	interactable = 0
 
 Pro-tip: You can still gain control of the window by clicking
@@ -643,7 +628,7 @@ places within the window.
 
 ### VSync
 
-VSync is enabled by default on XAVA and works ONLY if you use OpenGL.
+VSync is enabled by default on WAVA and works ONLY if you use OpenGL.
 
 You can change its behavior or just outright disable it.
 
@@ -658,7 +643,7 @@ find:
 
 ### Bars
 
-In XAVA you can customize the look of the visualizer.
+In WAVA you can customize the look of the visualizer.
 
 In the ``[general]`` section you'll find two options that let  you change the
 size of the bars and the space between them:
@@ -686,7 +671,7 @@ But if you want to have gradients on the bars instead of static colors, you can
 enable them by changing:
 
 	gradient_count = *number of colors higher than 1*
-	
+
 	gradient_color_1 = *same rule as colors*
 	gradient_color_2 = *same rule as colors*
 	...
@@ -694,10 +679,45 @@ enable them by changing:
 
 ### Additional options
 
-XAVA still has plenty to offer, just look up all of the options in the config
+WAVA still has plenty to offer, just look up all of the options in the config
 file. The config file also serves as documentation, so that you won't get stuck
 in configuration.
 
+Issues
+-----
+
+### Reporting issues
+
+Because WAVA has a pretty outdated design paradigm, its error messages may appear
+out of place and convoluting. If that's the case you may file an issue where you
+explain your confusion and I try fixing said issue.
+
+Otherwise, if the issue is of how the program itself performs, (i.e. an actual
+bug) be SURE that you attach the full log by running WAVA **with**
+``WAVA_SCREAM=1`` set in your environment.
+
+
+
+### Window Managers
+
+Not all Window Managers will allow you to manipulate the WAVA window. Keep this in mind when noticing
+changes to the config file & nothing's happening. It may be that your respective Window Manager is
+unable to manage the window however you'd like. This is especially true for Desktop Environments as
+this program is intended to be used on Linux with Window Managers. If you run into any problems
+related to window management, please. Open a issue either with some insight on how to fix it or
+provide a pull request as complaining about the issue wont solve it.
+
+
+### Windows Issues will be ignored!
+
+I don't run Windows myself, so any issue you may have using it on the operating system will
+be closed as I'm unable to test for it.
+
+### Xorg / X11
+
+The same goes for anything Xorg or X11 related. If the problem is due to Xorg or X11 itself,
+the issue will be ignored as Xorg's development is mostly abandoned & I refuse to develop
+for a dead display server.
 
 Contribution
 ------------
@@ -713,13 +733,7 @@ Thanks to:
 
 for major contributions in the early development of this project.
 
-### Reporting issues
+My personal thanks to:
+* [nikp123 / Nikola Pavlica](https://github.com/nikp123/xava)
 
-Because XAVA has a pretty outdated design paradigm, its error messages may appear
-out of place and convoluting. If that's the case you may file an issue where you
-explain your confusion and I try fixing said issue.
-
-Otherwise, if the issue is of how the program itself performs, (i.e. an actual
-bug) be SURE that you attach the full log by running XAVA **with** 
-``XAVA_SCREAM=1`` set in your environment.
-
+For making X.A.V.A, the initial fork of this possible.

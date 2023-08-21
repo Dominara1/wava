@@ -11,10 +11,10 @@
 #include "output/shared/graphical.h"
 
 // functions needed by something else
-void xava_gl_module_clear(XAVAGLModuleOptions *options);
+void wava_gl_module_clear(WAVAGLModuleOptions *options);
 
 // we don't really need this struct, but it's nice to have (for extensibility)
-xava_gl_module_program pre;
+wava_gl_module_program pre;
 
 // shader buffers
 static GLfloat *vertexData;
@@ -61,15 +61,15 @@ struct gl_renderer_options {
 /**
  * This function is used for handling file change notifications.
  */
-EXP_FUNC void xava_gl_module_ionotify_callback(XAVA_IONOTIFY_EVENT event,
+EXP_FUNC void wava_gl_module_ionotify_callback(WAVA_IONOTIFY_EVENT event,
                                 const char *filename,
                                 int id,
-                                XAVA* xava) {
+                                WAVA* wava) {
     UNUSED(filename);
     UNUSED(id);
-    UNUSED(xava);
+    UNUSED(wava);
     switch(event) {
-        case XAVA_IONOTIFY_CHANGED:
+        case WAVA_IONOTIFY_CHANGED:
             shouldRestart = true;
             break;
         default:
@@ -78,17 +78,17 @@ EXP_FUNC void xava_gl_module_ionotify_callback(XAVA_IONOTIFY_EVENT event,
     }
 }
 
-EXP_FUNC void xava_gl_module_config_load(XAVAGLModule *module, XAVA *xava) {
-    xava_gl_module_shader_load(&pre, SGL_PRE, SGL_VERT, "", module, xava);
-    xava_gl_module_shader_load(&pre, SGL_PRE, SGL_FRAG, "", module, xava);
+EXP_FUNC void wava_gl_module_config_load(WAVAGLModule *module, WAVA *wava) {
+    wava_gl_module_shader_load(&pre, SGL_PRE, SGL_VERT, "", module, wava);
+    wava_gl_module_shader_load(&pre, SGL_PRE, SGL_FRAG, "", module, wava);
 }
 
-EXP_FUNC void xava_gl_module_init(XAVAGLModuleOptions *options) {
-    XAVA *xava = options->xava;
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC void wava_gl_module_init(WAVAGLModuleOptions *options) {
+    WAVA *wava = options->wava;
+    WAVA_CONFIG *conf = &wava->conf;
 
     // create programs
-    xava_gl_module_program_create(&pre);
+    wava_gl_module_program_create(&pre);
 
     // color
     PRE_FGCOL      = glGetUniformLocation(pre.program, "foreground_color");
@@ -136,19 +136,19 @@ EXP_FUNC void xava_gl_module_init(XAVAGLModuleOptions *options) {
     shouldRestart = false;
 }
 
-EXP_FUNC void xava_gl_module_apply(XAVAGLModuleOptions *options) {
-    XAVA *xava = options->xava;
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC void wava_gl_module_apply(WAVAGLModuleOptions *options) {
+    WAVA *wava = options->wava;
+    WAVA_CONFIG *conf = &wava->conf;
 
     glUseProgram(pre.program);
 
     // reallocate and attach verticies data
-    vertexData = realloc(vertexData, sizeof(GLfloat)*xava->bars*12);
+    vertexData = realloc(vertexData, sizeof(GLfloat)*wava->bars*12);
     glVertexAttribPointer(PRE_BARS, 2, GL_FLOAT, GL_FALSE, 0, vertexData);
 
     // since most of this information remains untouched, let's precalculate
-    for(uint32_t i=0; i<xava->bars; i++) {
-        vertexData[i*12]    = xava->rest + i*(conf->bs+conf->bw);
+    for(uint32_t i=0; i<wava->bars; i++) {
+        vertexData[i*12]    = wava->rest + i*(conf->bs+conf->bw);
         vertexData[i*12+1]  = 1.0f;
         vertexData[i*12+2]  = vertexData[i*12];
         vertexData[i*12+3]  = 0.0f;
@@ -163,23 +163,23 @@ EXP_FUNC void xava_gl_module_apply(XAVAGLModuleOptions *options) {
     }
 
     // do image scaling
-    projectionMatrix[0] = 2.0/xava->outer.w;
-    projectionMatrix[5] = 2.0/xava->outer.h;
+    projectionMatrix[0] = 2.0/wava->outer.w;
+    projectionMatrix[5] = 2.0/wava->outer.h;
 
     // do image translation
-    projectionMatrix[3] = (float)xava->inner.x/xava->outer.w*2.0 - 1.0;
-    projectionMatrix[7] = 1.0 - (float)(xava->inner.y+xava->inner.h)/xava->outer.h*2.0;
+    projectionMatrix[3] = (float)wava->inner.x/wava->outer.w*2.0 - 1.0;
+    projectionMatrix[7] = 1.0 - (float)(wava->inner.y+wava->inner.h)/wava->outer.h*2.0;
 
     glUniformMatrix4fv(PRE_PROJMATRIX, 1, GL_FALSE, (GLfloat*) projectionMatrix);
 
     // update screen resoltion
-    glUniform2f(PRE_RESOLUTION, xava->outer.w, xava->outer.h);
+    glUniform2f(PRE_RESOLUTION, wava->outer.w, wava->outer.h);
 
     // update spacing info
-    glUniform1f(PRE_REST,        (float)xava->rest);
-    glUniform1f(PRE_BAR_WIDTH,   (float)xava->conf.bw);
-    glUniform1f(PRE_BAR_SPACING, (float)xava->conf.bs);
-    glUniform1f(PRE_BAR_COUNT,   (float)xava->bars);
+    glUniform1f(PRE_REST,        (float)wava->rest);
+    glUniform1f(PRE_BAR_WIDTH,   (float)wava->conf.bw);
+    glUniform1f(PRE_BAR_SPACING, (float)wava->conf.bs);
+    glUniform1f(PRE_BAR_COUNT,   (float)wava->bars);
     glUniform1f(PRE_AUDIO_RATE,  (float)conf->inputsize);
 
     u32 gradient_count = arr_count(conf->gradients);
@@ -187,18 +187,18 @@ EXP_FUNC void xava_gl_module_apply(XAVAGLModuleOptions *options) {
     glUniform4fv(PRE_GRADIENTS, gradient_count, gradientColor);
 
     // "clear" the screen
-    xava_gl_module_clear(options);
+    wava_gl_module_clear(options);
 }
 
-EXP_FUNC void xava_gl_module_event(XAVAGLModuleOptions *options) {
-    XAVA *xava = options->xava;
+EXP_FUNC void wava_gl_module_event(WAVAGLModuleOptions *options) {
+    WAVA *wava = options->wava;
 
     // check if the visualizer bounds were changed
-    if((xava->inner.w != xava->bar_space.w) ||
-       (xava->inner.h != xava->bar_space.h)) {
-        xava->bar_space.w = xava->inner.w;
-        xava->bar_space.h = xava->inner.h;
-        pushXAVAEventStack(options->events, XAVA_RESIZE);
+    if((wava->inner.w != wava->bar_space.w) ||
+       (wava->inner.h != wava->bar_space.h)) {
+        wava->bar_space.w = wava->inner.w;
+        wava->bar_space.h = wava->inner.h;
+        pushWAVAEventStack(options->events, WAVA_RESIZE);
         return; // priority
     }
 
@@ -209,9 +209,9 @@ EXP_FUNC void xava_gl_module_event(XAVAGLModuleOptions *options) {
 // This is not needed in EGL since glClear() is called on each frame. HOWEVER, this clear function
 // is often preceded by a slight state change such as a color change, so we pass color info to the
 // shaders HERE and ONLY HERE.
-EXP_FUNC void xava_gl_module_clear(XAVAGLModuleOptions *options) {
-    XAVA *xava   = options->xava;
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC void wava_gl_module_clear(WAVAGLModuleOptions *options) {
+    WAVA *wava   = options->wava;
+    WAVA_CONFIG *conf = &wava->conf;
 
     // if you want to fiddle with certain uniforms from a shader, YOU MUST SWITCH TO IT
     // (https://www.khronos.org/opengl/wiki/GLSL_:_common_mistakes#glUniform_doesn.27t_work)
@@ -237,22 +237,22 @@ EXP_FUNC void xava_gl_module_clear(XAVAGLModuleOptions *options) {
     //glClearColor(bgcol[0], bgcol[1], bgcol[2], bgcol[3]);
 }
 
-EXP_FUNC void xava_gl_module_draw(XAVAGLModuleOptions *options) {
-    XAVA   *xava  = options->xava;
+EXP_FUNC void wava_gl_module_draw(WAVAGLModuleOptions *options) {
+    WAVA   *wava  = options->wava;
 
-    float intensity = xava_gl_module_util_calculate_intensity(xava);
-    float time      = xava_gl_module_util_obtain_time();
+    float intensity = wava_gl_module_util_calculate_intensity(wava);
+    float time      = wava_gl_module_util_obtain_time();
 
     /**
      * Here we start rendering to the texture
      **/
 
     register GLfloat *d = vertexData;
-    for(register uint32_t i=0; i<xava->bars; i++) {
+    for(register uint32_t i=0; i<wava->bars; i++) {
         // the speed part
-        *(++d)  = xava->f[i];
-        *(d+=6) = xava->f[i];
-        *(d+=4) = xava->f[i];
+        *(++d)  = wava->f[i];
+        *(d+=6) = wava->f[i];
+        *(d+=4) = wava->f[i];
         d++;
     }
 
@@ -271,22 +271,22 @@ EXP_FUNC void xava_gl_module_draw(XAVAGLModuleOptions *options) {
     glEnableVertexAttribArray(PRE_BARS);
 
     // You use the number of verticies, but not the actual polygon count
-    glDrawArrays(GL_TRIANGLES, 0, xava->bars*6);
+    glDrawArrays(GL_TRIANGLES, 0, wava->bars*6);
 
     glDisableVertexAttribArray(PRE_BARS);
 }
 
-EXP_FUNC void xava_gl_module_cleanup(XAVAGLModuleOptions *options) {
+EXP_FUNC void wava_gl_module_cleanup(WAVAGLModuleOptions *options) {
     UNUSED(options);
 
     // delete both pipelines
-    xava_gl_module_program_destroy(&pre);
+    wava_gl_module_program_destroy(&pre);
 
     free(gradientColor);
     free(vertexData);
 }
 
-EXP_FUNC xava_version xava_gl_module_version(void) {
-    return xava_version_get();
+EXP_FUNC wava_version wava_gl_module_version(void) {
+    return wava_version_get();
 }
 

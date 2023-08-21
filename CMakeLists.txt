@@ -1,4 +1,4 @@
-project(xava C CXX)
+project(wava C CXX)
 cmake_minimum_required(VERSION 3.13)
 
 # Include common funnctions
@@ -13,24 +13,24 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Allow for custom link prefixes (in order to optimize CMake builds for packagers)
-if(NOT XAVA_LINK_TO_INSTALL_DIR)
-	set(XAVA_LINK_TO_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
+if(NOT WAVA_LINK_TO_INSTALL_DIR)
+	set(WAVA_LINK_TO_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 endif()
 
-# Define XAVA version
-set(xava_VERSION_MAJOR 0)
-set(xava_VERSION_MINOR 7)
-set(xava_VERSION_PATCH 1)
-set(xava_VERSION_TWEAK 1)
-set(xava_VERSION "${xava_VERSION_MAJOR}.${xava_VERSION_MINOR}.${xava_VERSION_PATCH}.${xava_VERSION_TWEAK}" CACHE STRING "XAVA version")
+# Define WAVA version
+set(wava_VERSION_MAJOR 0)
+set(wava_VERSION_MINOR 7)
+set(wava_VERSION_PATCH 1)
+set(wava_VERSION_TWEAK 1)
+set(wava_VERSION "${wava_VERSION_MAJOR}.${wava_VERSION_MINOR}.${wava_VERSION_PATCH}.${wava_VERSION_TWEAK}" CACHE STRING "WAVA version")
 
 # Definitions
-add_definitions(-DPACKAGE="xava" -DVERSION="${xava_VERSION}")
-add_definitions(-DXAVA_VERSION_MAJOR"=${xava_VERSION_MAJOR}")
-add_definitions(-DXAVA_VERSION_MINOR"=${xava_VERSION_MINOR}")
-add_definitions(-DXAVA_VERSION_PATCH"=${xava_VERSION_PATCH}")
-add_definitions(-DXAVA_VERSION_TWEAK"=${xava_VERSION_TWEAK}")
-add_definitions(-DPREFIX="${XAVA_LINK_TO_INSTALL_DIR}")
+add_definitions(-DPACKAGE="wava" -DVERSION="${wava_VERSION}")
+add_definitions(-DWAVA_VERSION_MAJOR"=${wava_VERSION_MAJOR}")
+add_definitions(-DWAVA_VERSION_MINOR"=${wava_VERSION_MINOR}")
+add_definitions(-DWAVA_VERSION_PATCH"=${wava_VERSION_PATCH}")
+add_definitions(-DWAVA_VERSION_TWEAK"=${wava_VERSION_TWEAK}")
+add_definitions(-DPREFIX="${WAVA_LINK_TO_INSTALL_DIR}")
 
 # Do OS-specific stuff
 include(src/cmake/os-prerequisites.cmake)
@@ -68,14 +68,14 @@ include("src/cmake/modules.cmake")
 
 # Build executable
 add_executable(
-	xava
+	wava
 	${ADDITIONAL_OBJS}
 	src/config.c
-	src/xava.c
+	src/wava.c
 )
 
 # Link executable
-target_link_libraries(xava xava-shared m pthread)
+target_link_libraries(wava wava-shared m pthread)
 
 include(src/cmake/install_and_configure.cmake)
 

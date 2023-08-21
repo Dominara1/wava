@@ -14,21 +14,21 @@ foreach(LICENSE_FILE ${LICENSE_FILES})
 endforeach()
 
 # Install
-install (TARGETS xava DESTINATION bin)
-install (FILES "${CMAKE_CURRENT_BINARY_DIR}/final-LICENSE.txt" DESTINATION share/licenses/xava)
-install (FILES example_files/config RENAME config.example DESTINATION share/xava)
+install (TARGETS wava DESTINATION bin)
+install (FILES "${CMAKE_CURRENT_BINARY_DIR}/final-LICENSE.txt" DESTINATION share/licenses/wava)
+install (FILES example_files/config RENAME config.example DESTINATION share/wava)
 
 # Install DLLs
-find_and_copy_dlls(xava)
+find_and_copy_dlls(wava)
 
 include("src/cmake/copy_gl_shaders.cmake")
 
 if(UNIX AND NOT APPLE)
     execute_process (COMMAND
         convert -size 128x128 -density 1200 -background none -format png32
-        "${CMAKE_CURRENT_SOURCE_DIR}/assets/linux/xava.svg"
-        "${CMAKE_CURRENT_BINARY_DIR}/xava.png")
-    install (FILES assets/linux/xava.desktop DESTINATION share/applications)
-    install (FILES assets/linux/xava.svg RENAME xava_visualizer.svg DESTINATION share/icons/hicolor/scalable/apps)
-    install (FILES "${CMAKE_CURRENT_BINARY_DIR}/xava.png" RENAME xava_visualizer.png DESTINATION share/icons/hicolor/128x128/apps)
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets/linux/wava.svg"
+        "${CMAKE_CURRENT_BINARY_DIR}/wava.png")
+    install (FILES assets/linux/wava.desktop DESTINATION share/applications)
+    install (FILES assets/linux/wava.svg RENAME wava_visualizer.svg DESTINATION share/icons/hicolor/scalable/apps)
+    install (FILES "${CMAKE_CURRENT_BINARY_DIR}/wava.png" RENAME wava_visualizer.png DESTINATION share/icons/hicolor/128x128/apps)
 endif()

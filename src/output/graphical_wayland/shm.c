@@ -54,9 +54,9 @@ const struct wl_buffer_listener wl_buffer_listener = {
 };
 
 struct wl_buffer *wl_create_framebuffer(struct waydata *wd) {
-    XAVA   *xava = wd->hand;
+    WAVA   *wava = wd->hand;
 
-    int width = xava->outer.w, height = xava->outer.h;
+    int width = wava->outer.w, height = wava->outer.h;
     int stride = width*sizeof(uint32_t);
     int size = stride * height;
 
@@ -75,17 +75,17 @@ struct wl_buffer *wl_create_framebuffer(struct waydata *wd) {
 }
 
 void update_frame(struct waydata *wd) {
-    //XAVA_CONFIG     *p    = &wd->s->conf;
+    //WAVA_CONFIG     *p    = &wd->s->conf;
 
     // Update frame and inform wayland
     struct wl_buffer *buffer = wl_create_framebuffer(wd);
     wl_surface_attach(wd->surface, buffer, 0, 0);
-    //wl_surface_damage_buffer(xavaWLSurface, 0, 0, INT32_MAX, INT32_MAX);
+    //wl_surface_damage_buffer(wavaWLSurface, 0, 0, INT32_MAX, INT32_MAX);
     wl_surface_commit(wd->surface);
 }
 
 void reallocSHM(struct waydata *wd) {
-    XAVA   *hand = wd->hand;
+    WAVA   *hand = wd->hand;
 
     munmap(wd->shm.buffer, wd->shm.max_size);
 
@@ -94,7 +94,7 @@ void reallocSHM(struct waydata *wd) {
                sizeof(uint32_t);
     if(size > wd->shm.max_size) {
         wd->shm.max_size = size;
-        xavaErrorCondition(ftruncate(wd->shm.fd, size) == -1,
+        wavaErrorCondition(ftruncate(wd->shm.fd, size) == -1,
                 "%s", strerror(errno));
     }
 
@@ -109,7 +109,7 @@ void reallocSHM(struct waydata *wd) {
             wd->shm.fd,
             0);
 
-    xavaBailCondition(wd->shm.buffer == MAP_FAILED,
+    wavaBailCondition(wd->shm.buffer == MAP_FAILED,
             "%s", strerror(errno));
 
     wl_surface_commit(wd->surface);

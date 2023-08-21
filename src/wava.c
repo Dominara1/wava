@@ -44,30 +44,30 @@ char *configPath;
 
 static _Bool kys = 0, should_reload = 0;
 
-// teh main XAVA handle (made just to not piss off MinGW)
-static XAVA xava;
+// teh main WAVA handle (made just to not piss off MinGW)
+static WAVA wava;
 
-// XAVA magic variables, too many of them indeed
+// WAVA magic variables, too many of them indeed
 static pthread_t p_thread;
 
-void handle_ionotify_call(XAVA_IONOTIFY_EVENT event, const char *filename,
-        int id, XAVA *xava) {
+void handle_ionotify_call(WAVA_IONOTIFY_EVENT event, const char *filename,
+        int id, WAVA *wava) {
     UNUSED(id);
-    UNUSED(xava);
+    UNUSED(wava);
     UNUSED(filename);
     switch(event) {
-        case XAVA_IONOTIFY_CHANGED:
-        //case XAVA_IONOTIFY_DELETED: // ignore because it is just broken
+        case WAVA_IONOTIFY_CHANGED:
+        //case WAVA_IONOTIFY_DELETED: // ignore because it is just broken
             should_reload = 1;
             break;
-        case XAVA_IONOTIFY_ERROR:
-            xavaBail("ionotify event errored out! Bailing...");
+        case WAVA_IONOTIFY_ERROR:
+            wavaBail("ionotify event errored out! Bailing...");
             break;
-        case XAVA_IONOTIFY_CLOSED:
-            xavaLog("ionotify socket closed");
+        case WAVA_IONOTIFY_CLOSED:
+            wavaLog("ionotify socket closed");
             break;
         default:
-            xavaLog("Unrecognized ionotify call occured!");
+            wavaLog("Unrecognized ionotify call occured!");
             break;
     }
     return;
@@ -75,30 +75,30 @@ void handle_ionotify_call(XAVA_IONOTIFY_EVENT event, const char *filename,
 
 // general: cleanup
 void cleanup(void) {
-    XAVA_CONFIG *p      = &xava.conf;
-    XAVA_AUDIO  *audio  = &xava.audio;
-    XAVA_FILTER *filter = &xava.filter;
-    XAVA_OUTPUT *output = &xava.output;
+    WAVA_CONFIG *p      = &wava.conf;
+    WAVA_AUDIO  *audio  = &wava.audio;
+    WAVA_FILTER *filter = &wava.filter;
+    WAVA_OUTPUT *output = &wava.output;
 
-    xavaIONotifyKill(xava.ionotify);
+    wavaIONotifyKill(wava.ionotify);
 
     // telling audio thread to terminate
     audio->terminate = 1;
 
     // waiting for all background threads and other stuff to terminate properly
-    xavaSleep(100, 0);
+    wavaSleep(100, 0);
 
     // kill the audio thread
     pthread_join(p_thread, NULL);
 
-    output->func.cleanup(&xava);
+    output->func.cleanup(&wava);
     if(!p->flag.skipFilter)
-        filter->func.cleanup(&xava);
+        filter->func.cleanup(&wava);
 
     // destroy modules
-    xava_module_free(audio->module);
-    xava_module_free(output->module);
-    xava_module_free(filter->module);
+    wava_module_free(audio->module);
+    wava_module_free(output->module);
+    wava_module_free(filter->module);
 
     // color information
     arr_free(p->gradients);
@@ -113,7 +113,7 @@ void cleanup(void) {
     free(audio->audio_out_l);
 
     // clean the config
-    xavaConfigClose(xava.default_config.config);
+    wavaConfigClose(wava.default_config.config);
 }
 
 #if defined(__unix__)||defined(__APPLE__)
@@ -124,11 +124,11 @@ void sig_handler(int sig_no) {
             should_reload = true;
             break;
         case SIGINT:
-            xavaLog("CTRL-C pressed -- goodbye\n");
+            wavaLog("CTRL-C pressed -- goodbye\n");
             kys=1;
             return;
         case SIGTERM:
-            xavaLog("Process termination requested -- goodbye\n");
+            wavaLog("Process termination requested -- goodbye\n");
             kys=1;
             return;
     }
@@ -161,7 +161,7 @@ Keys:\n\
         b         Cycle background color\n\
         q         Quit\n\
 \n\
-as of 0.4.0 all options are specified in config file, see in '/home/username/.config/xava/' \n";
+as of 0.4.0 all options are specified in config file, see in '/home/username/.config/wava/' \n";
 
     uint64_t oldTime = 0;
 
@@ -204,51 +204,51 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
     // general: main loop
     while (1) {
         // extract the shorthand sub-handles
-        XAVA_CONFIG     *p      = &xava.conf;
-        XAVA_AUDIO      *audio  = &xava.audio;
-        XAVA_FILTER     *filter = &xava.filter;
-        XAVA_OUTPUT     *output = &xava.output;
+        WAVA_CONFIG     *p      = &wava.conf;
+        WAVA_AUDIO      *audio  = &wava.audio;
+        WAVA_FILTER     *filter = &wava.filter;
+        WAVA_OUTPUT     *output = &wava.output;
 
         // initialize ioNotify engine
-        xava.ionotify = xavaIONotifySetup();
+        wava.ionotify = wavaIONotifySetup();
 
         // load config
-        configPath = load_config(configPath, &xava);
+        configPath = load_config(configPath, &wava);
 
         // attach that config to the IONotify thing
-        struct xava_ionotify_watch_setup thing;
-        thing.xava_ionotify_func = &handle_ionotify_call;
+        struct wava_ionotify_watch_setup thing;
+        thing.wava_ionotify_func = &handle_ionotify_call;
         thing.filename = configPath;
-        thing.ionotify = xava.ionotify;
+        thing.ionotify = wava.ionotify;
         thing.id = 1;
-        thing.xava = &xava;
-        xavaIONotifyAddWatch(&thing);
+        thing.wava = &wava;
+        wavaIONotifyAddWatch(&thing);
 
         // load symbols
-        audio->func.loop        = xava_module_symbol_address_get(audio->module, "xavaInput");
-        audio->func.load_config = xava_module_symbol_address_get(audio->module, "xavaInputLoadConfig");
+        audio->func.loop        = wava_module_symbol_address_get(audio->module, "wavaInput");
+        audio->func.load_config = wava_module_symbol_address_get(audio->module, "wavaInputLoadConfig");
 
-        output->func.init         = xava_module_symbol_address_get(output->module, "xavaInitOutput");
-        output->func.clear        = xava_module_symbol_address_get(output->module, "xavaOutputClear");
-        output->func.apply        = xava_module_symbol_address_get(output->module, "xavaOutputApply");
-        output->func.handle_input = xava_module_symbol_address_get(output->module, "xavaOutputHandleInput");
-        output->func.draw         = xava_module_symbol_address_get(output->module, "xavaOutputDraw");
-        output->func.cleanup      = xava_module_symbol_address_get(output->module, "xavaOutputCleanup");
-        output->func.load_config  = xava_module_symbol_address_get(output->module, "xavaOutputLoadConfig");
+        output->func.init         = wava_module_symbol_address_get(output->module, "wavaInitOutput");
+        output->func.clear        = wava_module_symbol_address_get(output->module, "wavaOutputClear");
+        output->func.apply        = wava_module_symbol_address_get(output->module, "wavaOutputApply");
+        output->func.handle_input = wava_module_symbol_address_get(output->module, "wavaOutputHandleInput");
+        output->func.draw         = wava_module_symbol_address_get(output->module, "wavaOutputDraw");
+        output->func.cleanup      = wava_module_symbol_address_get(output->module, "wavaOutputCleanup");
+        output->func.load_config  = wava_module_symbol_address_get(output->module, "wavaOutputLoadConfig");
 
         if(!p->flag.skipFilter) {
-            filter->func.init        = xava_module_symbol_address_get(filter->module, "xavaFilterInit");
-            filter->func.apply       = xava_module_symbol_address_get(filter->module, "xavaFilterApply");
-            filter->func.loop        = xava_module_symbol_address_get(filter->module, "xavaFilterLoop");
-            filter->func.cleanup     = xava_module_symbol_address_get(filter->module, "xavaFilterCleanup");
-            filter->func.load_config = xava_module_symbol_address_get(filter->module, "xavaFilterLoadConfig");
+            filter->func.init        = wava_module_symbol_address_get(filter->module, "wavaFilterInit");
+            filter->func.apply       = wava_module_symbol_address_get(filter->module, "wavaFilterApply");
+            filter->func.loop        = wava_module_symbol_address_get(filter->module, "wavaFilterLoop");
+            filter->func.cleanup     = wava_module_symbol_address_get(filter->module, "wavaFilterCleanup");
+            filter->func.load_config = wava_module_symbol_address_get(filter->module, "wavaFilterLoadConfig");
         }
 
         // we're loading this first because I want output modes to adjust audio
         // "renderer/filter" properties
 
         // load output config
-        output->func.load_config(&xava);
+        output->func.load_config(&wava);
 
         // set up audio properties BEFORE the input is initialized
         audio->inputsize = p->inputsize;
@@ -260,11 +260,11 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
         audio->latency   = p->samplelatency;
 
         // load input config
-        audio->func.load_config(&xava);
+        audio->func.load_config(&wava);
 
         // load filter config
         if(!p->flag.skipFilter)
-            filter->func.load_config(&xava);
+            filter->func.load_config(&wava);
 
         // setup audio garbo
         MALLOC_SELF(audio->audio_out_l, p->fftsize+1);
@@ -283,13 +283,13 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
         bool reloadConf = false;
 
         if(!p->flag.skipFilter)
-            xavaBailCondition(filter->func.init(&xava),
+            wavaBailCondition(filter->func.init(&wava),
                     "Failed to initialize filter! Bailing...");
 
-        xavaBailCondition(output->func.init(&xava),
+        wavaBailCondition(output->func.init(&wava),
                 "Failed to initialize output! Bailing...");
 
-        xavaIONotifyStart(xava.ionotify);
+        wavaIONotifyStart(wava.ionotify);
 
         while(!reloadConf) { //jumbing back to this loop means that you resized the screen
             if(p->flag.ignoreWindowSize == false) {
@@ -297,46 +297,46 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
                 if (p->fixedbars) {
                     p->autobars = 0;
                     if (p->fixedbars * p->bw + p->fixedbars * p->bs - p->bs >
-                            xava.bar_space.w)
+                            wava.bar_space.w)
                         p->autobars = 1;
                 }
 
                 //getting orignial numbers of barss incase of resize
                 if (p->autobars == 1)  {
-                    xava.bars = (xava.bar_space.w + p->bs) / (p->bw + p->bs);
+                    wava.bars = (wava.bar_space.w + p->bs) / (p->bw + p->bs);
 
                     //if (p->bs != 0) bars = (w - bars * p->bs + p->bs) / bw;
-                } else xava.bars = p->fixedbars;
+                } else wava.bars = p->fixedbars;
 
-                if (xava.bars < 1) xava.bars = 1; // must have at least 1 bars
+                if (wava.bars < 1) wava.bars = 1; // must have at least 1 bars
 
                 if (p->stereo) { // stereo must have even numbers of bars
-                    if (xava.bars%2) xava.bars--;
+                    if (wava.bars%2) wava.bars--;
                 }
             } else {
-                xava.bars = p->fixedbars;
+                wava.bars = p->fixedbars;
             }
 
             if(!p->flag.skipFilter)
-                filter->func.apply(&xava);
+                filter->func.apply(&wava);
 
-            output->func.apply(&xava);
+            output->func.apply(&wava);
 
             bool resizeWindow = false;
             bool redrawWindow = false;
 
             while  (!resizeWindow) {
-                switch(output->func.handle_input(&xava)) {
-                    case XAVA_QUIT:
+                switch(output->func.handle_input(&wava)) {
+                    case WAVA_QUIT:
                         cleanup();
                         return EXIT_SUCCESS;
-                    case XAVA_RELOAD:
+                    case WAVA_RELOAD:
                         should_reload = 1;
                         break;
-                    case XAVA_RESIZE:
+                    case WAVA_RESIZE:
                         resizeWindow = TRUE;
                         break;
-                    case XAVA_REDRAW:
+                    case WAVA_REDRAW:
                         redrawWindow = TRUE;
                         break;
                     default:
@@ -375,58 +375,58 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
                     sleep++;
                 } else {
                     sleep = 0;
-                    xavaSpamCondition(xava.pauseRendering, "Resuming from sleep");
+                    wavaSpamCondition(wava.pauseRendering, "Resuming from sleep");
                 }
 
                 // process: if input was present for the last 5 seconds apply FFT to it
                 if (sleep < p->framerate * 5) {
-                    xava.pauseRendering = false;
-                } else if(xava.pauseRendering) {
+                    wava.pauseRendering = false;
+                } else if(wava.pauseRendering) {
                     // unless the user requested that the program ends
                     if(kys||should_reload) sleep = 0;
 
                     // wait 100ms, then check sound again.
-                    xavaSleep(100, 0);
+                    wavaSleep(100, 0);
                     continue;
                 } else { // if in sleep mode wait and continue
-                    xavaSpam("Going to sleep!");
+                    wavaSpam("Going to sleep!");
 
                     // signal to any potential rendering threads to stop
-                    xava.pauseRendering = true;
+                    wava.pauseRendering = true;
                 }
 
                 // Calculate the result through filters
                 if(!p->flag.skipFilter) {
-                    filter->func.loop(&xava);
+                    filter->func.loop(&wava);
 
                     // zero values causes divided by zero segfault
                     // and set max height
-                    for (uint32_t i = 0; i < xava.bars; i++) {
-                        if(xava.f[i] < 1)
-                            xava.f[i] = 1;
-                        else if(xava.f[i] > xava.bar_space.h)
-                            xava.f[i] = xava.bar_space.h;
+                    for (uint32_t i = 0; i < wava.bars; i++) {
+                        if(wava.f[i] < 1)
+                            wava.f[i] = 1;
+                        else if(wava.f[i] > wava.bar_space.h)
+                            wava.f[i] = wava.bar_space.h;
                     }
                 }
 
                 // output: draw processed input
                 if(redrawWindow) {
-                    output->func.clear(&xava);
+                    output->func.clear(&wava);
 
                     // audio output is unallocated without the filter
                     if(!p->flag.skipFilter)
-                        memset(xava.fl, 0x00, sizeof(int)*xava.bars);
+                        memset(wava.fl, 0x00, sizeof(int)*wava.bars);
 
                     redrawWindow = FALSE;
                 }
-                output->func.draw(&xava);
+                output->func.draw(&wava);
 
-                if(!p->vsync) // the window handles frametimes instead of XAVA
-                    oldTime = xavaSleep(oldTime, p->framerate);
+                if(!p->vsync) // the window handles frametimes instead of WAVA
+                    oldTime = wavaSleep(oldTime, p->framerate);
 
                 // save previous bar values
                 if(!p->flag.skipFilter)
-                    memcpy(xava.fl, xava.f, sizeof(int)*xava.bars);
+                    memcpy(wava.fl, wava.f, sizeof(int)*wava.bars);
 
                 if(kys) {
                     resizeWindow=1;
@@ -434,7 +434,7 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
                 }
 
                 // checking if audio thread has exited unexpectedly
-                xavaBailCondition(audio->terminate,
+                wavaBailCondition(audio->terminate,
                         "Audio thread has exited unexpectedly.\nReason: %s",
                         audio->error_message);
             } // resize window

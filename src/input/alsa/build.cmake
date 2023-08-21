@@ -6,13 +6,13 @@ if(ALSA)
     pkg_check_modules(ALSA QUIET alsa)
     if(ALSA_FOUND)
         add_definitions(-DALSA)
-        add_library(in_alsa SHARED "${XAVA_MODULE_DIR}/main.c"
+        add_library(in_alsa SHARED "${WAVA_MODULE_DIR}/main.c"
                                     "${GLOBAL_FUNCTION_SOURCES}")
-        target_link_libraries(in_alsa xava-shared "${ALSA_LIBRARIES}")
+        target_link_libraries(in_alsa wava-shared "${ALSA_LIBRARIES}")
         target_include_directories(in_alsa PRIVATE "${ALSA_INCLUDE_DIRS}")
         target_link_directories(in_alsa PRIVATE "${ALSA_LIBRARY_DIRS}")
         set_target_properties(in_alsa PROPERTIES PREFIX "")
-        install(TARGETS in_alsa DESTINATION lib/xava)
+        install(TARGETS in_alsa DESTINATION lib/wava)
 
         # Add legal disclaimer
         file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/LICENSE_alsa.txt"

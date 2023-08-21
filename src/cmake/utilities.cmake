@@ -9,7 +9,7 @@ function(find_and_copy_dlls file)
     # 1001 reasons to not write shit in C
     if(MINGW)
         add_custom_command(TARGET ${file} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E env MINGW_BUNDLEDLLS_SEARCH_PATH="${xava_dep_dirs}"
+            COMMAND ${CMAKE_COMMAND} -E env MINGW_BUNDLEDLLS_SEARCH_PATH="${wava_dep_dirs}"
             python "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/mingw-bundledlls/mingw-bundledlls" $<TARGET_FILE:${file}> --copy
         )
     endif()

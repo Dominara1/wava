@@ -27,7 +27,7 @@ void media_data_update
     options.status       = MPRIS_PLAYER_ANY_PLAYING;
     properties           = get_mpris_player_status(&options);
 
-    data->last_timestamp = xavaGetTime();
+    data->last_timestamp = wavaGetTime();
 
     bool should_update = false;
 
@@ -63,7 +63,7 @@ void media_data_update
                     MUSIC_DATA_STRING_LENGTH-1);
         }
 
-        xava_util_artwork_update(properties.metadata.art_url,
+        wava_util_artwork_update(properties.metadata.art_url,
                 &data->data.cover, data->curl);
 
         strncpy(data->last_track_id, properties.metadata.track_id, TRACK_ID_LENGTH);
@@ -86,22 +86,22 @@ void* media_data_thread_runner(void* ptr) {
 
         // sleep for 1 second but interruptable every 50ms
         for(int i = 0; i < 10 && data->alive; i++) {
-            xavaSleep(100, 0);
+            wavaSleep(100, 0);
         }
     }
 
-    xava_util_artwork_destroy(&data->data.cover);
+    wava_util_artwork_destroy(&data->data.cover);
     curl_easy_cleanup(data->curl);
     return NULL;
 }
 
 struct media_data *
-    xava_util_media_data_thread_data(struct media_data_thread *thread) {
+    wava_util_media_data_thread_data(struct media_data_thread *thread) {
     return &thread->data;
 }
 
 struct media_data_thread *
-    xava_util_media_data_thread_create(void) {
+    wava_util_media_data_thread_create(void) {
     struct media_data_thread *value;
     MALLOC_SELF(value, 1);
 
@@ -114,7 +114,7 @@ struct media_data_thread *
     return value;
 }
 
-void xava_util_media_data_thread_destroy(struct media_data_thread *data) {
+void wava_util_media_data_thread_destroy(struct media_data_thread *data) {
     data->alive = false;
     pthread_join(data->thread, NULL);
     free(data);

@@ -11,22 +11,22 @@ struct options {
     // noop
 } options;
 
-xava_config_source *config_file;
-XAVAIONOTIFY       file_notifications;
+wava_config_source *config_file;
+WAVAIONOTIFY       file_notifications;
 
 // ionotify fun
-EXP_FUNC void xava_cairo_module_ionotify_callback
-                (XAVA_IONOTIFY_EVENT event,
+EXP_FUNC void wava_cairo_module_ionotify_callback
+                (WAVA_IONOTIFY_EVENT event,
                 const char* filename,
                 int id,
-                XAVA* xava) {
+                WAVA* wava) {
     UNUSED(filename);
     UNUSED(id);
-    xava_cairo_module_handle *handle = (xava_cairo_module_handle*)xava;
+    wava_cairo_module_handle *handle = (wava_cairo_module_handle*)wava;
     switch(event) {
-        case XAVA_IONOTIFY_CHANGED:
+        case WAVA_IONOTIFY_CHANGED:
             // trigger restart
-            pushXAVAEventStack(handle->events, XAVA_RELOAD);
+            pushWAVAEventStack(handle->events, WAVA_RELOAD);
             break;
         default:
             // noop
@@ -35,34 +35,34 @@ EXP_FUNC void xava_cairo_module_ionotify_callback
 }
 
 // report version
-EXP_FUNC xava_version xava_cairo_module_version(void) {
-    return xava_version_host_get();
+EXP_FUNC wava_version wava_cairo_module_version(void) {
+    return wava_version_host_get();
 }
 
 // load all the necessary config data and report supported drawing modes
-EXP_FUNC XAVA_CAIRO_FEATURE xava_cairo_module_config_load(xava_cairo_module_handle* handle) {
-    XAVA *xava = handle->xava;
-    XAVA_CONFIG *conf = &xava->conf;
+EXP_FUNC WAVA_CAIRO_FEATURE wava_cairo_module_config_load(wava_cairo_module_handle* handle) {
+    WAVA *wava = handle->wava;
+    WAVA_CONFIG *conf = &wava->conf;
 
     char config_file_path[MAX_PATH];
-    config_file = xava_cairo_module_file_load(
-            XAVA_CAIRO_FILE_CONFIG, handle, "config.ini", config_file_path);
+    config_file = wava_cairo_module_file_load(
+            WAVA_CAIRO_FILE_CONFIG, handle, "config.ini", config_file_path);
 
-    //options.option = xavaConfigGetBool(*config_file, "oscilloscope", "option", false);
+    //options.option = wavaConfigGetBool(*config_file, "oscilloscope", "option", false);
 
     // setup file notifications
-    file_notifications = xavaIONotifySetup();
+    file_notifications = wavaIONotifySetup();
 
-    XAVAIONOTIFYWATCHSETUP setup;
+    WAVAIONOTIFYWATCHSETUP setup;
     MALLOC_SELF(setup, 1);
     setup->filename           = config_file_path;
     setup->id                 = 1;
-    setup->xava_ionotify_func = xava_cairo_module_ionotify_callback;
-    setup->xava               = (XAVA*) handle;
+    setup->wava_ionotify_func = wava_cairo_module_ionotify_callback;
+    setup->wava               = (WAVA*) handle;
     setup->ionotify           = file_notifications;
-    xavaIONotifyAddWatch(setup);
+    wavaIONotifyAddWatch(setup);
 
-    xavaIONotifyStart(file_notifications);
+    wavaIONotifyStart(file_notifications);
 
     free(setup);
 
@@ -70,65 +70,65 @@ EXP_FUNC XAVA_CAIRO_FEATURE xava_cairo_module_config_load(xava_cairo_module_hand
     conf->stereo = true;
     conf->flag.skipFilter = true;
 
-    return XAVA_CAIRO_FEATURE_FULL_DRAW;
+    return WAVA_CAIRO_FEATURE_FULL_DRAW;
 }
 
-EXP_FUNC void               xava_cairo_module_init(xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_init(wava_cairo_module_handle* handle) {
     UNUSED(handle);
-    //XAVA *xava = handle->xava;
-    //XAVA_CONFIG *conf = &xava->conf;
+    //WAVA *wava = handle->wava;
+    //WAVA_CONFIG *conf = &wava->conf;
 
     // potentially set if no other modules require it
     //conf->skipFilterF = true;
 
-    xavaWarn("Just a heads up: THIS IS GOING TO LAG! Blame cairo.");
+    wavaWarn("Just a heads up: THIS IS GOING TO LAG! Blame cairo.");
 }
 
-EXP_FUNC void               xava_cairo_module_apply(xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_apply(wava_cairo_module_handle* handle) {
     UNUSED(handle);
 }
 
 // report drawn regions
-EXP_FUNC xava_cairo_region* xava_cairo_module_regions(xava_cairo_module_handle* handle) {
-    XAVA *xava = handle->xava;
+EXP_FUNC wava_cairo_region* wava_cairo_module_regions(wava_cairo_module_handle* handle) {
+    WAVA *wava = handle->wava;
 
-    xava_cairo_region *regions;
+    wava_cairo_region *regions;
     arr_init(regions);
 
-    xava_cairo_region region;
-    region.x = xava->inner.x;
-    region.y = xava->inner.y;
-    region.w = xava->inner.w;
-    region.h = xava->inner.h;
+    wava_cairo_region region;
+    region.x = wava->inner.x;
+    region.y = wava->inner.y;
+    region.w = wava->inner.w;
+    region.h = wava->inner.h;
     arr_add(regions, region);
 
     return regions;
 }
 
 // event handler
-EXP_FUNC void               xava_cairo_module_event      (xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_event      (wava_cairo_module_handle* handle) {
     UNUSED(handle);
 }
 
 // placeholder, as it literally does nothing atm
-EXP_FUNC void               xava_cairo_module_clear      (xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_clear      (wava_cairo_module_handle* handle) {
     UNUSED(handle);
 }
 
-EXP_FUNC void               xava_cairo_module_draw_region(xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_draw_region(wava_cairo_module_handle* handle) {
     UNUSED(handle);
 }
 
 // no matter what condition, this ensures a safe write
-EXP_FUNC void               xava_cairo_module_draw_safe  (xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_draw_safe  (wava_cairo_module_handle* handle) {
     UNUSED(handle);
 }
 
 // assume that the entire screen's being overwritten
-EXP_FUNC void               xava_cairo_module_draw_full  (xava_cairo_module_handle* handle) {
-    XAVA   *xava = handle->xava;
-    XAVA_CONFIG *conf = &xava->conf;
-    XAVA_AUDIO *audio = &xava->audio;
+EXP_FUNC void               wava_cairo_module_draw_full  (wava_cairo_module_handle* handle) {
+    WAVA   *wava = handle->wava;
+    WAVA_CONFIG *conf = &wava->conf;
+    WAVA_AUDIO *audio = &wava->audio;
 
     // setting new settings because default are WAY too slow
     cairo_antialias_t old_aa        = cairo_get_antialias(handle->cr);
@@ -148,10 +148,10 @@ EXP_FUNC void               xava_cairo_module_draw_full  (xava_cairo_module_hand
     cairo_set_line_width(handle->cr, 1.0);
 
     // optimization strats
-    float scale_x = (float)xava->inner.w / INT16_MAX;
-    float scale_y = (float)xava->inner.h / INT16_MIN;
-    float trans_x = xava->inner.x + xava->inner.w/2.0;
-    float trans_y = xava->inner.y + xava->inner.h/2.0;
+    float scale_x = (float)wava->inner.w / INT16_MAX;
+    float scale_y = (float)wava->inner.h / INT16_MIN;
+    float trans_x = wava->inner.x + wava->inner.w/2.0;
+    float trans_y = wava->inner.y + wava->inner.h/2.0;
 
     // optimized to shit loop
     double x1, y1, x2, y2;
@@ -179,11 +179,11 @@ EXP_FUNC void               xava_cairo_module_draw_full  (xava_cairo_module_hand
     cairo_set_operator(handle->cr, old_operator);
 }
 
-EXP_FUNC void               xava_cairo_module_cleanup    (xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_cleanup    (wava_cairo_module_handle* handle) {
     UNUSED(handle);
-    xavaIONotifyKill(file_notifications);
+    wavaIONotifyKill(file_notifications);
 
-    xavaConfigClose(*config_file);
+    wavaConfigClose(*config_file);
     free(config_file); // a fun hacky quirk because bad design
 }
 

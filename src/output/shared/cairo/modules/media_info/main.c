@@ -73,12 +73,12 @@ uint64_t last_version;
 uint32_t old_w, old_h;
 
 // report version
-EXP_FUNC xava_version xava_cairo_module_version(void) {
-    return xava_version_host_get();
+EXP_FUNC wava_version wava_cairo_module_version(void) {
+    return wava_version_host_get();
 }
 
 // load all the necessary config data and report supported drawing modes
-EXP_FUNC XAVA_CAIRO_FEATURE xava_cairo_module_config_load(xava_cairo_module_handle* handle) {
+EXP_FUNC WAVA_CAIRO_FEATURE wava_cairo_module_config_load(wava_cairo_module_handle* handle) {
     UNUSED(handle);
 
     options.cover.image = NULL; // because C
@@ -115,14 +115,14 @@ EXP_FUNC XAVA_CAIRO_FEATURE xava_cairo_module_config_load(xava_cairo_module_hand
 
     // processing weight and slant
 
-    return XAVA_CAIRO_FEATURE_FULL_DRAW |
-        XAVA_CAIRO_FEATURE_DRAW_REGION_SAFE |
-        XAVA_CAIRO_FEATURE_DRAW_REGION;
+    return WAVA_CAIRO_FEATURE_FULL_DRAW |
+        WAVA_CAIRO_FEATURE_DRAW_REGION_SAFE |
+        WAVA_CAIRO_FEATURE_DRAW_REGION;
 }
 
-EXP_FUNC void               xava_cairo_module_init(xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_init(wava_cairo_module_handle* handle) {
     UNUSED(handle);
-    media_data_thread = xava_util_media_data_thread_create();
+    media_data_thread = wava_util_media_data_thread_create();
 
     last_version = 0;
     old_w = 0;
@@ -131,26 +131,26 @@ EXP_FUNC void               xava_cairo_module_init(xava_cairo_module_handle* han
     surface = NULL;
 }
 
-EXP_FUNC void               xava_cairo_module_apply(xava_cairo_module_handle* handle) {
-    XAVA *xava = handle->xava;
+EXP_FUNC void               wava_cairo_module_apply(wava_cairo_module_handle* handle) {
+    WAVA *wava = handle->wava;
 
     // redraw everything if the size is wrong
-    if(old_w != xava->outer.w || old_h != xava->outer.h) {
+    if(old_w != wava->outer.w || old_h != wava->outer.h) {
         redraw_everything = true;
-        old_w = xava->outer.w;
-        old_h = xava->outer.h;
-        xava_util_media_data_thread_data(media_data_thread)->version++;
+        old_w = wava->outer.w;
+        old_h = wava->outer.h;
+        wava_util_media_data_thread_data(media_data_thread)->version++;
     }
 }
 
-struct xava_cairo_region xava_cairo_module_calculate_artwork_region(
-        xava_cairo_module_handle *handle,
+struct wava_cairo_region wava_cairo_module_calculate_artwork_region(
+        wava_cairo_module_handle *handle,
         artwork                  *artwork) {
-    XAVA *xava = handle->xava;
+    WAVA *wava = handle->wava;
 
-    struct xava_cairo_region region = {
-        .w = xava->outer.w,
-        .h = xava->outer.h,
+    struct wava_cairo_region region = {
+        .w = wava->outer.w,
+        .h = wava->outer.h,
         .x = 0,
         .y = 0
     };
@@ -162,7 +162,7 @@ struct xava_cairo_region xava_cairo_module_calculate_artwork_region(
         case ARTWORK_CROP_CENTER:
         case ARTWORK_PRESERVE:
         {
-            float scale = (float)xava->outer.w/xava->outer.h;
+            float scale = (float)wava->outer.w/wava->outer.h;
             float scale_x, scale_y;
             if(scale > 1.0) {
                 scale_x = 1.0 / scale;
@@ -172,40 +172,40 @@ struct xava_cairo_region xava_cairo_module_calculate_artwork_region(
                 scale_y = 1.0 / scale;
             }
 
-            float corrected_x = xava->outer.w - artwork->size*xava->outer.w;
-            float corrected_y = xava->outer.h - artwork->size*xava->outer.h;
+            float corrected_x = wava->outer.w - artwork->size*wava->outer.w;
+            float corrected_y = wava->outer.h - artwork->size*wava->outer.h;
 
             region.x = (float)artwork->x * corrected_x * scale_x;
             region.y = (float)artwork->y * corrected_y * scale_y;
-            region.w = artwork->size*xava->outer.w*scale_x;
-            region.h = artwork->size*xava->outer.h*scale_y;
+            region.w = artwork->size*wava->outer.w*scale_x;
+            region.h = artwork->size*wava->outer.h*scale_y;
             break;
         }
         case ARTWORK_SCALED:
-            region.x = artwork->x/(artwork->size+1.0)*xava->outer.w;
-            region.y = artwork->y/(artwork->size+1.0)*xava->outer.y;
-            region.w = artwork->size*xava->outer.w;
-            region.h = artwork->size*xava->outer.h;
+            region.x = artwork->x/(artwork->size+1.0)*wava->outer.w;
+            region.y = artwork->y/(artwork->size+1.0)*wava->outer.y;
+            region.w = artwork->size*wava->outer.w;
+            region.h = artwork->size*wava->outer.h;
             break;
     }
 
     return region;
 }
 
-struct xava_cairo_region xava_cairo_module_calculate_text_region(
-        xava_cairo_module_handle *handle,
+struct wava_cairo_region wava_cairo_module_calculate_text_region(
+        wava_cairo_module_handle *handle,
         text                     *text) {
-    XAVA *xava = handle->xava;
+    WAVA *wava = handle->wava;
 
-    struct xava_cairo_region region = {
-        .w = xava->outer.w,
-        .h = xava->outer.h,
+    struct wava_cairo_region region = {
+        .w = wava->outer.w,
+        .h = wava->outer.h,
         .x = 0,
         .y = 0
     };
 
-    region.x = text->x * xava->outer.w;
-    region.y = text->y * xava->outer.h;
+    region.x = text->x * wava->outer.w;
+    region.y = text->y * wava->outer.h;
 
     // set text properties
     cairo_select_font_face(handle->cr,
@@ -218,20 +218,20 @@ struct xava_cairo_region xava_cairo_module_calculate_text_region(
     cairo_text_extents_t extents;
     cairo_text_extents(handle->cr, "test123", &extents);
 
-    region.w = text->max_x * xava->outer.w;
+    region.w = text->max_x * wava->outer.w;
     region.h = extents.height;
 
     return region;
 }
 
 // report drawn regions
-EXP_FUNC xava_cairo_region* xava_cairo_module_regions(xava_cairo_module_handle* handle) {
-    XAVA *xava = handle->xava;
-    struct xava_cairo_region *regions;
+EXP_FUNC wava_cairo_region* wava_cairo_module_regions(wava_cairo_module_handle* handle) {
+    WAVA *wava = handle->wava;
+    struct wava_cairo_region *regions;
 
     arr_init_n(regions, region_count);
 
-    float scale = (float)xava->outer.w/xava->outer.h;
+    float scale = (float)wava->outer.w/wava->outer.h;
     if(scale > 1.0) {
         scale = 1.0 / scale;
     }
@@ -243,29 +243,29 @@ EXP_FUNC xava_cairo_region* xava_cairo_module_regions(xava_cairo_module_handle* 
     options.artist.x *= scale;
     options.title.x  *= scale;
 
-    arr_add(regions, xava_cairo_module_calculate_artwork_region(handle, &options.cover));
-    arr_add(regions, xava_cairo_module_calculate_text_region(handle, &options.artist));
-    arr_add(regions, xava_cairo_module_calculate_text_region(handle, &options.title));
+    arr_add(regions, wava_cairo_module_calculate_artwork_region(handle, &options.cover));
+    arr_add(regions, wava_cairo_module_calculate_text_region(handle, &options.artist));
+    arr_add(regions, wava_cairo_module_calculate_text_region(handle, &options.title));
 
     return regions;
 }
 
 // event handler
-EXP_FUNC void               xava_cairo_module_event      (xava_cairo_module_handle* handle) {
-    XAVA *xava = handle->xava;
+EXP_FUNC void               wava_cairo_module_event      (wava_cairo_module_handle* handle) {
+    WAVA *wava = handle->wava;
 
     // check if the visualizer bounds were changed
-    if((xava->inner.w != xava->bar_space.w) ||
-       (xava->inner.h != xava->bar_space.h)) {
-        xava->bar_space.w = xava->inner.w;
-        xava->bar_space.h = xava->inner.h;
-        pushXAVAEventStack(handle->events, XAVA_RESIZE);
+    if((wava->inner.w != wava->bar_space.w) ||
+       (wava->inner.h != wava->bar_space.h)) {
+        wava->bar_space.w = wava->inner.w;
+        wava->bar_space.h = wava->inner.h;
+        pushWAVAEventStack(handle->events, WAVA_RESIZE);
     }
 }
 
-struct region xava_cairo_module_draw_artwork(
+struct region wava_cairo_module_draw_artwork(
         cairo_t          *cr,
-        XAVA             *xava,
+        WAVA             *wava,
         artwork          *artwork) {
     // avoid unsafety
     if(artwork->image->ready == false)
@@ -276,8 +276,8 @@ struct region xava_cairo_module_draw_artwork(
             CAIRO_FORMAT_RGB24, artwork->image->w, artwork->image->h,
             cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, artwork->image->w));
 
-    float actual_scale_x = (float)xava->outer.w / artwork->image->w;
-    float actual_scale_y = (float)xava->outer.h / artwork->image->h;
+    float actual_scale_x = (float)wava->outer.w / artwork->image->w;
+    float actual_scale_y = (float)wava->outer.h / artwork->image->h;
 
     float scale_x = 1.0;
     float scale_y = 1.0;
@@ -328,8 +328,8 @@ struct region xava_cairo_module_draw_artwork(
     float ps_x = 1.0/scale_x;
     float ps_y = 1.0/scale_y;
 
-    float offset_x = (xava->outer.w/scale_x - artwork->image->w + crop_x*2.0)*artwork->x;
-    float offset_y = (xava->outer.h/scale_y - artwork->image->h + crop_y*2.0)*artwork->y;
+    float offset_x = (wava->outer.w/scale_x - artwork->image->w + crop_x*2.0)*artwork->x;
+    float offset_y = (wava->outer.h/scale_y - artwork->image->h + crop_y*2.0)*artwork->y;
 
     // set artwork as brush
     cairo_set_source_surface(cr, art_surface, offset_x-crop_x, offset_y-crop_y);
@@ -357,16 +357,16 @@ struct region xava_cairo_module_draw_artwork(
     };
 }
 
-struct region xava_cairo_module_draw_text(
+struct region wava_cairo_module_draw_text(
         cairo_t     *cr,
-        XAVA        *xava,
+        WAVA        *wava,
         struct text *text) {
     // colors
     cairo_set_source_rgba(cr, text->color.r,
             text->color.g, text->color.b, text->color.a);
 
     int font_size = text->size;
-xava_cairo_module_resize_font:
+wava_cairo_module_resize_font:
 
     // set text properties
     cairo_select_font_face(cr,
@@ -380,14 +380,14 @@ xava_cairo_module_resize_font:
     cairo_text_extents(cr, text->text, &extents);
 
     // shrink the text if it's too big
-    if(extents.width > xava->outer.w*text->max_x) {
+    if(extents.width > wava->outer.w*text->max_x) {
         font_size--;
-        goto xava_cairo_module_resize_font;
+        goto wava_cairo_module_resize_font;
     }
 
     // calculate text offsets
-    float offset_x = xava->outer.w * text->x;
-    float offset_y = extents.height + (xava->outer.h - extents.height) * text->y;
+    float offset_x = wava->outer.w * text->x;
+    float offset_y = extents.height + (wava->outer.h - extents.height) * text->y;
 
     // draw text
     cairo_move_to(cr, offset_x, offset_y);
@@ -403,18 +403,18 @@ xava_cairo_module_resize_font:
     };
 }
 
-cairo_surface_t *xava_cairo_module_draw_new_media_screen(
-        xava_cairo_module_handle *handle,
+cairo_surface_t *wava_cairo_module_draw_new_media_screen(
+        wava_cairo_module_handle *handle,
         struct options           *options,
         struct region            *new_region) {
 
-    XAVA *xava = handle->xava;
+    WAVA *wava = handle->wava;
 
     artwork *cover =  &options->cover;
     text    *title =  &options->title;
     text    *artist = &options->artist;
 
-    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, xava->outer.w, xava->outer.h);
+    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, wava->outer.w, wava->outer.h);
     cairo_t *new_context = cairo_create(surface);
 
     cairo_set_source_rgba(new_context, 0.0, 0.0, 0.0, 0.0);
@@ -425,17 +425,17 @@ cairo_surface_t *xava_cairo_module_draw_new_media_screen(
 
     struct region regions[region_count];
 
-    regions[0] = xava_cairo_module_draw_artwork(
-            new_context, handle->xava, cover);
+    regions[0] = wava_cairo_module_draw_artwork(
+            new_context, handle->wava, cover);
 
-    regions[1] = xava_cairo_module_draw_text(
-            new_context, handle->xava, title);
+    regions[1] = wava_cairo_module_draw_text(
+            new_context, handle->wava, title);
 
-    regions[2] = xava_cairo_module_draw_text(
-            new_context, handle->xava, artist);
+    regions[2] = wava_cairo_module_draw_text(
+            new_context, handle->wava, artist);
 
-    int min_x = xava->outer.w,
-        min_y = xava->outer.h,
+    int min_x = wava->outer.w,
+        min_y = wava->outer.h,
         max_x = 0, max_y = 0;
 
     // region bound dark magic
@@ -461,10 +461,10 @@ cairo_surface_t *xava_cairo_module_draw_new_media_screen(
 }
 
 // assume that the entire screen's being overwritten
-EXP_FUNC void               xava_cairo_module_draw_full  (xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_draw_full  (wava_cairo_module_handle* handle) {
 
     struct media_data *data;
-    data = xava_util_media_data_thread_data(media_data_thread);
+    data = wava_util_media_data_thread_data(media_data_thread);
 
     // artwork has been updated, draw the new one
     if(data->version != last_version) {
@@ -476,12 +476,12 @@ EXP_FUNC void               xava_cairo_module_draw_full  (xava_cairo_module_hand
         options.title.text  = data->title;
         options.cover.image = &data->cover;
 
-        surface = xava_cairo_module_draw_new_media_screen(
+        surface = wava_cairo_module_draw_new_media_screen(
                 handle, &options, &surface_region);
 
         last_version = data->version;
 
-        xavaLog("Artwork update number: %d", data->version);
+        wavaLog("Artwork update number: %d", data->version);
     }
 
     // skip drawing if no artwork is available
@@ -512,14 +512,14 @@ EXP_FUNC void               xava_cairo_module_draw_full  (xava_cairo_module_hand
 }
 
 // informs the thread that it should redraw
-EXP_FUNC void               xava_cairo_module_clear      (xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_clear      (wava_cairo_module_handle* handle) {
     UNUSED(handle);
     redraw_everything = true;
 }
 
-EXP_FUNC void               xava_cairo_module_draw_region(xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_draw_region(wava_cairo_module_handle* handle) {
     struct media_data *data;
-    data = xava_util_media_data_thread_data(media_data_thread);
+    data = wava_util_media_data_thread_data(media_data_thread);
 
     if(data->version != last_version)
         redraw_everything = true;
@@ -528,11 +528,11 @@ EXP_FUNC void               xava_cairo_module_draw_region(xava_cairo_module_hand
     if(redraw_everything == false)
         return;
 
-    xava_cairo_region* regions = xava_cairo_module_regions(handle);
-    XAVA*              xava = handle->xava;
+    wava_cairo_region* regions = wava_cairo_module_regions(handle);
+    WAVA*              wava = handle->wava;
 
-    int min_x = xava->outer.w,
-        min_y = xava->outer.h,
+    int min_x = wava->outer.w,
+        min_y = wava->outer.h,
         max_x = 0, max_y = 0;
 
     // region bound dark magic
@@ -548,39 +548,39 @@ EXP_FUNC void               xava_cairo_module_draw_region(xava_cairo_module_hand
     }
 
     cairo_set_source_rgba(handle->cr,
-            ARGB_R_32(handle->xava->conf.bgcol)/255.0,
-            ARGB_G_32(handle->xava->conf.bgcol)/255.0,
-            ARGB_B_32(handle->xava->conf.bgcol)/255.0,
-            handle->xava->conf.background_opacity);
+            ARGB_R_32(handle->wava->conf.bgcol)/255.0,
+            ARGB_G_32(handle->wava->conf.bgcol)/255.0,
+            ARGB_B_32(handle->wava->conf.bgcol)/255.0,
+            handle->wava->conf.background_opacity);
 
     cairo_rectangle(handle->cr, min_x, min_y, max_x-min_x, max_y-min_y);
     cairo_fill(handle->cr);
 
     arr_free(regions);
 
-    xava_cairo_module_draw_full(handle);
+    wava_cairo_module_draw_full(handle);
 }
 
 // no matter what condition, this ensures a safe write
-EXP_FUNC void               xava_cairo_module_draw_safe  (xava_cairo_module_handle* handle) {
-    xava_cairo_module_draw_full(handle);
+EXP_FUNC void               wava_cairo_module_draw_safe  (wava_cairo_module_handle* handle) {
+    wava_cairo_module_draw_full(handle);
 }
 
-EXP_FUNC void               xava_cairo_module_cleanup    (xava_cairo_module_handle* handle) {
+EXP_FUNC void               wava_cairo_module_cleanup    (wava_cairo_module_handle* handle) {
     UNUSED(handle);
-    xava_util_media_data_thread_destroy(media_data_thread);
+    wava_util_media_data_thread_destroy(media_data_thread);
     if(last_version > 0)
         cairo_surface_destroy(surface);
 }
 
 // ionotify fun
-EXP_FUNC void         xava_cairo_module_ionotify_callback
-                (XAVA_IONOTIFY_EVENT event,
+EXP_FUNC void         wava_cairo_module_ionotify_callback
+                (WAVA_IONOTIFY_EVENT event,
                 const char* filename,
                 int id,
-                XAVA* xava) {
+                WAVA* wava) {
     UNUSED(event);
     UNUSED(filename);
     UNUSED(id);
-    UNUSED(xava);
+    UNUSED(wava);
 }

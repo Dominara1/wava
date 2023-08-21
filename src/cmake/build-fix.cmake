@@ -5,7 +5,7 @@ endif()
 
 # REQUIRE GIT to be present
 if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
-    message(FATAL_ERROR "XAVA from 0.7.0 onwards requires to be built in a .git directory")
+    message(FATAL_ERROR "WAVA from 0.7.0 onwards requires to be built in a .git directory")
 endif()
 
 # Fix pkg-config for cross-builds (such as MinGW on ArchLinux)

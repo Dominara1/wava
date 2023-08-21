@@ -18,10 +18,10 @@ void waylandEGLCreateWindow(struct waydata *wd) {
     struct wl_egl_window *egl_window = wl_egl_window_create(wd->surface,
             wd->hand->conf.w, wd->hand->conf.h);
 
-    xavaBailCondition(egl_window == EGL_NO_SURFACE,
+    wavaBailCondition(egl_window == EGL_NO_SURFACE,
             "Failed to create EGL window!\n");
 
-    xavaSpam("Created EGL window!");
+    wavaSpam("Created EGL window!");
 
     wd->ESContext.native_window = (EGLNativeWindowType)egl_window;
     wd->ESContext.native_display = wd->display;

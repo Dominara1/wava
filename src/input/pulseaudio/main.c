@@ -13,7 +13,7 @@ pa_mainloop *m_pulseaudio_mainloop;
 
 void cb(__attribute__((unused)) pa_context *pulseaudio_context, const pa_server_info *i, void *userdata){
     //getting default sink name
-    XAVA_AUDIO *audio = (XAVA_AUDIO *)userdata;
+    WAVA_AUDIO *audio = (WAVA_AUDIO *)userdata;
     audio->source = malloc(sizeof(char) * 1024);
 
     strcpy(audio->source,i->default_sink_name);
@@ -34,27 +34,27 @@ void pulseaudio_context_state_callback(pa_context *pulseaudio_context,
     //make sure loop is ready
     switch (pa_context_get_state(pulseaudio_context)) {
         case PA_CONTEXT_UNCONNECTED:
-            xavaSpam("UNCONNECTED");
+            wavaSpam("UNCONNECTED");
             break;
         case PA_CONTEXT_CONNECTING:
-            xavaSpam("CONNECTING");
+            wavaSpam("CONNECTING");
             break;
         case PA_CONTEXT_AUTHORIZING:
-            xavaSpam("AUTHORIZING");
+            wavaSpam("AUTHORIZING");
             break;
         case PA_CONTEXT_SETTING_NAME:
-            xavaSpam("SETTING_NAME");
+            wavaSpam("SETTING_NAME");
             break;
         case PA_CONTEXT_READY://extract default sink name
-            xavaSpam("READY");
+            wavaSpam("READY");
             pa_operation_unref(pa_context_get_server_info(
             pulseaudio_context, cb, userdata));
             break;
         case PA_CONTEXT_FAILED:
-            xavaBail("Fail to connect to pulseaudio server");
+            wavaBail("Fail to connect to pulseaudio server");
             break;
         case PA_CONTEXT_TERMINATED:
-            xavaSpam("TERMINATED");
+            wavaSpam("TERMINATED");
             pa_mainloop_quit(m_pulseaudio_mainloop, 0);
             break;
     }
@@ -62,7 +62,7 @@ void pulseaudio_context_state_callback(pa_context *pulseaudio_context,
 
 
 void getPulseDefaultSink(void* data) {
-    XAVA_AUDIO *audio = (XAVA_AUDIO *)data;
+    WAVA_AUDIO *audio = (WAVA_AUDIO *)data;
     pa_mainloop_api *mainloop_api;
     pa_context *pulseaudio_context;
     int ret;
@@ -71,12 +71,12 @@ void getPulseDefaultSink(void* data) {
     m_pulseaudio_mainloop = pa_mainloop_new();
 
     mainloop_api = pa_mainloop_get_api(m_pulseaudio_mainloop);
-    pulseaudio_context = pa_context_new(mainloop_api, "xava device list");
+    pulseaudio_context = pa_context_new(mainloop_api, "wava device list");
 
     // This function connects to the pulse server
     pa_context_connect(pulseaudio_context, NULL, PA_CONTEXT_NOFLAGS, NULL);
 
-    xavaSpam("Connecting to PulseAudio server");
+    wavaSpam("Connecting to PulseAudio server");
 
     // This function defines a callback so the server will tell us its state.
     pa_context_set_state_callback(pulseaudio_context,
@@ -85,16 +85,16 @@ void getPulseDefaultSink(void* data) {
     // starting a mainloop to get default sink
 
     // starting with one nonblokng iteration in case pulseaudio is not able to run
-    xavaBailCondition(!(ret=pa_mainloop_iterate(m_pulseaudio_mainloop, 0, &ret)),
+    wavaBailCondition(!(ret=pa_mainloop_iterate(m_pulseaudio_mainloop, 0, &ret)),
             "Could not open PulseAudio mainloop to find device name: %d\n"
             "Check if PulseAudio is running!\n", ret);
 
     pa_mainloop_run(m_pulseaudio_mainloop, &ret);
 }
 
-EXP_FUNC void* xavaInput(void* data)
+EXP_FUNC void* wavaInput(void* data)
 {
-    XAVA_AUDIO *audio = (XAVA_AUDIO *)data;
+    WAVA_AUDIO *audio = (WAVA_AUDIO *)data;
     uint32_t n;
     int16_t buf[audio->inputsize];
 
@@ -160,9 +160,9 @@ EXP_FUNC void* xavaInput(void* data)
     return 0;
 }
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
-    audio->source = (char*)xavaConfigGetString(config, "input", "source", "auto");
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
+    audio->source = (char*)wavaConfigGetString(config, "input", "source", "auto");
 }
 

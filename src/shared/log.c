@@ -11,11 +11,11 @@
 
 // internal stuff below
 
-enum XAVA_MESSAGE_TYPE {
-    XAVA_LOG_ERROR, XAVA_LOG_WARN, XAVA_LOG_NORM, XAVA_LOG_SPAM
+enum WAVA_MESSAGE_TYPE {
+    WAVA_LOG_ERROR, WAVA_LOG_WARN, WAVA_LOG_NORM, WAVA_LOG_SPAM
 };
 
-static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, const char *fmt,
+static void __internal_wavaMsgHnd(enum WAVA_MESSAGE_TYPE mes, const char *fmt,
         const char *func, const char *file, int line, va_list list) {
 
     // please don't let this be a memory bug
@@ -28,16 +28,16 @@ static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, const char *fmt,
     bool ignore_spam = true;
     char *indicator = "[BUG!FIXTHISRIGHTTHEFUCKNOW]"; // ideally never shown
 
-    if(getenv("XAVA_DEBUG"))
+    if(getenv("WAVA_DEBUG"))
         debug_details = true;
 
-    if(getenv("XAVA_TRACE"))
+    if(getenv("WAVA_TRACE"))
         stack_trace = true;
 
-    if(getenv("XAVA_SPAMMY"))
+    if(getenv("WAVA_SPAMMY"))
         ignore_spam = false;
 
-    if(getenv("XAVA_SCREAM")) {
+    if(getenv("WAVA_SCREAM")) {
         debug_details = true;
         stack_trace = true;
         ignore_spam = false;
@@ -47,20 +47,20 @@ static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, const char *fmt,
 
     // process message headers
     switch(mes) {
-        case XAVA_LOG_ERROR:
+        case WAVA_LOG_ERROR:
             output = stderr;
             should_trace = true;
             indicator = "[ERROR]";
             break;
-        case XAVA_LOG_WARN:
+        case WAVA_LOG_WARN:
             should_trace = true;
             indicator = "[WARN]";
             break;
-        case XAVA_LOG_NORM:
+        case WAVA_LOG_NORM:
             if(ignore_spam) return;
             indicator = "[INFO]";
             break;
-        case XAVA_LOG_SPAM:
+        case WAVA_LOG_SPAM:
             if(ignore_spam) return;
             indicator = "[SPAM]";
             break;
@@ -97,11 +97,11 @@ static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, const char *fmt,
         char *messageTypeString = NULL;
         UINT messageBoxParams = MB_OK;
         switch(mes) {
-            case XAVA_LOG_ERROR:
+            case WAVA_LOG_ERROR:
                 messageTypeString = "Error";
                 messageBoxParams |= MB_ICONERROR;
                 break;
-            case XAVA_LOG_WARN:
+            case WAVA_LOG_WARN:
                 messageTypeString = "Warning";
                 messageBoxParams |= MB_ICONWARNING;
                 break;
@@ -125,35 +125,35 @@ static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, const char *fmt,
 
 // global stuff below
 
-EXP_FUNC void __internal_xavaSpam(const char *func, const char *file, int line, const char *fmt, ...) {
+EXP_FUNC void __internal_wavaSpam(const char *func, const char *file, int line, const char *fmt, ...) {
     va_list list;
     va_start(list, fmt);
-    __internal_xavaMsgHnd(XAVA_LOG_SPAM, fmt, func, file, line, list);
+    __internal_wavaMsgHnd(WAVA_LOG_SPAM, fmt, func, file, line, list);
     va_end(list);
 }
 
-EXP_FUNC void __internal_xavaLog(const char *func, const char *file, int line, const char *fmt, ...) {
+EXP_FUNC void __internal_wavaLog(const char *func, const char *file, int line, const char *fmt, ...) {
     va_list list;
     va_start(list, fmt);
-    __internal_xavaMsgHnd(XAVA_LOG_NORM, fmt, func, file, line, list);
+    __internal_wavaMsgHnd(WAVA_LOG_NORM, fmt, func, file, line, list);
     va_end(list);
 }
 
-EXP_FUNC void __internal_xavaWarn(const char *func, const char *file, int line, const char *fmt, ...) {
+EXP_FUNC void __internal_wavaWarn(const char *func, const char *file, int line, const char *fmt, ...) {
     va_list list;
     va_start(list, fmt);
-    __internal_xavaMsgHnd(XAVA_LOG_WARN, fmt, func, file, line, list);
+    __internal_wavaMsgHnd(WAVA_LOG_WARN, fmt, func, file, line, list);
     va_end(list);
 }
 
-EXP_FUNC void __internal_xavaError(const char *func, const char *file, int line, const char *fmt, ...) {
+EXP_FUNC void __internal_wavaError(const char *func, const char *file, int line, const char *fmt, ...) {
     va_list list;
     va_start(list, fmt);
-    __internal_xavaMsgHnd(XAVA_LOG_ERROR, fmt, func, file, line, list);
+    __internal_wavaMsgHnd(WAVA_LOG_ERROR, fmt, func, file, line, list);
     va_end(list);
 }
 
-EXP_FUNC void __internal_xavaDie(void) {
+EXP_FUNC void __internal_wavaDie(void) {
     exit(EXIT_FAILURE);
 }
 

@@ -1,15 +1,15 @@
 #include "shared.h"
 
-EXP_FUNC xava_version xava_version_host_get(void) {
-    xava_version v;
-    v.major = XAVA_VERSION_MAJOR;
-    v.minor = XAVA_VERSION_MINOR;
-    v.tweak = XAVA_VERSION_TWEAK;
-    v.patch = XAVA_VERSION_PATCH;
+EXP_FUNC wava_version wava_version_host_get(void) {
+    wava_version v;
+    v.major = WAVA_VERSION_MAJOR;
+    v.minor = WAVA_VERSION_MINOR;
+    v.tweak = WAVA_VERSION_TWEAK;
+    v.patch = WAVA_VERSION_PATCH;
     return v;
 }
 
-EXP_FUNC bool xava_version_less(xava_version host, xava_version target)
+EXP_FUNC bool wava_version_less(wava_version host, wava_version target)
 {
     if(target.major > host.major) {
         return false;
@@ -38,7 +38,7 @@ EXP_FUNC bool xava_version_less(xava_version host, xava_version target)
     return false;
 }
 
-EXP_FUNC bool xava_version_greater(xava_version host, xava_version target)
+EXP_FUNC bool wava_version_greater(wava_version host, wava_version target)
 {
     if(target.major > host.major) {
         return true;
@@ -67,7 +67,7 @@ EXP_FUNC bool xava_version_greater(xava_version host, xava_version target)
     return false;
 }
 
-EXP_FUNC bool xava_version_equal(xava_version host, xava_version target)
+EXP_FUNC bool wava_version_equal(wava_version host, wava_version target)
 {
     if(target.major == host.major && target.minor == host.minor &&
         target.tweak == host.tweak && target.patch == host.patch) {
@@ -76,15 +76,15 @@ EXP_FUNC bool xava_version_equal(xava_version host, xava_version target)
     return false;
 }
 
-EXP_FUNC bool xava_version_breaking_check(xava_version target)
+EXP_FUNC bool wava_version_breaking_check(wava_version target)
 {
     // list of all versions that broke something in terms of internal variables
-    xava_version breaking_versions[] = {
+    wava_version breaking_versions[] = {
         {0, 7, 1, 1},
     };
 
-    for(size_t i = 0; i < sizeof(breaking_versions)/sizeof(xava_version); i++) {
-        if(xava_version_less(breaking_versions[i], target)) {
+    for(size_t i = 0; i < sizeof(breaking_versions)/sizeof(wava_version); i++) {
+        if(wava_version_less(breaking_versions[i], target)) {
             return true;
         }
     }
@@ -92,25 +92,25 @@ EXP_FUNC bool xava_version_breaking_check(xava_version target)
     return false;
 }
 
-EXP_FUNC XAVA_VERSION_COMPATIBILITY xava_version_verify(xava_version target)
+EXP_FUNC WAVA_VERSION_COMPATIBILITY wava_version_verify(wava_version target)
 {
-    xava_version host = xava_version_host_get();
+    wava_version host = wava_version_host_get();
 
-    if(xava_version_equal(host, target)) {
-        return XAVA_VERSIONS_COMPATIBLE;
+    if(wava_version_equal(host, target)) {
+        return WAVA_VERSIONS_COMPATIBLE;
     }
 
-    if(xava_version_breaking_check(target)) {
-        xavaError("The version of the module is NOT compatible with the current build");
-        return XAVA_VERSIONS_INCOMPATIBLE;
+    if(wava_version_breaking_check(target)) {
+        wavaError("The version of the module is NOT compatible with the current build");
+        return WAVA_VERSIONS_INCOMPATIBLE;
     }
 
-    if(xava_version_greater(host, target)) {
-        xavaError("Please update XAVA to run this.");
-        return XAVA_VERSIONS_INCOMPATIBLE;
+    if(wava_version_greater(host, target)) {
+        wavaError("Please update WAVA to run this.");
+        return WAVA_VERSIONS_INCOMPATIBLE;
     }
 
-    xavaWarn("Versions may not be compatbile");
-    return XAVA_VERSIONS_UNKNOWN;
+    wavaWarn("Versions may not be compatbile");
+    return WAVA_VERSIONS_UNKNOWN;
 }
 

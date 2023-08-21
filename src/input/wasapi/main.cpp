@@ -14,7 +14,7 @@ extern "C" {
 }
 
 // This variable is read by the main executable
-const char XAVA_DEFAULT_AUDIO_SORUCE[] = "loopback";
+const char WAVA_DEFAULT_AUDIO_SORUCE[] = "loopback";
 
 using namespace std;
 
@@ -23,7 +23,7 @@ const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
 const IID IID_IAudioClient = __uuidof(IAudioClient);
 const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 
-static XAVA_AUDIO *audio;
+static WAVA_AUDIO *audio;
 static u32 n;
 
 HRESULT sinkSetFormat(WAVEFORMATEX * pWF) {
@@ -76,7 +76,7 @@ HRESULT sinkCopyData(BYTE * pData, UINT32 NumFrames) {
 
 extern "C" {
 
-EXP_FUNC void* xavaInput(void *audiodata) {
+EXP_FUNC void* wavaInput(void *audiodata) {
     HRESULT hr;
     REFERENCE_TIME hnsRequestedDuration = REFTIMES_PER_SEC;
     UINT32 bufferFrameCount;
@@ -89,7 +89,7 @@ EXP_FUNC void* xavaInput(void *audiodata) {
     UINT32 packetLength = 0;
     BYTE *pData;
     DWORD flags;
-    audio = (XAVA_AUDIO *)audiodata;
+    audio = (WAVA_AUDIO *)audiodata;
     REFERENCE_TIME hnsDefaultDevicePeriod;
 
     n = 0; // reset the buffer counter
@@ -100,19 +100,19 @@ EXP_FUNC void* xavaInput(void *audiodata) {
             CLSID_MMDeviceEnumerator, NULL,
             CLSCTX_ALL, IID_IMMDeviceEnumerator,
             (void**)&pEnumerator);
-    xavaBailCondition(hr, "CoCreateInstance failed - Couldn't get IMMDeviceEnumerator");
+    wavaBailCondition(hr, "CoCreateInstance failed - Couldn't get IMMDeviceEnumerator");
 
     hr = pEnumerator->GetDefaultAudioEndpoint(
             strcmp(audio->source, "loopback") ? eCapture : eRender, eConsole, &pDevice);
-    xavaBailCondition(hr, "Failed to get default audio endpoint");
+    wavaBailCondition(hr, "Failed to get default audio endpoint");
 
     hr = pDevice->Activate(
         IID_IAudioClient, CLSCTX_ALL,
         NULL, (void**)&pAudioClient);
-    xavaBailCondition(hr, "Failed setting up default audio endpoint");
+    wavaBailCondition(hr, "Failed setting up default audio endpoint");
 
     hr = pAudioClient->GetMixFormat(&pwfx);
-    xavaBailCondition(hr, "Failed getting default audio endpoint mix format");
+    wavaBailCondition(hr, "Failed getting default audio endpoint mix format");
 
     hr = pAudioClient->Initialize(
             AUDCLNT_SHAREMODE_SHARED,
@@ -121,26 +121,26 @@ EXP_FUNC void* xavaInput(void *audiodata) {
             0,
             pwfx,
             NULL);
-    xavaBailCondition(hr, "Failed initilizing default audio endpoint");
+    wavaBailCondition(hr, "Failed initilizing default audio endpoint");
 
     // Get the size of the allocated buffer.
     hr = pAudioClient->GetBufferSize(&bufferFrameCount);
-    xavaBailCondition(hr, "Failed getting buffer size");
+    wavaBailCondition(hr, "Failed getting buffer size");
 
     hr = pAudioClient->GetService(
         IID_IAudioCaptureClient,
         (void**)&pCaptureClient);
-    xavaBailCondition(hr, "Failed getting capture service");
+    wavaBailCondition(hr, "Failed getting capture service");
 
     // Set the audio sink format to use.
     hr = sinkSetFormat(pwfx);
-    xavaBailCondition(hr, "Failed setting format");
+    wavaBailCondition(hr, "Failed setting format");
 
     hr = pAudioClient->Start();  // Start recording.
-    xavaBailCondition(hr, "Failed starting capture");
+    wavaBailCondition(hr, "Failed starting capture");
 
     hr = pAudioClient->GetDevicePeriod(&hnsDefaultDevicePeriod, NULL);
-    xavaBailCondition(hr, "Error getting device period");
+    wavaBailCondition(hr, "Error getting device period");
 
     LONG lTimeBetweenFires = 1000*audio->latency/audio->rate; // convert to milliseconds
 
@@ -149,7 +149,7 @@ EXP_FUNC void* xavaInput(void *audiodata) {
         Sleep(lTimeBetweenFires);
 
         hr = pCaptureClient->GetNextPacketSize(&packetLength);
-        xavaBailCondition(hr, "Failure getting buffer size");
+        wavaBailCondition(hr, "Failure getting buffer size");
 
         while (packetLength != 0) {
             // Get the available data in the shared buffer.
@@ -157,24 +157,24 @@ EXP_FUNC void* xavaInput(void *audiodata) {
                     &pData,
                     &numFramesAvailable,
                     &flags, NULL, NULL);
-            xavaBailCondition(hr, "Failure to capture available buffer data");
+            wavaBailCondition(hr, "Failure to capture available buffer data");
 
             //if (flags & AUDCLNT_BUFFERFLAGS_SILENT) pData = NULL;  // Tell CopyData to write silence.
 
             // Copy the available capture data to the audio sink.
             hr = sinkCopyData(pData, numFramesAvailable);
-            xavaBailCondition(hr, "Failure copying buffer data");
+            wavaBailCondition(hr, "Failure copying buffer data");
 
             hr = pCaptureClient->ReleaseBuffer(numFramesAvailable);
-            xavaBailCondition(hr, "Failed to release buffer");
+            wavaBailCondition(hr, "Failed to release buffer");
 
             hr = pCaptureClient->GetNextPacketSize(&packetLength);
-            xavaBailCondition(hr, "Failure getting buffer size");
+            wavaBailCondition(hr, "Failure getting buffer size");
         }
     }
 
     hr = pAudioClient->Stop();  // Stop recording.
-    xavaBailCondition(hr, "Failure stopping capture");
+    wavaBailCondition(hr, "Failure stopping capture");
 
     CoTaskMemFree(pwfx);
     pEnumerator->Release();
@@ -188,11 +188,11 @@ EXP_FUNC void* xavaInput(void *audiodata) {
 }
 
 
-EXP_FUNC void xavaInputLoadConfig(XAVA *xava) {
-    XAVA_AUDIO *audio = &xava->audio;
-    xava_config_source config = xava->default_config.config;
+EXP_FUNC void wavaInputLoadConfig(WAVA *wava) {
+    WAVA_AUDIO *audio = &wava->audio;
+    wava_config_source config = wava->default_config.config;
 
-    audio->source = xavaConfigGetString(config, "input", "source", "loopback");
+    audio->source = wavaConfigGetString(config, "input", "source", "loopback");
 }
 
 } // extern "C"

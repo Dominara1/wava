@@ -16,19 +16,19 @@ if(SDL2)
         endif()
 
         # add winapi test
-        list(APPEND DEFAULT_OUTPUT_SOURCES "${XAVA_MODULE_DIR}/test.c")
+        list(APPEND DEFAULT_OUTPUT_SOURCES "${WAVA_MODULE_DIR}/test.c")
         list(APPEND DEFAULT_OUTPUT_LINKDIR "${SDL2_LIBRARY_DIRS}")
         list(APPEND DEFAULT_OUTPUT_LINKLIB "${SDL2_LIBRARIES}")
         list(APPEND DEFAULT_OUTPUT_INCDIR  "${SDL2_INCLUDE_DIRS}")
         list(APPEND DEFAULT_OUTPUT_DEF     "-DSDL2")
 
         add_library(out_sdl2_opengl SHARED
-            "${XAVA_MODULE_DIR}/main.c"
+            "${WAVA_MODULE_DIR}/main.c"
             "src/output/shared/graphical.c"
             "src/output/shared/gl/main.c"
             "src/output/shared/gl/glew.c"
             "${GLOBAL_FUNCTION_SOURCES}")
-        target_link_libraries(out_sdl2_opengl xava-shared
+        target_link_libraries(out_sdl2_opengl wava-shared
             ${SDL2_LIBRARIES} ${GLEW_LIBRARIES})
         target_include_directories(out_sdl2_opengl PRIVATE
             ${SDL2_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
@@ -36,7 +36,7 @@ if(SDL2)
             ${SDL2_LIBRARY_DIRS} ${GLEW_LIBRARY_DIRS})
         set_target_properties(out_sdl2_opengl PROPERTIES PREFIX "")
         target_compile_definitions(out_sdl2_opengl PUBLIC -DSDL -DGL)
-        install(TARGETS out_sdl2_opengl DESTINATION lib/xava)
+        install(TARGETS out_sdl2_opengl DESTINATION lib/wava)
 
         find_and_copy_dlls(out_sdl2_opengl)
 

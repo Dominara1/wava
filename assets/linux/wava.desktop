@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=Application
 Version=1.1
-Name=XAVA
+Name=WAVA
 GenericName=Graphical Audio Visualizer
 Comment=X11 Audio Visualizer for ALSA
-Exec=xava
-Icon=xava_visualizer
+Exec=wava
+Icon=wava_visualizer
 Terminal=false
 Categories=Audio;AudioVideo
 

@@ -22,19 +22,19 @@ static const char *taglib_id_picture = "APIC";
 
 #include "artwork.h"
 
-bool xava_util_artwork_update_by_audio_file(const char *url,
+bool wava_util_artwork_update_by_audio_file(const char *url,
         struct artwork *artwork) {
     TagLib::MPEG::File                   mpeg_file(&url[strlen(URI_HEADER_MUSIC)]);
     TagLib::ID3v2::Tag                  *id3v2tag = mpeg_file.ID3v2Tag();
     TagLib::ID3v2::FrameList             frame;
     TagLib::ID3v2::AttachedPictureFrame *pic_frame;
 
-    xavaReturnWarnCondition(id3v2tag == nullptr, true,
+    wavaReturnWarnCondition(id3v2tag == nullptr, true,
             "id3v2 not present in '%s'", url);
     
     // picture frame
     frame = id3v2tag->frameListMap()[taglib_id_picture];
-    xavaReturnLogCondition(frame.isEmpty() == true, true,
+    wavaReturnLogCondition(frame.isEmpty() == true, true,
             "'%s' has no artwork information", url);
     
     for(auto it = frame.begin(); it != frame.end(); ++it) {

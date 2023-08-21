@@ -9,16 +9,16 @@ IF(WAYLAND_PROTOCOLS_FOUND)
     function(generate_wayland_source input output)
         get_filename_component(FILE_EXT "${output}" LAST_EXT)
         if(FILE_EXT MATCHES ".c")
-            add_custom_command(OUTPUT "${XAVA_MODULE_DIR}/gen/${output}"
+            add_custom_command(OUTPUT "${WAVA_MODULE_DIR}/gen/${output}"
                 COMMAND wayland-scanner private-code
                 "${input}"
-                "${XAVA_MODULE_DIR}/gen/${output}"
+                "${WAVA_MODULE_DIR}/gen/${output}"
                 VERBATIM)
         elseif(FILE_EXT MATCHES ".h")
-            add_custom_command(OUTPUT "${XAVA_MODULE_DIR}/gen/${output}"
+            add_custom_command(OUTPUT "${WAVA_MODULE_DIR}/gen/${output}"
                 COMMAND wayland-scanner client-header
                 "${input}"
-                "${XAVA_MODULE_DIR}/gen/${output}"
+                "${WAVA_MODULE_DIR}/gen/${output}"
                 VERBATIM)
 
             if(_EXIT_CODE)
@@ -55,20 +55,20 @@ if(WAYLAND)
             "xdg-output-unstable-v1-client-protocol.c")
 
         generate_wayland_source(
-            "${XAVA_MODULE_DIR}/protocols/wlr-layer-shell-unstable-v1.xml"
+            "${WAVA_MODULE_DIR}/protocols/wlr-layer-shell-unstable-v1.xml"
             "wlr-layer-shell-unstable-v1-client-protocol.h")
         generate_wayland_source(
-            "${XAVA_MODULE_DIR}/protocols/wlr-layer-shell-unstable-v1.xml"
+            "${WAVA_MODULE_DIR}/protocols/wlr-layer-shell-unstable-v1.xml"
             "wlr-layer-shell-unstable-v1-client-protocol.c")
         generate_wayland_source(
-            "${XAVA_MODULE_DIR}/protocols/wlr-output-management-unstable-v1.xml"
+            "${WAVA_MODULE_DIR}/protocols/wlr-output-management-unstable-v1.xml"
             "wlr-output-managment-unstable-v1.h")
         generate_wayland_source(
-            "${XAVA_MODULE_DIR}/protocols/wlr-output-management-unstable-v1.xml"
+            "${WAVA_MODULE_DIR}/protocols/wlr-output-management-unstable-v1.xml"
             "wlr-output-managment-unstable-v1.c")
 
         # add winapi test
-        list(APPEND DEFAULT_OUTPUT_SOURCES "${XAVA_MODULE_DIR}/test.c")
+        list(APPEND DEFAULT_OUTPUT_SOURCES "${WAVA_MODULE_DIR}/test.c")
         list(APPEND DEFAULT_OUTPUT_LINKDIR "${WAYLAND_LIBRARY_DIRS}")
         list(APPEND DEFAULT_OUTPUT_LINKLIB "${WAYLAND_LIBRARIES}")
         list(APPEND DEFAULT_OUTPUT_INCDIR  "${WAYLAND_INCLUDE_DIRS}")
@@ -83,25 +83,25 @@ if(WAYLAND)
     pkg_check_modules(WAYLAND_EGL QUIET glew egl wayland-egl)
     if(WAYLAND_FOUND AND WAYLAND_EGL_FOUND)
         add_library(out_wayland_opengl SHARED
-            "${XAVA_MODULE_DIR}/main.c"
-            "${XAVA_MODULE_DIR}/wl_output.c"
-            "${XAVA_MODULE_DIR}/registry.c"
-            "${XAVA_MODULE_DIR}/xdg.c"
-            "${XAVA_MODULE_DIR}/egl.c"
-            "${XAVA_MODULE_DIR}/zwlr.c"
+            "${WAVA_MODULE_DIR}/main.c"
+            "${WAVA_MODULE_DIR}/wl_output.c"
+            "${WAVA_MODULE_DIR}/registry.c"
+            "${WAVA_MODULE_DIR}/xdg.c"
+            "${WAVA_MODULE_DIR}/egl.c"
+            "${WAVA_MODULE_DIR}/zwlr.c"
             "src/output/shared/gl/egl.c"
             "src/output/shared/gl/main.c"
             "src/output/shared/graphical.c"
-            "${XAVA_MODULE_DIR}/gen/xdg-shell-client-protocol.c"
-            "${XAVA_MODULE_DIR}/gen/xdg-output-unstable-v1-client-protocol.c"
-            "${XAVA_MODULE_DIR}/gen/wlr-output-managment-unstable-v1.c"
-            "${XAVA_MODULE_DIR}/gen/wlr-layer-shell-unstable-v1-client-protocol.c"
-            "${XAVA_MODULE_DIR}/gen/xdg-shell-client-protocol.h"
-            "${XAVA_MODULE_DIR}/gen/xdg-output-unstable-v1-client-protocol.h"
-            "${XAVA_MODULE_DIR}/gen/wlr-output-managment-unstable-v1.h"
-            "${XAVA_MODULE_DIR}/gen/wlr-layer-shell-unstable-v1-client-protocol.h"
+            "${WAVA_MODULE_DIR}/gen/xdg-shell-client-protocol.c"
+            "${WAVA_MODULE_DIR}/gen/xdg-output-unstable-v1-client-protocol.c"
+            "${WAVA_MODULE_DIR}/gen/wlr-output-managment-unstable-v1.c"
+            "${WAVA_MODULE_DIR}/gen/wlr-layer-shell-unstable-v1-client-protocol.c"
+            "${WAVA_MODULE_DIR}/gen/xdg-shell-client-protocol.h"
+            "${WAVA_MODULE_DIR}/gen/xdg-output-unstable-v1-client-protocol.h"
+            "${WAVA_MODULE_DIR}/gen/wlr-output-managment-unstable-v1.h"
+            "${WAVA_MODULE_DIR}/gen/wlr-layer-shell-unstable-v1-client-protocol.h"
             "${GLOBAL_FUNCTION_SOURCES}")
-        target_link_libraries(out_wayland_opengl xava-shared
+        target_link_libraries(out_wayland_opengl wava-shared
             ${WAYLAND_LIBRARIES} ${WAYLAND_EGL_LIBRARIES} OpenGL
             GL wayland-egl GLEW)
         target_include_directories(out_wayland_opengl PRIVATE
@@ -109,7 +109,7 @@ if(WAYLAND)
         target_link_directories(out_wayland_opengl PRIVATE
             ${WAYLAND_LIBRARY_DIRS} ${WAYLAND_EGL_LIBRARY_DIRS})
         set_target_properties(out_wayland_opengl PROPERTIES PREFIX "")
-        install(TARGETS out_wayland_opengl DESTINATION lib/xava)
+        install(TARGETS out_wayland_opengl DESTINATION lib/wava)
         target_compile_definitions(out_wayland_opengl PUBLIC -DWAYLAND -DEGL)
     else()
         message(WARNING "Wayland EGL or GLEW libraries not found, \"wayland\" won't build")
@@ -118,31 +118,31 @@ if(WAYLAND)
     pkg_check_modules(CAIRO QUIET cairo)
     if(WAYLAND_FOUND AND CAIRO_FOUND)
         add_library(out_wayland_cairo SHARED
-            "${XAVA_MODULE_DIR}/main.c"
-            "${XAVA_MODULE_DIR}/wl_output.c"
-            "${XAVA_MODULE_DIR}/registry.c"
-            "${XAVA_MODULE_DIR}/xdg.c"
-            "${XAVA_MODULE_DIR}/cairo.c"
-            "${XAVA_MODULE_DIR}/shm.c"
-            "${XAVA_MODULE_DIR}/zwlr.c"
+            "${WAVA_MODULE_DIR}/main.c"
+            "${WAVA_MODULE_DIR}/wl_output.c"
+            "${WAVA_MODULE_DIR}/registry.c"
+            "${WAVA_MODULE_DIR}/xdg.c"
+            "${WAVA_MODULE_DIR}/cairo.c"
+            "${WAVA_MODULE_DIR}/shm.c"
+            "${WAVA_MODULE_DIR}/zwlr.c"
             "src/output/shared/cairo/main.c"
             "src/output/shared/cairo/util/feature_compat.c"
             "src/output/shared/cairo/util/module.c"
             "src/output/shared/cairo/util/region.c"
             "src/output/shared/graphical.c"
-            "${XAVA_MODULE_DIR}/gen/xdg-shell-client-protocol.c"
-            "${XAVA_MODULE_DIR}/gen/xdg-output-unstable-v1-client-protocol.c"
-            "${XAVA_MODULE_DIR}/gen/wlr-output-managment-unstable-v1.c"
-            "${XAVA_MODULE_DIR}/gen/wlr-layer-shell-unstable-v1-client-protocol.c"
+            "${WAVA_MODULE_DIR}/gen/xdg-shell-client-protocol.c"
+            "${WAVA_MODULE_DIR}/gen/xdg-output-unstable-v1-client-protocol.c"
+            "${WAVA_MODULE_DIR}/gen/wlr-output-managment-unstable-v1.c"
+            "${WAVA_MODULE_DIR}/gen/wlr-layer-shell-unstable-v1-client-protocol.c"
             "${GLOBAL_FUNCTION_SOURCES}")
-        target_link_libraries(out_wayland_cairo xava-shared
+        target_link_libraries(out_wayland_cairo wava-shared
             ${WAYLAND_LIBRARIES} ${CAIRO_LIBRARIES})
         target_include_directories(out_wayland_cairo PRIVATE
             ${WAYLAND_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS})
         target_link_directories(out_wayland_cairo PRIVATE
             ${WAYLAND_LIBRARY_DIRS} ${CAIRO_LIBRARY_DIRS})
         set_target_properties(out_wayland_cairo PROPERTIES PREFIX "")
-        install(TARGETS out_wayland_cairo DESTINATION lib/xava)
+        install(TARGETS out_wayland_cairo DESTINATION lib/wava)
         target_compile_definitions(out_wayland_cairo PUBLIC -DWAYLAND -DCAIRO
             -DSHM)
     else()

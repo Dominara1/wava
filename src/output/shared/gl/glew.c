@@ -9,33 +9,33 @@
 #include "output/shared/graphical.h"
 
 
-void GLConfigLoad(XAVA *xava) {
-    SGLConfigLoad(xava);
+void GLConfigLoad(WAVA *wava) {
+    SGLConfigLoad(wava);
 }
 
-void GLInit(XAVA *xava) {
+void GLInit(WAVA *wava) {
     glewInit();
 
-    SGLInit(xava);
+    SGLInit(wava);
 }
 
-void GLApply(XAVA *xava) {
-    SGLApply(xava);
+void GLApply(WAVA *wava) {
+    SGLApply(wava);
 }
 
-XG_EVENT_STACK *GLEvent(XAVA *xava) {
-    return SGLEvent(xava);
+XG_EVENT_STACK *GLEvent(WAVA *wava) {
+    return SGLEvent(wava);
 }
 
-void GLClear(XAVA *xava) {
-    SGLClear(xava);
+void GLClear(WAVA *wava) {
+    SGLClear(wava);
 }
 
-void GLDraw(XAVA *xava) {
-    SGLDraw(xava);
+void GLDraw(WAVA *wava) {
+    SGLDraw(wava);
 }
 
-void GLCleanup(XAVA *xava) {
-    SGLCleanup(xava);
+void GLCleanup(WAVA *wava) {
+    SGLCleanup(wava);
 }
 

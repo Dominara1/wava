@@ -5,7 +5,7 @@
 #include "wl_output.h"
 #include "main.h"
 
-struct zxdg_output_manager_v1 *xavaXDGOutputManager;
+struct zxdg_output_manager_v1 *wavaXDGOutputManager;
 
 static void output_geometry(void *data, struct wl_output *output, int32_t x,
         int32_t y, int32_t width_mm, int32_t height_mm, int32_t subpixel,
@@ -60,7 +60,7 @@ void wl_output_cleanup(struct waydata *wd) {
     struct wlOutput *output, *tmp;
 
     wl_list_for_each_safe(output, tmp, &wd->outputs, link) {
-        xavaSpam("Destroying output %s", output->name);
+        wavaSpam("Destroying output %s", output->name);
         wl_list_remove(&output->link);
         free(output->name);
         free(output);
@@ -112,7 +112,7 @@ static void xdg_output_handle_name(void *data,
     UNUSED(xdg_output);
 
     struct wlOutput *output = data;
-    xavaSpam("Output %s loaded with id %d", name, output->id);
+    wavaSpam("Output %s loaded with id %d", name, output->id);
     output->name = strdup(name);
 }
 
