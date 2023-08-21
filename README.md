@@ -5,7 +5,7 @@ W.A.V.A.
 
 **W**ayland **A**udio **V**isualizer for **A**ll
 
-Unofficial support: for WASAPI (Windows)
+Unofficial support for: WASAPI (Windows)
 
 Official support for: Pipewire, PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and sndio.
 
