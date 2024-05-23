@@ -9,9 +9,8 @@ compile_commands.json
 Debug/
 .cache/
 .vimspector.json
+INSTALLER/
 
-# Just some random patches I keep around
-# Usually some experiments gone wrong, I guess
 *.patch
 
 !src/output/graphical_wayland/gen/.gitignore
