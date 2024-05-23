@@ -9,9 +9,14 @@ Unofficial support for: WASAPI (Windows)
 
 Official support for: Pipewire, PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and sndio.
 
+120 FPS clip
 [![Demo video 1](https://wava-example-1.surge.sh/shot1.png)](https://wava-example-1.surge.sh/vid1.mp4)
+60 FPS clip
 [![Demo video 2](https://wava-example-2.surge.sh/shot2.png)](https://wava-example-2.surge.sh/vid2.mp4)
+60 FPS clip #2
 [![Demo video 3](https://wava-example-3.surge.sh/shot3.png)](https://wava-example-3.surge.sh/vid3.mp4)
+
+
 
 a fork of [Karl Stavestrand's](mailto:karl@stavestrand.no) [C.A.V.A.](https://github.com/karlstav/cava) as well as [Nikola Pavlica](mailto:pavlica.nikola@gmail.com) [X.A.V.A](https://github.com/nikp123/xava)  by [Dominara](https://github.com/Dominara1).
 
