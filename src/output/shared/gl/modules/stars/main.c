@@ -309,9 +309,10 @@ EXP_FUNC void wava_gl_module_draw(WAVAGLModuleOptions *options) {
 
 
         if (stars[i].size >= star.max_size)
-          stars[i].size -= (wava_generate_star_size()*sin(stars[i].size)-intensity) * star.min_shrink;
+          stars[i].size += (wava_generate_star_size()*sin(stars[i].size)-intensity) * star.min_shrink;
         else if (stars[i].size <= 1)
-          stars[i].size += (wava_generate_star_size()*sin(stars[i].size)+intensity) / star.max_shrink;
+          stars[i].size *= (wava_generate_star_size()*sin(stars[i].size)+intensity) / star.max_shrink;
+          //stars[i].size += (wava_generate_star_size()*sin(stars[i].size)+intensity) / star.max_shrink;
 
 
         if(stars[i].x < 0.0-stars[i].size) {

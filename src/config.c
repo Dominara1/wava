@@ -6,6 +6,7 @@
 #include <math.h>
 #include <limits.h>
 
+#include "shared/util/array.h"
 #include "output/shared/graphical.h"
 #include "config.h"
 #include "shared.h"
@@ -214,6 +215,7 @@ char *load_config(char *configPath, WAVA *hand) {
     WAVA_CONFIG_GET_U32(hand->default_config.config, "color", "gradient_count", 0, gradient_count);
     p->gradients_is_set_from_file = gradient_count_is_set_from_file;
     arr_init_n(p->gradients, gradient_count);
+    arr_resize(p->gradients, gradient_count);
     if(arr_count(p->gradients) > 0) {
         wavaBailCondition(arr_count(p->gradients) < 2,
                 "At least two colors must be given as gradient!\n");
