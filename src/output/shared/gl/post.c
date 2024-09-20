@@ -61,6 +61,7 @@ void wava_gl_module_post_config_load(WAVAGLHostOptions *vars) {
 
     WAVA_CONFIG_GET_STRING(config, "gl", "post_shader", "default", shader);
     if(strcmp("none", shader)){
+      wavaLog("Post shader '%s' enabled", shader);
         // HACK: (ab)using the 1st modules inotify for the post shaders reload function
         wava_gl_module_shader_load(&vars->post, SGL_POST, SGL_VERT, shader,
                 &vars->module[0], wava);

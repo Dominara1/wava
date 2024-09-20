@@ -1,4 +1,5 @@
 build*/
+build-nix*/
 !build.cmake
 *.files
 *.includes

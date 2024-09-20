@@ -24,10 +24,15 @@ find_and_copy_dlls(wava)
 include("src/cmake/copy_gl_shaders.cmake")
 
 if(UNIX AND NOT APPLE)
+    find_program(CONVERT magick
+                 REQUIRED)
+    find_program(LIBRSVG rsvg-convert
+                 REQUIRED)
     execute_process (COMMAND
         convert -size 128x128 -density 1200 -background none -format png32
         "${CMAKE_CURRENT_SOURCE_DIR}/assets/linux/wava.svg"
-        "${CMAKE_CURRENT_BINARY_DIR}/wava.png")
+        "${CMAKE_CURRENT_BINARY_DIR}/wava.png"
+         COMMAND_ERROR_IS_FATAL ANY)
     install (FILES assets/linux/wava.desktop DESTINATION share/applications)
     install (FILES assets/linux/wava.svg RENAME wava_visualizer.svg DESTINATION share/icons/hicolor/scalable/apps)
     install (FILES "${CMAKE_CURRENT_BINARY_DIR}/wava.png" RENAME wava_visualizer.png DESTINATION share/icons/hicolor/128x128/apps)
