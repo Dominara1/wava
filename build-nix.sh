@@ -1,4 +1,4 @@
 #!/run/current-system/sw/bin/sh
 
-nix-env -f. -i
-nixos-rebuild switch
+sudo nix-env -f. -i
+sudo nixos-rebuild switch
