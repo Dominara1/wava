@@ -12,7 +12,7 @@
       pkgs = import nixpkgs {
         inherit system;
       };
-      lightgbm-cli = (with pkgs; stdenv.mkDerivation {
+      wava = (with pkgs; stdenv.mkDerivation {
           pname = "wava";
           version = "0.2";
           src = fetchgit {
