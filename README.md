@@ -143,6 +143,17 @@ make
 sudo make install
 cp -rv libwava* /usr/lib
 ldconfig
+Done! You can now run it by executing wava in your launcher or terminal of choice.
+
+
+
+### Building on NixOS
+git clone https://github.com/Dominara1/wava
+cd wava
+chmod +x build-nix.sh
+./build-nix.sh
+
+Done! You can now run it by executing wava in your launcher or terminal of choice.
 ```
 
 And uninstalling with:
