@@ -14,6 +14,9 @@ Official support for: Pipewire, PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and snd
 60 FPS clip
 [![Demo video 2](https://wava-example-2.surge.sh/shot2.png)](https://wava-example-2.surge.sh/vid2.mp4)
 
+# KEEP IN MIND ONLY THE MUSIC BAR ON THE BOTTOM IS WAVA.
+
+The rest of them are from Noctalia-Shell! If you like how they look, maybe you should give Noctalia a try ~
 
 
 a fork of [Karl Stavestrand's](mailto:karl@stavestrand.no) [C.A.V.A.](https://github.com/karlstav/cava) as well as [Nikola Pavlica](mailto:pavlica.nikola@gmail.com) [X.A.V.A](https://github.com/nikp123/xava)  by [Dominara](https://github.com/Dominara1).
