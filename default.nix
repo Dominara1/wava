@@ -8,6 +8,7 @@ pkgs.stdenv.mkDerivation {
   [
     wayland
     wayland-protocols
+    wayland-scanner
     cmake
     gcc
     egl-wayland

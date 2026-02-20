@@ -10,11 +10,9 @@ Unofficial support for: WASAPI (Windows)
 Official support for: Pipewire, PortAudio, Pulseaudio, SHMEM, FIFO (MPD) and sndio.
 
 120 FPS clip
-[![Demo video 1](https://wava-example-1.surge.sh/shot1.png)](https://wava-example-1.surge.sh/vid1.mp4)
+[![Demo video 1](https://wava-example-01.surge.sh/shot1.png)](https://wava-example-01.surge.sh/vid1.mp4)
 60 FPS clip
 [![Demo video 2](https://wava-example-2.surge.sh/shot2.png)](https://wava-example-2.surge.sh/vid2.mp4)
-60 FPS clip #2
-[![Demo video 3](https://wava-example-3.surge.sh/shot3.png)](https://wava-example-3.surge.sh/vid3.mp4)
 
 
 
@@ -160,6 +158,9 @@ And uninstalling with:
 ```
 cat install_manifest.txt | xargs sudo rm -
 ```
+
+# WARNING:
+I do NOT run NixOS anymore as it was a bit of a pain for me to work on anything. Perhaps I'm too hollow-brained for it. That being said, I may eventually create a VM or container with NixOS running in it just to check to see if it continues to build.
 
 Updating
 --------
